@@ -43,6 +43,7 @@ LIBBITCOINCONSENSUS=libchaincoinconsensus.la
 endif
 if ENABLE_WALLET
 LIBBITCOIN_WALLET=libchaincoin_wallet.a
+LIBBITCOIN_WALLET_TOOL=libchaincoin_wallet_tool.a
 endif
 
 LIBBITCOIN_CRYPTO= $(LIBBITCOIN_CRYPTO_BASE)
@@ -75,6 +76,7 @@ EXTRA_LIBRARIES += \
   $(LIBBITCOIN_SERVER) \
   $(LIBBITCOIN_CLI) \
   $(LIBBITCOIN_WALLET) \
+  $(LIBBITCOIN_WALLET_TOOL) \
   $(LIBBITCOIN_ZMQ)
 
 lib_LTLIBRARIES = $(LIBBITCOINCONSENSUS)
@@ -93,6 +95,11 @@ if BUILD_BITCOIN_CLI
 endif
 if BUILD_BITCOIN_TX
   bin_PROGRAMS += chaincoin-tx
+endif
+if ENABLE_WALLET
+if BUILD_BITCOIN_WALLET
+  bin_PROGRAMS += chaincoin-wallet
+endif
 endif
 
 .PHONY: FORCE check-symbols check-security
@@ -228,6 +235,7 @@ BITCOIN_CORE_H = \
   wallet/rpcwallet.h \
   wallet/wallet.h \
   wallet/walletdb.h \
+  wallet/wallettool.h \
   wallet/walletutil.h \
   wallet/coinselection.h \
   warnings.h \
@@ -349,6 +357,12 @@ libchaincoin_wallet_a_SOURCES = \
   wallet/walletdb.cpp \
   wallet/walletutil.cpp \
   wallet/coinselection.cpp \
+  $(BITCOIN_CORE_H)
+
+libchaincoin_wallet_tool_a_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES)
+libchaincoin_wallet_tool_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+libchaincoin_wallet_tool_a_SOURCES = \
+  wallet/wallettool.cpp \
   $(BITCOIN_CORE_H)
 
 # crypto primitives library
@@ -594,6 +608,32 @@ chaincoin_tx_LDADD = \
   $(LIBSECP256K1)
 
 chaincoin_tx_LDADD += $(BOOST_LIBS) $(CRYPTO_LIBS)
+#
+
+# chaincoin-wallet binary #
+chaincoin_wallet_SOURCES = chaincoin-wallet.cpp
+chaincoin_wallet_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES)
+chaincoin_wallet_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+chaincoin_wallet_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS)
+
+if TARGET_WINDOWS
+chaincoin_wallet_SOURCES += chaincoin-wallet-res.rc
+endif
+
+chaincoin_wallet_LDADD = \
+  $(LIBBITCOIN_WALLET_TOOL) \
+  $(LIBBITCOIN_WALLET) \
+  $(LIBBITCOIN_SERVER) \
+  $(LIBBITCOIN_COMMON) \
+  $(LIBBITCOIN_CONSENSUS) \
+  $(LIBBITCOIN_UTIL) \
+  $(LIBBITCOIN_CRYPTO) \
+  $(LIBLEVELDB) \
+  $(LIBLEVELDB_SSE42) \
+  $(LIBMEMENV) \
+  $(LIBSECP256K1)
+
+chaincoin_wallet_LDADD += $(BOOST_LIBS) $(BDB_LIBS) $(CRYPTO_LIBS) $(MINIUPNPC_LIBS)
 #
 
 # chaincoinconsensus library #

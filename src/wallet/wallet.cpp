@@ -413,7 +413,7 @@ bool CWallet::LoadWatchOnly(const CScript &dest)
     return CCryptoKeyStore::AddWatchOnly(dest);
 }
 
-bool CWallet::Unlock(const SecureString& strWalletPassphrase, bool fForMixingOnly)
+bool CWallet::Unlock(const SecureString& strWalletPassphrase, bool accept_no_keys, bool fForMixingOnly)
 {
     CCrypter crypter;
     CKeyingMaterial _vMasterKey;
@@ -426,7 +426,7 @@ bool CWallet::Unlock(const SecureString& strWalletPassphrase, bool fForMixingOnl
                 return false;
             if (!crypter.Decrypt(pMasterKey.second.vchCryptedKey, _vMasterKey))
                 continue; // try another master key
-            if (CCryptoKeyStore::Unlock(_vMasterKey, fForMixingOnly)) {
+            if (CCryptoKeyStore::Unlock(_vMasterKey, accept_no_keys, fForMixingOnly)) {
                 if(nWalletBackups == -2) {
                     TopUpKeyPool();
                     WalletLogPrintf("Keypool replenished, re-initializing automatic backups.\n");

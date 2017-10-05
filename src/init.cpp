@@ -13,6 +13,7 @@
 
 #include <addrman.h>
 #include <amount.h>
+#include <banman.h>
 #include <cachedb.h>
 #include <chain.h>
 #include <chainparams.h>

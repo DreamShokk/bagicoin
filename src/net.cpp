@@ -27,6 +27,8 @@
 #include <masternodeman.h>
 #include <privatesend.h>
 
+#include <memory>
+
 #ifdef WIN32
 #include <string.h>
 #else

@@ -1704,6 +1704,70 @@ UniValue converttopsct(const JSONRPCRequest& request)
     return EncodeBase64((unsigned char*)ssTx.data(), ssTx.size());
 }
 
+UniValue utxoupdatepsct(const JSONRPCRequest& request)
+{
+    if (request.fHelp || request.params.size() != 1) {
+        throw std::runtime_error(
+            RPCHelpMan{"utxoupdatepsct",
+            "\nUpdates a PSCT with witness UTXOs retrieved from the UTXO set or the mempool.\n",
+            {
+                {"psct", RPCArg::Type::STR, RPCArg::Optional::NO, "A base64 string of a PSCT"}
+            },
+            RPCResult {
+                "  \"psct\"          (string) The base64-encoded partially signed transaction with inputs updated\n"
+            },
+            RPCExamples {
+                HelpExampleCli("utxoupdatepsct", "\"psct\"")
+            }}.ToString());
+    }
+
+    RPCTypeCheck(request.params, {UniValue::VSTR}, true);
+
+    // Unserialize the transactions
+    PartiallySignedTransaction psctx;
+    std::string error;
+    if (!DecodeBase64PSCT(psctx, request.params[0].get_str(), error)) {
+        throw JSONRPCError(RPC_DESERIALIZATION_ERROR, strprintf("TX decode failed %s", error));
+    }
+
+    // Fetch previous transactions (inputs):
+    CCoinsView viewDummy;
+    CCoinsViewCache view(&viewDummy);
+    {
+        LOCK2(cs_main, mempool.cs);
+        CCoinsViewCache &viewChain = *pcoinsTip;
+        CCoinsViewMemPool viewMempool(&viewChain, mempool);
+        view.SetBackend(viewMempool); // temporarily switch cache backend to db+mempool view
+
+        for (const CTxIn& txin : psctx.tx->vin) {
+            view.AccessCoin(txin.prevout); // Load entries from viewChain into view; can fail.
+        }
+
+        view.SetBackend(viewDummy); // switch back to avoid locking mempool for too long
+    }
+
+    // Fill the inputs
+    for (unsigned int i = 0; i < psctx.tx->vin.size(); ++i) {
+        PSCTInput& input = psctx.inputs.at(i);
+
+        if (input.non_witness_utxo || !input.witness_utxo.IsNull()) {
+            continue;
+        }
+
+        const Coin& coin = view.AccessCoin(psctx.tx->vin[i].prevout);
+
+        std::vector<std::vector<unsigned char>> solutions_data;
+        txnouttype which_type = Solver(coin.out.scriptPubKey, solutions_data);
+        if (which_type == TX_WITNESS_V0_SCRIPTHASH || which_type == TX_WITNESS_V0_KEYHASH || which_type == TX_WITNESS_UNKNOWN) {
+            input.witness_utxo = coin.out;
+        }
+    }
+
+    CDataStream ssTx(SER_NETWORK, PROTOCOL_VERSION);
+    ssTx << psctx;
+    return EncodeBase64((unsigned char*)ssTx.data(), ssTx.size());
+}
+
 // clang-format off
 static const CRPCCommand commands[] =
 { //  category              name                            actor (function)            argNames
@@ -1722,6 +1786,7 @@ static const CRPCCommand commands[] =
     { "rawtransactions",    "finalizepsct",                 &finalizepsct,              {"psct", "extract"} },
     { "rawtransactions",    "createpsct",                   &createpsct,                {"inputs","outputs","locktime","replaceable"} },
     { "rawtransactions",    "converttopsct",                &converttopsct,             {"hexstring","permitsigdata","iswitness"} },
+    { "rawtransactions",    "utxoupdatepsct",               &utxoupdatepsct,            {"psct"} },
 
     { "blockchain",         "gettxoutproof",                &gettxoutproof,             {"txids", "blockhash"} },
     { "blockchain",         "verifytxoutproof",             &verifytxoutproof,          {"proof"} },

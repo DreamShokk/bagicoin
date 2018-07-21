@@ -1768,6 +1768,80 @@ UniValue utxoupdatepsct(const JSONRPCRequest& request)
     return EncodeBase64((unsigned char*)ssTx.data(), ssTx.size());
 }
 
+UniValue joinpscts(const JSONRPCRequest& request)
+{
+    if (request.fHelp || request.params.size() != 1) {
+        throw std::runtime_error(
+            RPCHelpMan{"joinpscts",
+            "\nJoins multiple distinct PSCTs with different inputs and outputs into one PSCT with inputs and outputs from all of the PSCTs\n"
+            "No input in any of the PSCTs can be in more than one of the PSCTs.\n",
+            {
+                {"txs", RPCArg::Type::ARR, RPCArg::Optional::NO, "A json array of base64 strings of partially signed transactions",
+                    {
+                        {"psct", RPCArg::Type::STR, RPCArg::Optional::NO, "A base64 string of a PSCT"}
+                    }}
+            },
+            RPCResult {
+                "  \"psct\"          (string) The base64-encoded partially signed transaction\n"
+            },
+            RPCExamples {
+                HelpExampleCli("joinpscts", "\"psct\"")
+            }}.ToString());
+    }
+
+    RPCTypeCheck(request.params, {UniValue::VARR}, true);
+
+    // Unserialize the transactions
+    std::vector<PartiallySignedTransaction> psctxs;
+    UniValue txs = request.params[0].get_array();
+
+    if (txs.size() <= 1) {
+        throw JSONRPCError(RPC_INVALID_PARAMETER, "At least two PSCTs are required to join PSCTs.");
+    }
+
+    int32_t best_version = 1;
+    uint32_t best_locktime = 0xffffffff;
+    for (unsigned int i = 0; i < txs.size(); ++i) {
+        PartiallySignedTransaction psctx;
+        std::string error;
+        if (!DecodeBase64PSCT(psctx, txs[i].get_str(), error)) {
+            throw JSONRPCError(RPC_DESERIALIZATION_ERROR, strprintf("TX decode failed %s", error));
+        }
+        psctxs.push_back(psctx);
+        // Choose the highest version number
+        if (psctx.tx->nVersion > best_version) {
+            best_version = psctx.tx->nVersion;
+        }
+        // Choose the lowest lock time
+        if (psctx.tx->nLockTime < best_locktime) {
+            best_locktime = psctx.tx->nLockTime;
+        }
+    }
+
+    // Create a blank psct where everything will be added
+    PartiallySignedTransaction merged_psct;
+    merged_psct.tx = CMutableTransaction();
+    merged_psct.tx->nVersion = best_version;
+    merged_psct.tx->nLockTime = best_locktime;
+
+    // Merge
+    for (auto& psct : psctxs) {
+        for (unsigned int i = 0; i < psct.tx->vin.size(); ++i) {
+            if (!merged_psct.AddInput(psct.tx->vin[i], psct.inputs[i])) {
+                throw JSONRPCError(RPC_INVALID_PARAMETER, strprintf("Input %s:%d exists in multiple PSCTs", psct.tx->vin[i].prevout.hash.ToString().c_str(), psct.tx->vin[i].prevout.n));
+            }
+        }
+        for (unsigned int i = 0; i < psct.tx->vout.size(); ++i) {
+            merged_psct.AddOutput(psct.tx->vout[i], psct.outputs[i]);
+        }
+        merged_psct.unknown.insert(psct.unknown.begin(), psct.unknown.end());
+    }
+
+    CDataStream ssTx(SER_NETWORK, PROTOCOL_VERSION);
+    ssTx << merged_psct;
+    return EncodeBase64((unsigned char*)ssTx.data(), ssTx.size());
+}
+
 // clang-format off
 static const CRPCCommand commands[] =
 { //  category              name                            actor (function)            argNames
@@ -1787,6 +1861,7 @@ static const CRPCCommand commands[] =
     { "rawtransactions",    "createpsct",                   &createpsct,                {"inputs","outputs","locktime","replaceable"} },
     { "rawtransactions",    "converttopsct",                &converttopsct,             {"hexstring","permitsigdata","iswitness"} },
     { "rawtransactions",    "utxoupdatepsct",               &utxoupdatepsct,            {"psct"} },
+    { "rawtransactions",    "joinpscts",                    &joinpscts,                 {"txs"} },
 
     { "blockchain",         "gettxoutproof",                &gettxoutproof,             {"txids", "blockhash"} },
     { "blockchain",         "verifytxoutproof",             &verifytxoutproof,          {"proof"} },

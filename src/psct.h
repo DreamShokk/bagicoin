@@ -389,6 +389,8 @@ struct PartiallySignedTransaction
       * same actual Bitcoin transaction.) Returns true if the merge succeeded, false otherwise. */
     NODISCARD bool Merge(const PartiallySignedTransaction& psct);
     bool IsSane() const;
+    bool AddInput(const CTxIn& txin, PSCTInput& psctin);
+    bool AddOutput(const CTxOut& txout, const PSCTOutput& psctout);
     PartiallySignedTransaction() {}
     PartiallySignedTransaction(const PartiallySignedTransaction& psct_in) : tx(psct_in.tx), inputs(psct_in.inputs), outputs(psct_in.outputs), unknown(psct_in.unknown) {}
     explicit PartiallySignedTransaction(const CMutableTransaction& tx);

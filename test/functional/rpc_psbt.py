@@ -321,6 +321,23 @@ class PSCTTest(BitcoinTestFramework):
         assert "witness_utxo" not in decoded['inputs'][1] and "non_witness_utxo" not in decoded['inputs'][1]
         assert "witness_utxo" not in decoded['inputs'][2] and "non_witness_utxo" not in decoded['inputs'][2]
 
+        # Two PSCTs with a common input should not be joinable
+        psct1 = self.nodes[1].createpsct([{"txid":txid1, "vout":vout1}], {self.nodes[0].getnewaddress():Decimal('10.999')})
+        assert_raises_rpc_error(-8, "exists in multiple PSCTs", self.nodes[1].joinpscts, [psct1, updated])
+
+        # Join two distinct PSCTs
+        addr4 = self.nodes[1].getnewaddress("", "p2sh-segwit")
+        txid4 = self.nodes[0].sendtoaddress(addr4, 5)
+        vout4 = find_output(self.nodes[0], txid4, 5)
+        self.nodes[0].generate(6)
+        self.sync_all()
+        psct2 = self.nodes[1].createpsct([{"txid":txid4, "vout":vout4}], {self.nodes[0].getnewaddress():Decimal('4.999')})
+        psct2 = self.nodes[1].walletprocesspsct(psct2)['psct']
+        psct2_decoded = self.nodes[0].decodepsct(psct2)
+        assert "final_scriptwitness" in psct2_decoded['inputs'][0] and "final_scriptSig" in psct2_decoded['inputs'][0]
+        joined = self.nodes[0].joinpscts([psct, psct2])
+        joined_decoded = self.nodes[0].decodepsct(joined)
+        assert len(joined_decoded['inputs']) == 4 and len(joined_decoded['outputs']) == 2 and "final_scriptwitness" not in joined_decoded['inputs'][3] and "final_scriptSig" not in joined_decoded['inputs'][3]
 
 
 if __name__ == '__main__':

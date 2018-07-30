@@ -92,7 +92,7 @@ void QRGeneralImageWidget::contextMenuEvent(QContextMenuEvent *event)
 QRDialog::QRDialog(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::QRDialog),
-    model(0)
+    model(nullptr)
 {
     ui->setupUi(this);
 

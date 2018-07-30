@@ -40,7 +40,7 @@ public:
         AllNodesTab = 1
     };
 
-    explicit MasternodeList(const PlatformStyle *platformStyle, QWidget *parent = 0);
+    explicit MasternodeList(const PlatformStyle *platformStyle, QWidget *parent = nullptr);
     ~MasternodeList();
 
     void setClientModel(ClientModel *_clientmodel);

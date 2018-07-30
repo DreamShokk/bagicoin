@@ -31,7 +31,7 @@ class ProposalList : public QWidget
     Q_OBJECT
 
 public:
-    explicit ProposalList(const PlatformStyle *platformStyle, QWidget *parent = 0);
+    explicit ProposalList(const PlatformStyle *platformStyle, QWidget *parent = nullptr);
     ~ProposalList();
 
     enum DateEnum

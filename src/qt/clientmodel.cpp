@@ -38,13 +38,13 @@ ClientModel::ClientModel(interfaces::Node& node, OptionsModel *_optionsModel, QO
     QObject(parent),
     m_node(node),
     optionsModel(_optionsModel),
-    peerTableModel(0),
-    banTableModel(0),
-    masternodeTableModel(0),
-    proposalTableModel(0),
+    peerTableModel(nullptr),
+    banTableModel(nullptr),
+    masternodeTableModel(nullptr),
+    proposalTableModel(nullptr),
     cachedMasternodeCountString(""),
-    pollTimer(0),
-    pollMnTimer(0)
+    pollTimer(nullptr),
+    pollMnTimer(nullptr)
 {
     cachedBestHeaderHeight = -1;
     cachedBestHeaderTime = -1;

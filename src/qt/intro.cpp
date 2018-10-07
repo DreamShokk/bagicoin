@@ -23,10 +23,6 @@
 #include <cmath>
 
 static const uint64_t GB_BYTES = 1000000000LL;
-/* Minimum free space (in GB) needed for data directory */
-static const uint64_t BLOCK_CHAIN_SIZE = 10;
-/* Minimum free space (in GB) needed for data directory when pruned; Does not include prune target */
-static const uint64_t CHAIN_STATE_SIZE = 2;
 /* Total required space (in GB) depending on user choice (prune, not prune) */
 static uint64_t requiredSpace;
 
@@ -115,11 +111,13 @@ void FreespaceChecker::check()
 }
 
 
-Intro::Intro(QWidget *parent) :
+Intro::Intro(QWidget *parent, uint64_t blockchain_size, uint64_t chain_state_size) :
     QDialog(parent),
     ui(new Ui::Intro),
     thread(0),
-    signalled(false)
+    signalled(false),
+    m_blockchain_size(blockchain_size),
+    m_chain_state_size(chain_state_size)
 {
     ui->setupUi(this);
     ui->welcomeLabel->setText(ui->welcomeLabel->text().arg(tr(PACKAGE_NAME)));
@@ -127,22 +125,27 @@ Intro::Intro(QWidget *parent) :
 
     ui->lblExplanation1->setText(ui->lblExplanation1->text()
         .arg(tr(PACKAGE_NAME))
-        .arg(BLOCK_CHAIN_SIZE)
+        .arg(m_blockchain_size)
         .arg(2009)
         .arg(tr("Chaincoin"))
     );
     ui->lblExplanation2->setText(ui->lblExplanation2->text().arg(tr(PACKAGE_NAME)));
 
     uint64_t pruneTarget = std::max<int64_t>(0, gArgs.GetArg("-prune", 0));
-    requiredSpace = BLOCK_CHAIN_SIZE;
+    requiredSpace = m_blockchain_size;
+    QString storageRequiresMsg = tr("At least %1 GB of data will be stored in this directory, and it will grow over time.");
     if (pruneTarget) {
         uint64_t prunedGBs = std::ceil(pruneTarget * 1024 * 1024.0 / GB_BYTES);
         if (prunedGBs <= requiredSpace) {
             requiredSpace = prunedGBs;
         }
     }
-    requiredSpace += CHAIN_STATE_SIZE;
-    ui->sizeWarningLabel->setText(ui->sizeWarningLabel->text().arg(tr(PACKAGE_NAME)).arg(requiredSpace));
+    requiredSpace += m_chain_state_size;
+    ui->sizeWarningLabel->setText(
+        tr("%1 will download and store a copy of the Chaincoin block chain.").arg(tr(PACKAGE_NAME)) + " " +
+        storageRequiresMsg.arg(requiredSpace) + " " +
+        tr("The wallet will also be stored in this directory.")
+    );
     startThread();
 }
 
@@ -193,10 +196,17 @@ bool Intro::pickDataDirectory(interfaces::Node& node)
 
     if(!fs::exists(GUIUtil::qstringToBoostPath(dataDir)) || gArgs.GetBoolArg("-choosedatadir", DEFAULT_CHOOSE_DATADIR) || settings.value("fReset", false).toBool() || gArgs.GetBoolArg("-resetguisettings", false))
     {
+        /* Use selectParams here to guarantee Params() can be used by node interface */
+        try {
+            node.selectParams(gArgs.GetChainName());
+        } catch (const std::exception&) {
+            return false;
+        }
+
         /* If current default data directory does not exist, let the user choose one */
-        Intro intro;
+        Intro intro(0, node.getAssumedBlockchainSize(), node.getAssumedChainStateSize());
         intro.setDataDirectory(dataDir);
-        intro.setWindowIcon(QIcon(":icons/bitcoin"));
+        intro.setWindowIcon(QIcon(":icons/chaincoin"));
 
         while(true)
         {

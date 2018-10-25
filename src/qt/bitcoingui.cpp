@@ -57,6 +57,7 @@
 #include <QToolBar>
 #include <QUrlQuery>
 #include <QVBoxLayout>
+#include <QWindow>
 
 #include <boost/bind.hpp>
 
@@ -445,9 +446,6 @@ void BitcoinGUI::createMenuBar()
         file->addAction(signMessageAction);
         file->addAction(verifyMessageAction);
         file->addSeparator();
-        file->addAction(usedSendingAddressesAction);
-        file->addAction(usedReceivingAddressesAction);
-        file->addSeparator();
     }
     file->addAction(quitAction);
 
@@ -460,17 +458,60 @@ void BitcoinGUI::createMenuBar()
     }
     settings->addAction(optionsAction);
 
-    if(walletFrame)
-    {
-        QMenu *tools = appMenuBar->addMenu(tr("&Tools"));
-        tools->addAction(openInfoAction);
-        tools->addAction(openRPCConsoleAction);
-        tools->addAction(openGraphAction);
-        tools->addAction(openPeersAction);
-        tools->addSeparator();
-        tools->addAction(openConfEditorAction);
-        tools->addAction(openMNConfEditorAction);
-        tools->addAction(showBackupsAction);
+    QMenu* window_menu = appMenuBar->addMenu(tr("&Window"));
+
+    QAction* minimize_action = window_menu->addAction(tr("Minimize"), [] {
+        qApp->focusWindow()->showMinimized();
+    }, QKeySequence(Qt::CTRL + Qt::Key_M));
+
+    connect(qApp, &QApplication::focusWindowChanged, [minimize_action] (QWindow* window) {
+        minimize_action->setEnabled(window != nullptr && (window->flags() & Qt::Dialog) != Qt::Dialog && window->windowState() != Qt::WindowMinimized);
+    });
+
+#ifdef Q_OS_MAC
+    QAction* zoom_action = window_menu->addAction(tr("Zoom"), [] {
+        QWindow* window = qApp->focusWindow();
+        if (window->windowState() != Qt::WindowMaximized) {
+            window->showMaximized();
+        } else {
+            window->showNormal();
+        }
+    });
+
+    connect(qApp, &QApplication::focusWindowChanged, [zoom_action] (QWindow* window) {
+        zoom_action->setEnabled(window != nullptr);
+    });
+#else
+    QAction* restore_action = window_menu->addAction(tr("Restore"), [] {
+        qApp->focusWindow()->showNormal();
+    });
+
+    connect(qApp, &QApplication::focusWindowChanged, [restore_action] (QWindow* window) {
+        restore_action->setEnabled(window != nullptr);
+    });
+#endif
+
+    if (walletFrame) {
+        window_menu->addSeparator();
+        window_menu->addAction(tr("Main Window"), [this] {
+            GUIUtil::bringToFront(this);
+        });
+
+        window_menu->addSeparator();
+        window_menu->addAction(usedSendingAddressesAction);
+        window_menu->addAction(usedReceivingAddressesAction);
+        window_menu->addSeparator();
+        window_menu->addAction(openConfEditorAction);
+        window_menu->addAction(openMNConfEditorAction);
+        window_menu->addAction(showBackupsAction);
+    }
+
+    window_menu->addSeparator();
+    for (RPCConsole::TabTypes tab_type : rpcConsole->tabs()) {
+        window_menu->addAction(rpcConsole->tabTitle(tab_type), [this, tab_type] {
+            rpcConsole->setTabFocus(tab_type);
+            showDebugWindow();
+        });
     }
 
     QMenu *help = appMenuBar->addMenu(tr("&Help"));

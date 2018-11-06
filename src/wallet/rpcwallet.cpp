@@ -31,6 +31,7 @@
 #include <script/sign.h>
 #include <shutdown.h>
 #include <timedata.h>
+#include <util/bip32.h>
 #include <util/system.h>
 #include <util/moneystr.h>
 #include <validation.h>

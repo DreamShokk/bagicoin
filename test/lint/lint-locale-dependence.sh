@@ -4,7 +4,6 @@ export LC_ALL=C
 KNOWN_VIOLATIONS=(
     "src/chaincoin-tx.cpp.*stoul"
     "src/chaincoin-tx.cpp.*trim_right"
-    "src/chaincoin-tx.cpp:.*atoi"
     "src/dbwrapper.cpp.*stoul"
     "src/dbwrapper.cpp:.*vsnprintf"
     "src/httprpc.cpp.*trim"

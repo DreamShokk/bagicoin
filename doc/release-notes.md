@@ -36,15 +36,16 @@ wallets that were created with older versions are not affected by this.
 Compatibility
 ==============
 
-Chaincoin Core is extensively tested on multiple operating systems using
-the Linux kernel, macOS 10.10+, and Windows 7 and newer (Windows XP is not supported).
+Chaincoin Core is supported and extensively tested on operating systems using
+the Linux kernel, macOS 10.11+, and Windows 7 and newer.  It is not recommended
+to use Chaincoin Core on unsupported systems.
 
 Chaincoin Core should also work on most other Unix-like systems but is not
 frequently tested on them.
 
-From 0.17.0 onwards, macOS <10.10 is no longer supported.  0.17.0 is
+From 0.17.0 onwards, macOS <10.11 is no longer supported.  0.17.0 is
 built using Qt 5.9.x, which doesn't support versions of macOS older than
-10.10.  Additionally, Bitcoin Core does not yet change appearance when
+10.11.  Additionally, Bitcoin Core does not yet change appearance when
 macOS "dark mode" is activated.
 
 In addition to previously-supported CPU platforms, this release's

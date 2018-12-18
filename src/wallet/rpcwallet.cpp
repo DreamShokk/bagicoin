@@ -4161,7 +4161,7 @@ UniValue prepareproposal(const JSONRPCRequest& request)
                 {
                     {"parent-hash", RPCArg::Type::STR_HEX, /* opt */ false, /* default_val */ "", "The parent hash of the proposal\n"
                             "0 if submitted for the first time"},
-                    {"revision", RPCArg::Type::ARR, /* opt */ false, /* default_val */ "0", "Revision of the proposal."},
+                    {"revision", RPCArg::Type::NUM, /* opt */ false, /* default_val */ "", "Revision of the proposal."},
                     {"time", RPCArg::Type::NUM, /* opt */ false, /* default_val */ "", "UNIX time of the submittal."},
                     {"data-hex", RPCArg::Type::STR_HEX, /* opt */ false, /* default_val */ "", "The hex string of the generated proposal."},
                 }}
@@ -4173,11 +4173,12 @@ UniValue prepareproposal(const JSONRPCRequest& request)
                             "\nExamples:\n"
                             "\nCreate a transaction with no inputs\n"
                             + HelpExampleCli("prepareproposal", "\"[{\\\"txid\\\":\\\"00010203\\\"}]\"")
+                            + HelpExampleRpc("prepareproposal", "\"[{\\\"txid\\\":\\\"00010203\\\"}]\"")
                             );
 
     RPCTypeCheck(request.params, {
                      UniValue::VSTR,
-                     UniValue::VARR,
+                     UniValue::VNUM,
                      UniValue::VNUM,
                      UniValue::VSTR
                  }, true

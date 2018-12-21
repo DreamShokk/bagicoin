@@ -39,8 +39,6 @@ QT_TRANSLATE_NOOP("chaincoin-core", ""
 "Enable use of automated PrivateSend for funds stored in this wallet (0-1, "
 "default: %u)"),
 QT_TRANSLATE_NOOP("chaincoin-core", ""
-"Error loading %s: You can't enable HD on an already existing non-HD wallet"),
-QT_TRANSLATE_NOOP("chaincoin-core", ""
 "Error reading %s! All keys read correctly, but transaction data or address "
 "book entries might be missing or incorrect."),
 QT_TRANSLATE_NOOP("chaincoin-core", ""
@@ -55,12 +53,6 @@ QT_TRANSLATE_NOOP("chaincoin-core", ""
 QT_TRANSLATE_NOOP("chaincoin-core", ""
 "Found unconfirmed denominated outputs, will wait till they confirm to "
 "continue."),
-QT_TRANSLATE_NOOP("chaincoin-core", ""
-"Group outputs by address, selecting all or none, instead of selecting on a "
-"per-output basis. Privacy is improved as an address is only used once "
-"(unless someone sends to it after spending from it), but may result in "
-"slightly higher fees as suboptimal coin selection may result due to the "
-"added limitation (default: %u)"),
 QT_TRANSLATE_NOOP("chaincoin-core", ""
 "Invalid amount for -maxtxfee=<amount>: '%s' (must be at least the minrelay "
 "fee of %s to prevent stuck transactions)"),
@@ -121,12 +113,6 @@ QT_TRANSLATE_NOOP("chaincoin-core", ""
 "Unable to rewind the database to a pre-fork state. You will need to "
 "redownload the blockchain"),
 QT_TRANSLATE_NOOP("chaincoin-core", ""
-"Unsupported argument -socks found. Setting SOCKS version isn't possible "
-"anymore, only SOCKS5 proxies are supported."),
-QT_TRANSLATE_NOOP("chaincoin-core", ""
-"Unsupported argument -whitelistalwaysrelay ignored, use -whitelistrelay and/"
-"or -whitelistforcerelay."),
-QT_TRANSLATE_NOOP("chaincoin-core", ""
 "Use N separate masternodes for each denominated input to mix funds (2-16, "
 "default: %u)"),
 QT_TRANSLATE_NOOP("chaincoin-core", ""
@@ -181,6 +167,7 @@ QT_TRANSLATE_NOOP("chaincoin-core", "Cannot resolve -%s address: '%s'"),
 QT_TRANSLATE_NOOP("chaincoin-core", "Cannot write to data directory '%s'; check permissions."),
 QT_TRANSLATE_NOOP("chaincoin-core", "Change index out of range"),
 QT_TRANSLATE_NOOP("chaincoin-core", "Collateral not valid."),
+QT_TRANSLATE_NOOP("chaincoin-core", "Config setting for %s only applied on %s network when in [%s] section."),
 QT_TRANSLATE_NOOP("chaincoin-core", "Connecting to masternode..."),
 QT_TRANSLATE_NOOP("chaincoin-core", "Copyright (C) %i-%i"),
 QT_TRANSLATE_NOOP("chaincoin-core", "Corrupted block database detected"),
@@ -191,14 +178,12 @@ QT_TRANSLATE_NOOP("chaincoin-core", "ERROR! Failed to create automatic backup"),
 QT_TRANSLATE_NOOP("chaincoin-core", "Enable the client to act as a masternode (0-1, default: %u)"),
 QT_TRANSLATE_NOOP("chaincoin-core", "Entries are full."),
 QT_TRANSLATE_NOOP("chaincoin-core", "Entry exceeds maximum size."),
-QT_TRANSLATE_NOOP("chaincoin-core", "Error creating %s: You can't create non-HD wallets with this version."),
 QT_TRANSLATE_NOOP("chaincoin-core", "Error initializing block database"),
 QT_TRANSLATE_NOOP("chaincoin-core", "Error initializing wallet database environment %s!"),
 QT_TRANSLATE_NOOP("chaincoin-core", "Error loading %s"),
 QT_TRANSLATE_NOOP("chaincoin-core", "Error loading %s: Private keys can only be disabled during creation"),
 QT_TRANSLATE_NOOP("chaincoin-core", "Error loading %s: Wallet corrupted"),
 QT_TRANSLATE_NOOP("chaincoin-core", "Error loading %s: Wallet requires newer version of %s"),
-QT_TRANSLATE_NOOP("chaincoin-core", "Error loading %s: You can't disable HD on an already existing HD wallet"),
 QT_TRANSLATE_NOOP("chaincoin-core", "Error loading block database"),
 QT_TRANSLATE_NOOP("chaincoin-core", "Error loading wallet %s. Duplicate -wallet filename specified."),
 QT_TRANSLATE_NOOP("chaincoin-core", "Error opening block database"),
@@ -275,6 +260,7 @@ QT_TRANSLATE_NOOP("chaincoin-core", "Reducing -maxconnections from %d to %d, bec
 QT_TRANSLATE_NOOP("chaincoin-core", "Replaying blocks..."),
 QT_TRANSLATE_NOOP("chaincoin-core", "Rescanning..."),
 QT_TRANSLATE_NOOP("chaincoin-core", "Rewinding blocks..."),
+QT_TRANSLATE_NOOP("chaincoin-core", "Section [%s] is not recognized."),
 QT_TRANSLATE_NOOP("chaincoin-core", "Session not complete!"),
 QT_TRANSLATE_NOOP("chaincoin-core", "Session timed out."),
 QT_TRANSLATE_NOOP("chaincoin-core", "Set the masternode private key"),
@@ -296,6 +282,7 @@ QT_TRANSLATE_NOOP("chaincoin-core", "Synchronizing governance objects..."),
 QT_TRANSLATE_NOOP("chaincoin-core", "Synchronizing masternode payments..."),
 QT_TRANSLATE_NOOP("chaincoin-core", "Synchronizing masternodes..."),
 QT_TRANSLATE_NOOP("chaincoin-core", "The source code is available from %s."),
+QT_TRANSLATE_NOOP("chaincoin-core", "The specified config file %s does not exist\n"),
 QT_TRANSLATE_NOOP("chaincoin-core", "The transaction amount is too small to pay the fee"),
 QT_TRANSLATE_NOOP("chaincoin-core", "The wallet will avoid paying less than the minimum relay fee."),
 QT_TRANSLATE_NOOP("chaincoin-core", "This is experimental software."),
@@ -322,9 +309,6 @@ QT_TRANSLATE_NOOP("chaincoin-core", "Unable to start HTTP server. See debug log 
 QT_TRANSLATE_NOOP("chaincoin-core", "Unknown network specified in -onlynet: '%s'"),
 QT_TRANSLATE_NOOP("chaincoin-core", "Unknown response."),
 QT_TRANSLATE_NOOP("chaincoin-core", "Unknown state: id = %u"),
-QT_TRANSLATE_NOOP("chaincoin-core", "Unsupported argument -benchmark ignored, use -debug=bench."),
-QT_TRANSLATE_NOOP("chaincoin-core", "Unsupported argument -debugnet ignored, use -debug=net."),
-QT_TRANSLATE_NOOP("chaincoin-core", "Unsupported argument -tor found, use -onion."),
 QT_TRANSLATE_NOOP("chaincoin-core", "Unsupported logging category %s=%s."),
 QT_TRANSLATE_NOOP("chaincoin-core", "Upgrading UTXO database"),
 QT_TRANSLATE_NOOP("chaincoin-core", "Upgrading txindex database"),

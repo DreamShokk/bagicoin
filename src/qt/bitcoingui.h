@@ -277,12 +277,8 @@ public Q_SLOTS:
     void aboutClicked();
     /** Show debug window */
     void showDebugWindow();
-
-    /** Show debug window and set focus to the appropriate tab */
-    void showInfo();
-    void showConsole();
-    void showGraph();
-    void showPeers();
+    /** Show debug window and set focus to the console */
+    void showDebugWindowActivateConsole();
 
     /** Open external (default) editor with chaincoin.conf */
     void showConfEditor();

@@ -32,6 +32,7 @@ class QAbstractItemView;
 class QDateTime;
 class QFont;
 class QLineEdit;
+class QProgressDialog;
 class QUrl;
 class QWidget;
 QT_END_NAMESPACE
@@ -273,6 +274,9 @@ namespace GUIUtil
     private:
         bool eventFilter(QObject *object, QEvent *event);
     };
+
+    // Fix known bugs in QProgressDialog class.
+    void PolishProgressDialog(QProgressDialog* dialog);
 } // namespace GUIUtil
 
 #endif // BITCOIN_QT_GUIUTIL_H

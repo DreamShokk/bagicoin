@@ -53,5 +53,6 @@ static const int MAX_URI_LENGTH = 255;
 #define QAPP_ORG_DOMAIN "chaincoin.org"
 #define QAPP_APP_NAME_DEFAULT "Chaincoin-Qt"
 #define QAPP_APP_NAME_TESTNET "Chaincoin-Qt-testnet"
+#define QAPP_APP_NAME_REGTEST "Chaincoin-Qt-regtest"
 
 #endif // BITCOIN_QT_GUICONSTANTS_H

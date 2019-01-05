@@ -40,7 +40,6 @@ WalletModel::WalletModel(std::unique_ptr<interfaces::Wallet> wallet, interfaces:
     cachedNumBlocks(0)
 {
     fHaveWatchOnly = m_wallet->haveWatchOnly();
-    fForceCheckBalanceChanged = false;
     m_privsendconfig = m_wallet->getPrivateSendConstants();
 
     addressTableModel = new AddressTableModel(this);

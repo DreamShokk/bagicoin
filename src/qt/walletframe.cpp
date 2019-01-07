@@ -140,7 +140,7 @@ void WalletFrame::gotoHistoryPage()
 
 void WalletFrame::gotoMasternodePage()
 {
-    QMap<QString, WalletView*>::const_iterator i;
+    QMap<WalletModel*, WalletView*>::const_iterator i;
     for (i = mapWalletViews.constBegin(); i != mapWalletViews.constEnd(); ++i)
         i.value()->gotoMasternodePage();
 }
@@ -161,7 +161,7 @@ void WalletFrame::gotoSendCoinsPage(QString addr)
 
 void WalletFrame::gotoProposalPage()
 {
-    QMap<QString, WalletView*>::const_iterator i;
+    QMap<WalletModel*, WalletView*>::const_iterator i;
     for (i = mapWalletViews.constBegin(); i != mapWalletViews.constEnd(); ++i)
         i.value()->gotoProposalPage();
 }

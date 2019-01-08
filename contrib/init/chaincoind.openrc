@@ -5,7 +5,7 @@
 if [ -d "/var/lib/chaincoin/.chaincoin" ]; then
 	BITCOIND_DEFAULT_DATADIR="/var/lib/chaincoin/.chaincoin"
 else
-	BITCOIND_DEFAULT_DATADIR="/var/lib/bitcoind"
+        BITCOIND_DEFAULT_DATADIR="/var/lib/chaincoind"
 fi
 
 BITCOIND_CONFIGFILE=${BITCOIND_CONFIGFILE:-/etc/chaincoin/chaincoin.conf}

@@ -1,5 +1,4 @@
-// Copyright (c) 2011-2018 The Bitcoin Core developers
-// Copyright (c) 2018 PM-Tech
+// Copyright (c) 2011-2019 The Bitcoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -59,7 +58,6 @@
 #include <QVBoxLayout>
 #include <QWindow>
 
-#include <boost/bind.hpp>
 
 const std::string BitcoinGUI::DEFAULT_UIPLATFORM =
 #if defined(Q_OS_MAC)
@@ -134,6 +132,7 @@ BitcoinGUI::BitcoinGUI(interfaces::Node& node, const PlatformStyle *_platformSty
     if (QSystemTrayIcon::isSystemTrayAvailable()) {
         createTrayIcon(networkStyle);
     }
+    notificator = new Notificator(QApplication::applicationName(), trayIcon, this);
 
     // Create status bar
     statusBar();
@@ -601,8 +600,7 @@ void BitcoinGUI::setClientModel(ClientModel *_clientModel)
         unitDisplayControl->setOptionsModel(_clientModel->getOptionsModel());
 
         OptionsModel* optionsModel = _clientModel->getOptionsModel();
-        if(optionsModel)
-        {
+        if (optionsModel && trayIcon) {
             // be aware of the tray icon disable state change reported by the OptionsModel object.
             connect(optionsModel, &OptionsModel::hideTrayIconChanged, this, &BitcoinGUI::setTrayIconVisible);
 
@@ -634,10 +632,9 @@ bool BitcoinGUI::addWallet(WalletModel *walletModel)
 {
     if(!walletFrame)
         return false;
-    const QString name = walletModel->getWalletName();
-    QString display_name = name.isEmpty() ? "["+tr("default wallet")+"]" : name;
+    const QString display_name = walletModel->getDisplayName();
     setWalletActionsEnabled(true);
-    m_wallet_selector->addItem(display_name, name);
+    m_wallet_selector->addItem(display_name, QVariant::fromValue(walletModel));
     if (m_wallet_selector->count() == 2) {
         m_wallet_selector_label_action->setVisible(true);
         m_wallet_selector_action->setVisible(true);
@@ -649,8 +646,7 @@ bool BitcoinGUI::addWallet(WalletModel *walletModel)
 bool BitcoinGUI::removeWallet(WalletModel* walletModel)
 {
     if (!walletFrame) return false;
-    QString name = walletModel->getWalletName();
-    int index = m_wallet_selector->findData(name);
+    int index = m_wallet_selector->findData(QVariant::fromValue(walletModel));
     m_wallet_selector->removeItem(index);
     if (m_wallet_selector->count() == 0) {
         setWalletActionsEnabled(false);
@@ -659,20 +655,20 @@ bool BitcoinGUI::removeWallet(WalletModel* walletModel)
         m_wallet_selector_action->setVisible(false);
     }
     rpcConsole->removeWallet(walletModel);
-    return walletFrame->removeWallet(name);
+    return walletFrame->removeWallet(walletModel);
 }
 
-bool BitcoinGUI::setCurrentWallet(const QString& name)
+bool BitcoinGUI::setCurrentWallet(WalletModel* wallet_model)
 {
     if(!walletFrame)
         return false;
-    return walletFrame->setCurrentWallet(name);
+    return walletFrame->setCurrentWallet(wallet_model);
 }
 
 bool BitcoinGUI::setCurrentWalletBySelectorIndex(int index)
 {
-    QString internal_name = m_wallet_selector->itemData(index).toString();
-    return setCurrentWallet(internal_name);
+    WalletModel* wallet_model = m_wallet_selector->itemData(index).value<WalletModel*>();
+    return setCurrentWallet(wallet_model);
 }
 
 void BitcoinGUI::removeAllWallets()
@@ -712,14 +708,10 @@ void BitcoinGUI::createTrayIcon(const NetworkStyle *networkStyle)
     assert(QSystemTrayIcon::isSystemTrayAvailable());
 
 #ifndef Q_OS_MAC
-    trayIcon = new QSystemTrayIcon(this);
+    trayIcon = new QSystemTrayIcon(networkStyle->getTrayAndWindowIcon(), this);
     QString toolTip = tr("%1 client").arg(tr(PACKAGE_NAME)) + " " + networkStyle->getTitleAddText();
     trayIcon->setToolTip(toolTip);
-    trayIcon->setIcon(networkStyle->getTrayAndWindowIcon());
-    trayIcon->hide();
 #endif
-
-    notificator = new Notificator(QApplication::applicationName(), trayIcon, this);
 }
 
 void BitcoinGUI::createTrayIconMenu()
@@ -1441,8 +1433,8 @@ static bool ThreadSafeMessageBox(BitcoinGUI* gui, const std::string& message, co
 void BitcoinGUI::subscribeToCoreSignals()
 {
     // Connect signals to client
-    m_handler_message_box = m_node.handleMessageBox(boost::bind(ThreadSafeMessageBox, this, _1, _2, _3));
-    m_handler_question = m_node.handleQuestion(boost::bind(ThreadSafeMessageBox, this, _1, _3, _4));
+    m_handler_message_box = m_node.handleMessageBox(std::bind(ThreadSafeMessageBox, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+    m_handler_question = m_node.handleQuestion(std::bind(ThreadSafeMessageBox, this, std::placeholders::_1, std::placeholders::_3, std::placeholders::_4));
 }
 
 void BitcoinGUI::unsubscribeFromCoreSignals()

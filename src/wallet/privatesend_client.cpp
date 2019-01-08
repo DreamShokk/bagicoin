@@ -1260,8 +1260,8 @@ bool CPrivateSendClient::MakeCollateralAmounts(interfaces::Chain::Lock& locked_c
         return false;
 
     std::vector<CompactTallyItem> vecTally;
-    if(!m_wallet->SelectCoinsGrouppedByAddresses(vecTally, false)) {
-        LogPrint(BCLog::PRIVSEND, "CPrivateSendClient::MakeCollateralAmounts -- SelectCoinsGrouppedByAddresses can't find any inputs!\n");
+    if(!m_wallet->SelectCoinsGroupedByAddresses(vecTally, false)) {
+        LogPrint(BCLog::PRIVSEND, "CPrivateSendClient::MakeCollateralAmounts -- SelectCoinsGroupedByAddresses can't find any inputs!\n");
         return false;
     }
 
@@ -1368,8 +1368,8 @@ bool CPrivateSendClient::CreateDenominated()
     LOCK(m_wallet->cs_wallet);
 
     std::vector<CompactTallyItem> vecTally;
-    if(!m_wallet->SelectCoinsGrouppedByAddresses(vecTally)) {
-        LogPrint(BCLog::PRIVSEND, "CPrivateSendClient::CreateDenominated -- SelectCoinsGrouppedByAddresses can't find any inputs!\n");
+    if(!m_wallet->SelectCoinsGroupedByAddresses(vecTally)) {
+        LogPrint(BCLog::PRIVSEND, "CPrivateSendClient::CreateDenominated -- SelectCoinsGroupedByAddresses can't find any inputs!\n");
         return false;
     }
 

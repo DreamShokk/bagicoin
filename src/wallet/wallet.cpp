@@ -2212,7 +2212,7 @@ CAmount CWallet::GetAnonymizableBalance(bool fSkipDenominated, const int min_dep
     if(fLiteMode) return 0;
 
     std::vector<CompactTallyItem> vecTally;
-    if(!SelectCoinsGrouppedByAddresses(vecTally, fSkipDenominated, true, min_depth)) return 0;
+    if(!SelectCoinsGroupedByAddresses(vecTally, fSkipDenominated, true, min_depth)) return 0;
 
     CAmount nTotal = 0;
 
@@ -2649,34 +2649,29 @@ bool CWallet::SelectCoinsMinConf(const CAmount& nTargetValue, const CoinEligibil
 
         // Filter by the min conf specs and add to utxo_pool and calculate effective value
         // try to find nondenom first to prevent unneeded spending of mixed coins
-        for (unsigned int tryDenom = 0; tryDenom < 2; tryDenom++)
-        {
-            for (OutputGroup& group : groups) {
-                if (!group.EligibleForSpending(eligibility_filter)) continue;
+        // if a denom is member of a group > 1 it is not useful for PS
+        LogPrint(BCLog::SELECTCOINS, "SelectCoinsMinConf (BnB)\n");
+        for (OutputGroup& group : groups) {
+            if (!group.EligibleForSpending(eligibility_filter)) continue;
+            if (CPrivateSend::IsDenominatedAmount(group.m_value)) continue;
 
-                group.fee = 0;
-                group.long_term_fee = 0;
-                group.effective_value = 0;
-                bool isDenom = false;
-                for (auto it = group.m_outputs.begin(); it != group.m_outputs.end(); ) {
-                    LogPrint(BCLog::SELECTCOINS, "tryDenom: %d\n", tryDenom);
-                    const CInputCoin& coin = *it;
-                    if (CPrivateSend::IsDenominatedAmount(coin.txout.nValue)) {
-                        isDenom = true;
-                    }
-                    CAmount effective_value = coin.txout.nValue - (coin.m_input_bytes < 0 ? 0 : coin_selection_params.effective_fee.GetFee(coin.m_input_bytes));
-                    // Only include outputs that are positive effective value (i.e. not dust)
-                    if (effective_value > 0) {
-                        group.fee += coin.m_input_bytes < 0 ? 0 : coin_selection_params.effective_fee.GetFee(coin.m_input_bytes);
-                        group.long_term_fee += coin.m_input_bytes < 0 ? 0 : long_term_feerate.GetFee(coin.m_input_bytes);
-                        group.effective_value += effective_value;
-                        ++it;
-                    } else {
-                        it = group.Discard(coin);
-                    }
+            group.fee = 0;
+            group.long_term_fee = 0;
+            group.effective_value = 0;
+            for (auto it = group.m_outputs.begin(); it != group.m_outputs.end(); ) {
+                const CInputCoin& coin = *it;
+                CAmount effective_value = coin.txout.nValue - (coin.m_input_bytes < 0 ? 0 : coin_selection_params.effective_fee.GetFee(coin.m_input_bytes));
+                // Only include outputs that are positive effective value (i.e. not dust)
+                if (effective_value > 0) {
+                    group.fee += coin.m_input_bytes < 0 ? 0 : coin_selection_params.effective_fee.GetFee(coin.m_input_bytes);
+                    group.long_term_fee += coin.m_input_bytes < 0 ? 0 : long_term_feerate.GetFee(coin.m_input_bytes);
+                    group.effective_value += effective_value;
+                    ++it;
+                } else {
+                    it = group.Discard(coin);
                 }
-                if ((!isDenom || tryDenom > 0) && group.effective_value > 0) utxo_pool.push_back(group);
             }
+            if (group.effective_value > 0) utxo_pool.push_back(group);
         }
         // Calculate the fees for things that aren't inputs
         CAmount not_input_fees = coin_selection_params.effective_fee.GetFee(coin_selection_params.tx_noinputs_size);
@@ -2687,13 +2682,18 @@ bool CWallet::SelectCoinsMinConf(const CAmount& nTargetValue, const CoinEligibil
         // try to find nondenom first to prevent unneeded spending of mixed coins
         for (unsigned int tryDenom = 0; tryDenom < 2; tryDenom++)
         {
-            LogPrint(BCLog::SELECTCOINS, "tryDenom: %d\n", tryDenom);
+            LogPrint(BCLog::SELECTCOINS, "SelectCoinsMinConf (Knapsack) tryDenom: %d\n", tryDenom);
+            utxo_pool.clear();
             for (const OutputGroup& group : groups)
             {
+                if (!group.EligibleForSpending(eligibility_filter)) continue;
                 if (tryDenom == 0 && CPrivateSend::IsDenominatedAmount(group.m_value)) continue; // we don't want denom values on first run
 
-                if (!group.EligibleForSpending(eligibility_filter)) continue;
                 utxo_pool.push_back(group);
+            }
+            if (tryDenom == 0 && KnapsackSolver(nTargetValue, utxo_pool, setCoinsRet, nValueRet)) {
+                bnb_used = false;
+                return true;
             }
         }
         bnb_used = false;
@@ -2717,7 +2717,7 @@ bool CWallet::SelectCoins(const std::vector<COutput>& vAvailableCoins, const CAm
                 continue;
 
             if(coin_selection_params.use_private) {
-                COutPoint outpoint = COutPoint(out.tx->GetHash(),out.i);
+                COutPoint outpoint = COutPoint(out.tx->GetHash(), out.i);
                 int nRounds = GetCappedOutpointPrivateSendRounds(outpoint);
                 // make sure it's actually anonymized
                 if(nRounds < privateSendClient->nPrivateSendRounds) continue;
@@ -2736,16 +2736,16 @@ bool CWallet::SelectCoins(const std::vector<COutput>& vAvailableCoins, const CAm
         // Make outputs by looping through denominations, from large to small
         for (const auto& nDenom : vecPrivateSendDenominations)
         {
-            for (const auto& out : vCoins)
+            for (const COutput& out : vCoins)
             {
                 //make sure it's the denom we're looking for, round the amount up to smallest denom
                 if(out.tx->tx->vout[out.i].nValue == nDenom && nValueRet + nDenom < nTargetValue + nSmallestDenom) {
-                    COutPoint outpoint = COutPoint(out.tx->GetHash(),out.i);
+                    COutPoint outpoint = COutPoint(out.tx->GetHash(), out.i);
                     int nRounds = GetCappedOutpointPrivateSendRounds(outpoint);
                     // make sure it's actually anonymized
                     if(nRounds < privateSendClient->nPrivateSendRounds) continue;
-                    nValueRet += nDenom;
-                    setCoinsRet.insert(CInputCoin(out.tx->tx, out.i));
+                    nValueRet += out.tx->tx->vout[out.i].nValue;
+                    setCoinsRet.insert(out.GetInputCoin());
                 }
             }
         }
@@ -2965,7 +2965,7 @@ struct CompareByAmount
     }
 };
 
-bool CWallet::SelectCoinsGrouppedByAddresses(std::vector<CompactTallyItem>& vecTallyRet, bool fSkipDenominated, bool fAnonymizable, const int min_depth) const
+bool CWallet::SelectCoinsGroupedByAddresses(std::vector<CompactTallyItem>& vecTallyRet, bool fSkipDenominated, bool fAnonymizable, const int min_depth) const
 {
     auto locked_chain = chain().lock();
     LOCK(cs_wallet);
@@ -2977,12 +2977,12 @@ bool CWallet::SelectCoinsGrouppedByAddresses(std::vector<CompactTallyItem>& vecT
     if(fAnonymizable && min_depth >= default_conf) {
         if(fSkipDenominated && fAnonymizableTallyCachedNonDenom) {
             vecTallyRet = vecAnonymizableTallyCachedNonDenom;
-            LogPrint(BCLog::SELECTCOINS, "SelectCoinsGrouppedByAddresses - using cache for non-denom inputs %d\n", vecTallyRet.size());
+            LogPrint(BCLog::SELECTCOINS, "SelectCoinsGroupedByAddresses - using cache for non-denom inputs %d\n", vecTallyRet.size());
             return vecTallyRet.size() > 0;
         }
         if(!fSkipDenominated && fAnonymizableTallyCached) {
             vecTallyRet = vecAnonymizableTallyCached;
-            LogPrint(BCLog::SELECTCOINS, "SelectCoinsGrouppedByAddresses - using cache for all inputs %d\n", vecTallyRet.size());
+            LogPrint(BCLog::SELECTCOINS, "SelectCoinsGroupedByAddresses - using cache for all inputs %d\n", vecTallyRet.size());
             return vecTallyRet.size() > 0;
         }
     }
@@ -3049,7 +3049,7 @@ bool CWallet::SelectCoinsGrouppedByAddresses(std::vector<CompactTallyItem>& vecT
 
     // debug
     if (LogAcceptCategory(BCLog::SELECTCOINS)) {
-        std::string strMessage = "SelectCoinsGrouppedByAddresses - vecTallyRet:\n";
+        std::string strMessage = "SelectCoinsGroupedByAddresses - vecTallyRet:\n";
         for (const auto& item : vecTallyRet)
             strMessage += strprintf("  %s %f\n", EncodeDestination(item.txdest).c_str(), float(item.nAmount)/COIN);
         LogPrint(BCLog::SELECTCOINS, "%s\n", strMessage);
@@ -3350,7 +3350,7 @@ bool CWallet::CreateTransaction(interfaces::Chain::Lock& locked_chain, const std
     {
         if (nValue < 0 || recipient.nAmount < 0)
         {
-            strFailReason = _("Transaction amounts must be positive");
+            strFailReason = _("Transaction amounts must not be negative");
             return false;
         }
         nValue += recipient.nAmount;
@@ -3530,24 +3530,22 @@ bool CWallet::CreateTransaction(interfaces::Chain::Lock& locked_chain, const std
                         if (bnb_used) {
                             coin_selection_params.use_bnb = false;
                             continue;
-                        } else if (nCoinType == ONLY_NONDENOMINATED) {
-                            strFailReason = _("Unable to locate enough PrivateSend non-denominated funds for this transaction that are not equal 1000 CHC.");
-                        } else if (nCoinType == ONLY_DENOMINATED) {
-                            strFailReason = _("Unable to locate enough PrivateSend denominated funds for this transaction.");
-                            strFailReason += " " + _("PrivateSend uses exact denominated amounts to send funds, you might simply need to anonymize some more coins.");
-                        } else if (nValueIn < nValueToSelect) {
-                            strFailReason = _("Insufficient funds.");
+                        } else {
+                            if (nCoinType == ONLY_NONDENOMINATED)
+                                strFailReason = _("Unable to locate enough PrivateSend non-denominated funds for this transaction that are not equal 1000 CHC.");
+                            if (nCoinType == ONLY_DENOMINATED)
+                                strFailReason = _("Unable to locate enough PrivateSend denominated funds for this transaction.");
+                                strFailReason += " " + _("PrivateSend uses exact denominated amounts to send funds, you might simply need to anonymize some more coins.");
+                            if (nValueIn < nValueToSelect)
+                                strFailReason = _("Insufficient funds.");
+                            return false;
                         }
-
-                        return false;
                     }
                 } else {
                     bnb_used = false;
                 }
 
                 const CAmount nChange = nValueIn - nValueToSelect;
-                CTxOut newTxOut;
-
                 if (nChange > 0)
                 {
 
@@ -3559,7 +3557,7 @@ bool CWallet::CreateTransaction(interfaces::Chain::Lock& locked_chain, const std
                     } else {
 
                         // Fill a vout to ourself
-                        newTxOut = CTxOut(nChange, scriptChange);
+                        CTxOut newTxOut(nChange, scriptChange);
 
                         // Never create dust outputs; if we would, just
                         // add the dust to the fee.

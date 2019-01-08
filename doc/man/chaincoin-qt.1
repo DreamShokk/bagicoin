@@ -6,7 +6,7 @@ chaincoin-qt \- manual page for chaincoin-qt v0.16.99.0
 .B chaincoin-qt
 [\fI\,command-line options\/\fR]
 .SH DESCRIPTION
-Chaincoin Core version v0.17.99.0\-12d0b93fc (64\-bit)
+Chaincoin Core version v0.16.99.0 (64\-bit)
 .SH OPTIONS
 .HP
 \-?
@@ -320,7 +320,15 @@ Wallet options:
 \fB\-addresstype\fR
 .IP
 What type of addresses to use ("legacy", "p2sh\-segwit", or "bech32",
-default: "p2sh\-segwit")
+default: "legacy")
+.HP
+\fB\-avoidpartialspends\fR
+.IP
+Group outputs by address, selecting all or none, instead of selecting on
+a per\-output basis. Privacy is improved as an address is only
+used once (unless someone sends to it after spending from it),
+but may result in slightly higher fees as suboptimal coin
+selection may result due to the added limitation (default: 0)
 .HP
 \fB\-avoidpartialspends\fR
 .IP
@@ -573,7 +581,7 @@ Maximum size of data in data carrier transactions we relay and mine
 .HP
 \fB\-mempoolreplacement\fR
 .IP
-Enable transaction replacement in the memory pool (default: 1)
+Enable transaction replacement in the memory pool (default: 0)
 .HP
 \fB\-minrelaytxfee=\fR<amt>
 .IP

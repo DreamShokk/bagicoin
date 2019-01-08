@@ -302,7 +302,7 @@ UniValue gobject(const JSONRPCRequest& request)
         else {
             nFailed++;
             statusObj.pushKV("result", "failed");
-            statusObj.pushKV("errorMessage", exception.GetMessage());
+            statusObj.pushKV("errorMessage", exception.GetExceptMessage());
         }
 
         resultsObj.pushKV("chaincoin.conf", statusObj);
@@ -401,7 +401,7 @@ UniValue gobject(const JSONRPCRequest& request)
             else {
                 nFailed++;
                 statusObj.pushKV("result", "failed");
-                statusObj.pushKV("errorMessage", exception.GetMessage());
+                statusObj.pushKV("errorMessage", exception.GetExceptMessage());
             }
 
             resultsObj.pushKV(mne.getAlias(), statusObj);
@@ -523,7 +523,7 @@ UniValue gobject(const JSONRPCRequest& request)
             else {
                 nFailed++;
                 statusObj.pushKV("result", "failed");
-                statusObj.pushKV("errorMessage", exception.GetMessage());
+                statusObj.pushKV("errorMessage", exception.GetExceptMessage());
             }
 
             resultsObj.pushKV(mne.getAlias(), statusObj);
@@ -832,7 +832,7 @@ UniValue voteraw(const JSONRPCRequest& request)
         return "Voted successfully";
     }
     else {
-        throw JSONRPCError(RPC_INTERNAL_ERROR, "Error voting : " + exception.GetMessage());
+        throw JSONRPCError(RPC_INTERNAL_ERROR, "Error voting : " + exception.GetExceptMessage());
     }
 }
 

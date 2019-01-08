@@ -422,13 +422,13 @@ AC_ARG_ENABLE([util-cli],
   [AS_HELP_STRING([--enable-util-cli],
   [build chaincoin-cli])],
   [build_chaincoin_cli=$enableval],
-  [build_chaincoin_cli=$build_bitcoin_utils])
+  [build_chaincoin_cli=$build_chaincoin_utils])
 
 AC_ARG_ENABLE([util-tx],
   [AS_HELP_STRING([--enable-util-tx],
   [build chaincoin-tx])],
   [build_chaincoin_tx=$enableval],
-  [build_chaincoin_tx=$build_bitcoin_utils])
+  [build_chaincoin_tx=$build_chaincoin_utils])
 
 AC_ARG_WITH([libs],
   [AS_HELP_STRING([--with-libs],
@@ -1247,7 +1247,7 @@ AC_MSG_CHECKING([whether to build chaincoind])
 AM_CONDITIONAL([BUILD_BITCOIND], [test x$build_chaincoind = xyes])
 AC_MSG_RESULT($build_chaincoind)
 
-AC_MSG_CHECKING([whether to build bitcoin-cli])
+AC_MSG_CHECKING([whether to build chaincoin-cli])
 AM_CONDITIONAL([BUILD_BITCOIN_CLI], [test x$build_chaincoin_cli = xyes])
 AC_MSG_RESULT($build_chaincoin_cli)
 

@@ -232,3 +232,52 @@ bool SignPSCTInput(const SigningProvider& provider, PartiallySignedTransaction& 
 
     return sig_complete;
 }
+
+bool FinalizePSCT(PartiallySignedTransaction& psctx)
+{
+    // Finalize input signatures -- in case we have partial signatures that add up to a complete
+    //   signature, but have not combined them yet (e.g. because the combiner that created this
+    //   PartiallySignedTransaction did not understand them), this will combine them into a final
+    //   script.
+    bool complete = true;
+    for (unsigned int i = 0; i < psctx.tx->vin.size(); ++i) {
+        complete &= SignPSCTInput(DUMMY_SIGNING_PROVIDER, psctx, i, SIGHASH_ALL);
+    }
+
+    return complete;
+}
+
+bool FinalizeAndExtractPSCT(PartiallySignedTransaction& psctx, CMutableTransaction& result)
+{
+    // It's not safe to extract a PSCT that isn't finalized, and there's no easy way to check
+    //   whether a PSCT is finalized without finalizing it, so we just do this.
+    if (!FinalizePSCT(psctx)) {
+        return false;
+    }
+
+    result = *psctx.tx;
+    for (unsigned int i = 0; i < result.vin.size(); ++i) {
+        result.vin[i].scriptSig = psctx.inputs[i].final_script_sig;
+        result.vin[i].scriptWitness = psctx.inputs[i].final_script_witness;
+    }
+    return true;
+}
+
+bool CombinePSCTs(PartiallySignedTransaction& out, TransactionError& error, const std::vector<PartiallySignedTransaction>& psctxs)
+{
+    out = psctxs[0]; // Copy the first one
+
+    // Merge
+    for (auto it = std::next(psctxs.begin()); it != psctxs.end(); ++it) {
+        if (!out.Merge(*it)) {
+            error = TransactionError::PSCT_MISMATCH;
+            return false;
+        }
+    }
+    if (!out.IsSane()) {
+        error = TransactionError::INVALID_PSCT;
+        return false;
+    }
+
+    return true;
+}

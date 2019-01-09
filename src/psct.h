@@ -385,7 +385,7 @@ struct PartiallySignedTransaction
 
     bool IsNull() const;
 
-    /** Merge psct into this. The two psbts must have the same underlying CTransaction (i.e. the
+    /** Merge psct into this. The two pscts must have the same underlying CTransaction (i.e. the
       * same actual Bitcoin transaction.) Returns true if the merge succeeded, false otherwise. */
     NODISCARD bool Merge(const PartiallySignedTransaction& psct);
     bool IsSane() const;
@@ -543,5 +543,32 @@ bool PSCTInputSigned(PSCTInput& input);
 
 /** Signs a PSCTInput, verifying that all provided data matches what is being signed. */
 bool SignPSCTInput(const SigningProvider& provider, PartiallySignedTransaction& psct, int index, int sighash = SIGHASH_ALL);
+
+/**
+ * Finalizes a PSCT if possible, combining partial signatures.
+ *
+ * @param[in,out] &psctx reference to PartiallySignedTransaction to finalize
+ * return True if the PSCT is now complete, false otherwise
+ */
+bool FinalizePSCT(PartiallySignedTransaction& psctx);
+
+/**
+ * Finalizes a PSCT if possible, and extracts it to a CMutableTransaction if it could be finalized.
+ *
+ * @param[in]  &psctx reference to PartiallySignedTransaction
+ * @param[out] result CMutableTransaction representing the complete transaction, if successful
+ * @return True if we successfully extracted the transaction, false otherwise
+ */
+bool FinalizeAndExtractPSCT(PartiallySignedTransaction& psctx, CMutableTransaction& result);
+
+/**
+ * Combines PSCTs with the same underlying transaction, resulting in a single PSCT with all partial signatures from each input.
+ *
+ * @param[out] &out   the combined PSCT, if successful
+ * @param[out] &error reference to TransactionError to fill with error info on failure
+ * @param[in]  psctxs the PSCTs to combine
+ * @return True if we successfully combined the transactions, false if they were not compatible
+ */
+bool CombinePSCTs(PartiallySignedTransaction& out, TransactionError& error, const std::vector<PartiallySignedTransaction>& psctxs);
 
 #endif // BITCOIN_PSCT_H

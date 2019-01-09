@@ -18,6 +18,7 @@ enum class TransactionError {
     MEMPOOL_REJECTED,
     MEMPOOL_ERROR,
     INVALID_PSCT,
+    PSCT_MISMATCH,
     SIGHASH_MISMATCH,
 
     ERROR_COUNT

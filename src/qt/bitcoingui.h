@@ -135,10 +135,7 @@ private:
     QAction* backupWalletAction = nullptr;
     QAction* changePassphraseAction = nullptr;
     QAction* aboutQtAction = nullptr;
-    QAction* openInfoAction = nullptr;
     QAction* openRPCConsoleAction = nullptr;
-    QAction* openGraphAction = nullptr;
-    QAction* openPeersAction = nullptr;
     QAction* openConfEditorAction = nullptr;
     QAction* openMNConfEditorAction = nullptr;
     QAction* showBackupsAction = nullptr;
@@ -199,6 +196,8 @@ private:
 Q_SIGNALS:
     /** Signal raised when a URI was entered or dragged to the GUI */
     void receivedURI(const QString &uri);
+    /** Signal raised when RPC console shown */
+    void consoleShown(RPCConsole* console);
 
 public Q_SLOTS:
     /** Set number of connections shown in the UI */

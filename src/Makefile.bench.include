@@ -71,7 +71,7 @@ chaincoin_bench: $(BENCH_BINARY)
 bench: $(BENCH_BINARY) FORCE
 	$(BENCH_BINARY)
 
-bitcoin_bench_clean : FORCE
+chaincoin_bench_clean : FORCE
 	rm -f $(CLEAN_BITCOIN_BENCH) $(bench_bench_chaincoin_OBJECTS) $(BENCH_BINARY)
 
 %.raw.h: %.raw

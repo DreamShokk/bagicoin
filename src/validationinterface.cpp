@@ -52,7 +52,7 @@ struct MainSignalsInstance {
     SingleThreadedSchedulerClient m_schedulerClient;
     std::unordered_map<CValidationInterface*, ValidationInterfaceConnections> m_connMainSignals;
 
-    MainSignalsInstance(CScheduler *pscheduler) : m_schedulerClient(pscheduler) {}
+    explicit MainSignalsInstance(CScheduler *pscheduler) : m_schedulerClient(pscheduler) {}
 };
 
 static CMainSignals g_signals;

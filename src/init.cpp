@@ -139,7 +139,7 @@ static const char* FEE_ESTIMATES_FILENAME="fee_estimates.dat";
 class CCoinsViewErrorCatcher final : public CCoinsViewBacked
 {
 public:
-    CCoinsViewErrorCatcher(CCoinsView* view) : CCoinsViewBacked(view) {}
+    explicit CCoinsViewErrorCatcher(CCoinsView* view) : CCoinsViewBacked(view) {}
     bool GetCoin(const COutPoint &outpoint, Coin &coin) const override {
         try {
             return CCoinsViewBacked::GetCoin(outpoint, coin);

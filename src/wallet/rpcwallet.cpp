@@ -36,6 +36,7 @@
 #include <wallet/coincontrol.h>
 #include <wallet/feebumper.h>
 #include <wallet/privatesend_client.h>
+#include <wallet/psctwallet.h>
 #include <wallet/rpcwallet.h>
 #include <wallet/wallet.h>
 #include <wallet/walletdb.h>
@@ -853,7 +854,7 @@ static UniValue sendmany(const JSONRPCRequest& request)
             "       \"UNSET\"\n"
             "       \"ECONOMICAL\"\n"
             "       \"CONSERVATIVE\""},
-                    {"use_ps", RPCArg::Type::BOOL, /* opt */ true, /* default_val */ "UNSET", "Use only anomymized inputs"},
+                    {"use_ps", RPCArg::Type::BOOL, RPCArg::Optional::OMITTED, "Use only anomymized inputs"},
                 },
                  RPCResult{
             "\"txid\"                   (string) The transaction id for the send. Only 1 transaction is created regardless of \n"
@@ -3968,60 +3969,6 @@ void AddKeypathToMap(const CWallet* pwallet, const CKeyID& keyID, std::map<CPubK
     hd_keypaths.emplace(vchPubKey, std::move(info));
 }
 
-bool FillPSCT(const CWallet* pwallet, PartiallySignedTransaction& psctx, int sighash_type, bool sign, bool bip32derivs)
-{
-    LOCK(pwallet->cs_wallet);
-    // Get all of the previous transactions
-    bool complete = true;
-    for (unsigned int i = 0; i < psctx.tx->vin.size(); ++i) {
-        const CTxIn& txin = psctx.tx->vin[i];
-        PSCTInput& input = psctx.inputs.at(i);
-
-        if (PSCTInputSigned(input)) {
-            continue;
-        }
-
-        // Verify input looks sane. This will check that we have at most one uxto, witness or non-witness.
-        if (!input.IsSane()) {
-            throw JSONRPCError(RPC_DESERIALIZATION_ERROR, "PSCT input is not sane.");
-        }
-
-        // If we have no utxo, grab it from the wallet.
-        if (!input.non_witness_utxo && input.witness_utxo.IsNull()) {
-            const uint256& txhash = txin.prevout.hash;
-            const auto it = pwallet->mapWallet.find(txhash);
-            if (it != pwallet->mapWallet.end()) {
-                const CWalletTx& wtx = it->second;
-                // We only need the non_witness_utxo, which is a superset of the witness_utxo.
-                //   The signing code will switch to the smaller witness_utxo if this is ok.
-                input.non_witness_utxo = wtx.tx;
-            }
-        }
-
-        // Get the Sighash type
-        if (sign && input.sighash_type > 0 && input.sighash_type != sighash_type) {
-            throw JSONRPCError(RPC_DESERIALIZATION_ERROR, "Specified Sighash and sighash in PSCT do not match.");
-        }
-
-        complete &= SignPSCTInput(HidingSigningProvider(pwallet, !sign, !bip32derivs), psctx, i, sighash_type);
-    }
-
-    // Fill in the bip32 keypaths and redeemscripts for the outputs so that hardware wallets can identify change
-    for (unsigned int i = 0; i < psctx.tx->vout.size(); ++i) {
-        const CTxOut& out = psctx.tx->vout.at(i);
-        PSCTOutput& psct_out = psctx.outputs.at(i);
-
-        // Fill a SignatureData with output info
-        SignatureData sigdata;
-        psct_out.FillSignatureData(sigdata);
-
-        MutableTransactionSignatureCreator creator(psctx.tx.get_ptr(), 0, out.nValue, 1);
-        ProduceSignature(HidingSigningProvider(pwallet, true, !bip32derivs), creator, out.scriptPubKey, sigdata);
-        psct_out.FromSignatureData(sigdata);
-    }
-    return complete;
-}
-
 UniValue walletprocesspsct(const JSONRPCRequest& request)
 {
     std::shared_ptr<CWallet> const wallet = GetWalletForJSONRPCRequest(request);
@@ -4066,7 +4013,7 @@ UniValue walletprocesspsct(const JSONRPCRequest& request)
     // Unserialize the transaction
     PartiallySignedTransaction psctx;
     std::string error;
-    if (!DecodeBase64PSCT(psCtx, request.params[0].get_str(), error)) {
+    if (!DecodeBase64PSCT(psctx, request.params[0].get_str(), error)) {
         throw JSONRPCError(RPC_DESERIALIZATION_ERROR, strprintf("TX decode failed %s", error));
     }
 
@@ -4218,11 +4165,11 @@ UniValue prepareproposal(const JSONRPCRequest& request)
                 "\nCreates and submits the collateral transaction for a pre-defined proposal\n" +
                        HelpRequiringPassphrase(pwallet) + "\n",
                 {
-                    {"parent-hash", RPCArg::Type::STR_HEX, /* opt */ false, /* default_val */ "", "The parent hash of the proposal\n"
+                    {"parent-hash", RPCArg::Type::STR_HEX, RPCArg::Optional::NO, "The parent hash of the proposal\n"
                             "0 if submitted for the first time"},
-                    {"revision", RPCArg::Type::NUM, /* opt */ false, /* default_val */ "", "Revision of the proposal."},
-                    {"time", RPCArg::Type::NUM, /* opt */ false, /* default_val */ "", "UNIX time of the submittal."},
-                    {"data-hex", RPCArg::Type::STR_HEX, /* opt */ false, /* default_val */ "", "The hex string of the generated proposal."},
+                    {"revision", RPCArg::Type::NUM, RPCArg::Optional::NO, "Revision of the proposal."},
+                    {"time", RPCArg::Type::NUM, RPCArg::Optional::NO, "UNIX time of the submittal."},
+                    {"data-hex", RPCArg::Type::STR_HEX, RPCArg::Optional::NO, "The hex string of the generated proposal."},
                 },
                 RPCResult{
                             "{\n"

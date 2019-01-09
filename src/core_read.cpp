@@ -4,6 +4,7 @@
 
 #include <core_io.h>
 
+#include <psct.h>
 #include <primitives/block.h>
 #include <primitives/transaction.h>
 #include <script/script.h>

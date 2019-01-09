@@ -184,6 +184,7 @@ BITCOIN_CORE_H = \
   policy/rbf.h \
   pow.h \
   protocol.h \
+  psct.h \
   random.h \
   reverse_iterator.h \
   reverselock.h \
@@ -233,6 +234,7 @@ BITCOIN_CORE_H = \
   wallet/feebumper.h \
   wallet/fees.h \
   wallet/privatesend_client.h \
+  wallet/psctwallet.h \
   wallet/rpcwallet.h \
   wallet/wallet.h \
   wallet/walletdb.h \
@@ -353,6 +355,7 @@ libchaincoin_wallet_a_SOURCES = \
   wallet/fees.cpp \
   wallet/init.cpp \
   wallet/privatesend_client.cpp \
+  wallet/psctwallet.cpp \
   wallet/rpcdump.cpp \
   wallet/rpcwallet.cpp \
   wallet/wallet.cpp \
@@ -494,6 +497,7 @@ libchaincoin_common_a_SOURCES = \
   netaddress.cpp \
   netbase.cpp \
   policy/feerate.cpp \
+  psct.cpp \
   protocol.cpp \
   scheduler.cpp \
   script/descriptor.cpp \

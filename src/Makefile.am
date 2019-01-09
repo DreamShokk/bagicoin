@@ -174,6 +174,7 @@ BITCOIN_CORE_H = \
   netbase.h \
   netfulfilledman.h \
   netmessagemaker.h \
+  node/transaction.h \
   noui.h \
   optional.h \
   outputtype.h \
@@ -295,6 +296,7 @@ libchaincoin_server_a_SOURCES = \
   net.cpp \
   netfulfilledman.cpp \
   net_processing.cpp \
+  node/transaction.cpp \
   noui.cpp \
   outputtype.cpp \
   policy/fees.cpp \

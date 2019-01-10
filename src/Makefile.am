@@ -598,7 +598,7 @@ chaincoin_tx_LDADD += $(BOOST_LIBS) $(CRYPTO_LIBS)
 # chaincoinconsensus library #
 if BUILD_BITCOIN_LIBS
 include_HEADERS = script/chaincoinconsensus.h
-libchaincoinconsensus_la_SOURCES = $(crypto_libchaincoin_crypto_base_a_SOURCES) $(libchaincoin_consensus_a_SOURCES)
+libchaincoinconsensus_la_SOURCES = $(crypto_libchaincoin_crypto_base_a_SOURCES) $(crypto_libchaincoin_crypto_c11_a_SOURCES) $(libchaincoin_consensus_a_SOURCES)
 
 if GLIBC_BACK_COMPAT
   libchaincoinconsensus_la_SOURCES += compat/glibc_compat.cpp

@@ -30,6 +30,8 @@ LIBBITCOIN_CONSENSUS=libchaincoin_consensus.a
 LIBBITCOIN_CLI=libchaincoin_cli.a
 LIBBITCOIN_UTIL=libchaincoin_util.a
 LIBBITCOIN_CRYPTO_BASE=crypto/libchaincoin_crypto_base.a
+LIBBITCOIN_CRYPTO_C11=crypto/libchaincoin_crypto_c11.a
+
 LIBBITCOINQT=qt/libchaincoinqt.a
 LIBSECP256K1=secp256k1/libsecp256k1.la
 
@@ -56,6 +58,9 @@ if ENABLE_SHANI
 LIBBITCOIN_CRYPTO_SHANI = crypto/libchaincoin_crypto_shani.a
 LIBBITCOIN_CRYPTO += $(LIBBITCOIN_CRYPTO_SHANI)
 endif
+
+LIBBITCOIN_CRYPTO += $(LIBBITCOIN_CRYPTO_C11)
+
 
 $(LIBSECP256K1): $(wildcard secp256k1/src/*.h) $(wildcard secp256k1/src/*.c) $(wildcard secp256k1/include/*)
 	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
@@ -366,9 +371,16 @@ crypto_libchaincoin_crypto_base_a_SOURCES = \
   crypto/sha512.h \
   crypto/siphash.cpp \
   crypto/siphash.h
+  
+if USE_ASM
+crypto_libchaincoin_crypto_base_a_SOURCES += crypto/sha256_sse4.cpp
+endif
+
 
 # c11
-crypto_libchaincoin_crypto_base_a_SOURCES += \
+crypto_libchaincoin_crypto_c11_a_CPPFLAGS = $(AM_CPPFLAGS)
+crypto_libchaincoin_crypto_c11_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+crypto_libchaincoin_crypto_c11_a_SOURCES = \
   crypto/aes_helper.c \
   crypto/blake.c \
   crypto/bmw.c \
@@ -394,10 +406,6 @@ crypto_libchaincoin_crypto_base_a_SOURCES += \
   crypto/sph_skein.h \
   crypto/sph_types.h
   
-if USE_ASM
-crypto_libchaincoin_crypto_base_a_SOURCES += crypto/sha256_sse4.cpp
-endif
-
 crypto_libchaincoin_crypto_sse41_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 crypto_libchaincoin_crypto_sse41_a_CPPFLAGS = $(AM_CPPFLAGS)
 crypto_libchaincoin_crypto_sse41_a_CXXFLAGS += $(SSE41_CXXFLAGS)
@@ -590,7 +598,7 @@ chaincoin_tx_LDADD += $(BOOST_LIBS) $(CRYPTO_LIBS)
 # chaincoinconsensus library #
 if BUILD_BITCOIN_LIBS
 include_HEADERS = script/chaincoinconsensus.h
-libchaincoinconsensus_la_SOURCES = $(crypto_libchaincoin_crypto_base_a_SOURCES) $(libchaincoin_consensus_a_SOURCES)
+libchaincoinconsensus_la_SOURCES = $(crypto_libchaincoin_crypto_base_a_SOURCES) $(crypto_libchaincoin_crypto_c11_a_SOURCES) $(libchaincoin_consensus_a_SOURCES)
 
 if GLIBC_BACK_COMPAT
   libchaincoinconsensus_la_SOURCES += compat/glibc_compat.cpp

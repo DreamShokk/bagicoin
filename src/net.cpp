@@ -16,14 +16,11 @@
 #include <crypto/sha256.h>
 #include <primitives/transaction.h>
 #include <netbase.h>
-#include <netmessagemaker.h>
 #include <scheduler.h>
 #include <ui_interface.h>
 #include <util/strencodings.h>
 
-#include <modules/platform/funding.h>
 #include <modules/masternode/masternode_sync.h>
-#include <modules/masternode/masternode_man.h>
 
 #ifdef WIN32
 #include <string.h>

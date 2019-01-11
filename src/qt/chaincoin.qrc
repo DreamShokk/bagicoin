@@ -2,7 +2,7 @@
     <qresource prefix="/icons">
         <file alias="prompticon">res/icons/chevron.png</file>
         <file alias="warning">res/icons/warning.png</file>
-        <file alias="bitcoin">res/icons/chaincoin.png</file>
+        <file alias="chaincoin">res/icons/chaincoin.png</file>
     </qresource>
     <qresource prefix="/icons/green">
         <file alias="about">res/icons/green/about.png</file>

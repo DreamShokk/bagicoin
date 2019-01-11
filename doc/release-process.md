@@ -22,10 +22,10 @@ Before every minor and major release:
 
 Before every major release:
 
-* Update hardcoded [seeds](/contrib/seeds/README.md), see [this pull request](https://github.com/bitcoin/bitcoin/pull/7415) for an example.
+* Update hardcoded [seeds](/contrib/seeds/README.md), see [this pull request](https://github.com/chaincoin/chaincoin/pull/7415) for an example.
 * Update [`BLOCK_CHAIN_SIZE`](/src/qt/intro.cpp) to the current size plus some overhead.
 * Update `src/chainparams.cpp` chainTxData with statistics about the transaction count and rate. Use the output of the RPC `getchaintxstats`, see
-  [this pull request](https://github.com/bitcoin/bitcoin/pull/12270) for an example.
+  [this pull request](https://github.com/chaincoin/chaincoin/pull/12270) for an example.
 * Update version of `contrib/gitian-descriptors/*.yml`: usually one'd want to do this on master after branching off the release - but be sure to at least do it before a new major release
 
 ### First time / New builders
@@ -35,8 +35,8 @@ If you're using the automated script (found in [contrib/gitian-build.py](/contri
 Check out the source code in the following directory hierarchy.
 
     cd /path/to/your/toplevel/build
-    git clone https://github.com/chaincoin-core/gitian.sigs.git
-    git clone https://github.com/chaincoin-core/chaincoin-detached-sigs.git
+    git clone https://github.com/chaincoin/gitian.sigs.git
+    git clone https://github.com/chaincoin/chaincoin-detached-sigs.git
     git clone https://github.com/devrandom/gitian-builder.git
     git clone https://github.com/chaincoin/chaincoin.git
 
@@ -96,7 +96,7 @@ Create the macOS SDK tarball, see the [macOS readme](README_osx.md) for details,
 
 NOTE: Gitian is sometimes unable to download files. If you have errors, try the step below.
 
-By default, Gitian will fetch source files as needed. To cache them ahead of time, make sure you have checked out the tag you want to build in bitcoin, then:
+By default, Gitian will fetch source files as needed. To cache them ahead of time, make sure you have checked out the tag you want to build in chaincoin, then:
 
     pushd ./gitian-builder
     make -C ../chaincoin/depends download SOURCES_PATH=`pwd`/cache/common
@@ -196,7 +196,7 @@ Codesigner only: Commit the detached codesign payloads:
 Non-codesigners: wait for Windows/macOS detached signatures:
 
 - Once the Windows/macOS builds each have 3 matching signatures, they will be signed with their respective release keys.
-- Detached signatures will then be committed to the [chaincoin-detached-sigs](https://github.com/chaincoin-core/chaincoin-detached-sigs) repository, which can be combined with the unsigned apps to create signed binaries.
+- Detached signatures will then be committed to the [chaincoin-detached-sigs](https://github.com/chaincoin/chaincoin-detached-sigs) repository, which can be combined with the unsigned apps to create signed binaries.
 
 Create (and optionally verify) the signed macOS binary:
 
@@ -261,52 +261,5 @@ rm SHA256SUMS
 ```
 (the digest algorithm is forced to sha256 to avoid confusion of the `Hash:` header that GPG adds with the SHA256 used for the files)
 Note: check that SHA256SUMS itself doesn't end up in SHA256SUMS, which is a spurious/nonsensical entry.
-
-- Upload zips and installers, as well as `SHA256SUMS.asc` from last step, to the chaincoin.org server
-  into `/var/www/bin/chaincoin-core-${VERSION}`
-
-- A `.torrent` will appear in the directory after a few minutes. Optionally help seed this torrent. To get the `magnet:` URI use:
-```bash
-transmission-show -m <torrent file>
-```
-Insert the magnet URI into the announcement sent to mailing lists. This permits
-people without access to `chaincoin.org` to download the binary distribution.
-Also put it into the `optional_magnetlink:` slot in the YAML file for
-chaincoin.org (see below for chaincoin.org update instructions).
-
-- Update chaincoin.org version
-
-  - First, check to see if the Chaincoin.org maintainers have prepared a
-    release: https://github.com/chaincoin-dot-org/chaincoin.org/labels/Releases
-
-      - If they have, it will have previously failed their Travis CI
-        checks because the final release files weren't uploaded.
-        Trigger a Travis CI rebuild---if it passes, merge.
-
-  - If they have not prepared a release, follow the Chaincoin.org release
-    instructions: https://github.com/chaincoin-dot-org/chaincoin.org#release-notes
-
-  - After the pull request is merged, the website will automatically show the newest version within 15 minutes, as well
-    as update the OS download links. Ping @saivann/@harding (saivann/harding on Freenode) in case anything goes wrong
-
-- Announce the release:
-
-  - chaincoin-dev and chaincoin-core-dev mailing list
-
-  - Optionally twitter, reddit /r/Chaincoin, ... but this will usually sort out itself
-
-  - bitcoincore.org blog post
-
-  - bitcoincore.org RPC documentation update
-
-  - Update title of #bitcoin on Freenode IRC
-
-  - Optionally twitter, reddit /r/Bitcoin, ... but this will usually sort out itself
-
-  - Notify BlueMatt so that he can start building [the PPAs](https://launchpad.net/~bitcoin/+archive/ubuntu/bitcoin)
-
-  - Archive release notes for the new version to `doc/release-notes/` (branch `master` and branch of the release)
-
-  - Create a [new GitHub release](https://github.com/chaincoin/chaincoin/releases/new) with a link to the archived release notes.
 
   - Celebrate

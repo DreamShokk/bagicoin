@@ -18,7 +18,8 @@ request is opened. All sets of tests can also be run locally.
 
 # Running tests locally
 
-Build for your system first. Be sure to enable wallet, utils and daemon when you configure. Tests will not run otherwise.
+Before tests can be run locally, Chaincoin Core must be built.  See the [building instructions](/doc#building) for help.
+
 
 ### Functional tests
 
@@ -178,7 +179,7 @@ Note: gdb attach step may require `sudo`
 
 ### Util tests
 
-Util tests can be run locally by running `test/util/bitcoin-util-test.py`.
+Util tests can be run locally by running `test/util/chaincoin-util-test.py`.
 Use the `-v` option for verbose output.
 
 ### Lint tests

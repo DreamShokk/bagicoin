@@ -105,6 +105,7 @@ BITCOIN_CORE_H = \
   dsnotificationinterface.h \
   fs.h \
   governance.h \
+  flat-database.h \
   governance-classes.h \
   governance-exceptions.h \
   governance-object.h \
@@ -127,6 +128,7 @@ BITCOIN_CORE_H = \
   masternodeconfig.h \
   memusage.h \
   merkleblock.h \
+  messagesigner.h \
   miner.h \
   net.h \
   net_processing.h \

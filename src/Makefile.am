@@ -83,6 +83,7 @@ BITCOIN_CORE_H = \
   bloom.h \
   blockencodings.h \
   cachemap.h \
+  cachemultimap.h \
   chain.h \
   chainparams.h \
   chainparamsbase.h \

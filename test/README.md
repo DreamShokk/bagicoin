@@ -179,7 +179,7 @@ Note: gdb attach step may require `sudo`
 
 ### Util tests
 
-Util tests can be run locally by running `test/util/bitcoin-util-test.py`.
+Util tests can be run locally by running `test/util/chaincoin-util-test.py`.
 Use the `-v` option for verbose output.
 
 ### Lint tests

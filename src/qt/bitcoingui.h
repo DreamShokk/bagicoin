@@ -156,6 +156,7 @@ private:
     QAction* showHelpMessageAction = nullptr;
     QAction* showPrivateSendHelpAction = nullptr;
     QAction* proposalAction = nullptr;
+    QAction* m_open_wallet_action{nullptr};
     QAction* m_wallet_selector_label_action = nullptr;
     QAction* m_wallet_selector_action = nullptr;
 

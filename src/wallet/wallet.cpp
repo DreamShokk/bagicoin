@@ -2917,7 +2917,7 @@ bool CWallet::SelectCoinsByDenominations(int nDenom, CAmount nValueMin, CAmount 
         AvailableCoins(*locked_chain, vCoins, true, nullptr, ONLY_DENOMINATED);
     }
 
-    std::random_shuffle(vCoins.rbegin(), vCoins.rend(), GetRandInt);
+    Shuffle(vCoins.rbegin(), vCoins.rend(), GetRandInt);
 
     // ( bit on if present )
     // bit 0 - 100CHC+1

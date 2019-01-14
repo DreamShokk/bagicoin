@@ -119,7 +119,7 @@ bool CActiveMasternode::SendMasternodePing(CConnman* connman)
     return true;
 }
 
-bool CActiveMasternode::UpdateSentinelPing(int version)
+bool CActiveMasternode::UpdateSentinelPing(uint32_t version)
 {
     nSentinelVersion = version;
     nSentinelPingTime = GetAdjustedTime();

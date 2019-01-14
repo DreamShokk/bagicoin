@@ -2917,7 +2917,7 @@ bool CWallet::SelectCoinsByDenominations(int nDenom, CAmount nValueMin, CAmount 
         AvailableCoins(*locked_chain, vCoins, true, nullptr, ONLY_DENOMINATED);
     }
 
-    Shuffle(vCoins.rbegin(), vCoins.rend(), GetRandInt);
+    Shuffle(vCoins.rbegin(), vCoins.rend(), FastRandomContext());
 
     // ( bit on if present )
     // bit 0 - 100CHC+1

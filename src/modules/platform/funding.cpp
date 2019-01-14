@@ -1114,8 +1114,8 @@ int CGovernanceManager::RequestGovernanceObjectVotes(const std::vector<CNode*>& 
     LogPrint(BCLog::GOV, "CGovernanceManager::RequestGovernanceObjectVotes -- start: vTriggerObjHashes %d vOtherObjHashes %d mapAskedRecently %d\n",
                 vTriggerObjHashes.size(), vOtherObjHashes.size(), mapAskedRecently.size());
 
-    Shuffle(vTriggerObjHashes.begin(), vTriggerObjHashes.end(), GetRandInt);
-    Shuffle(vOtherObjHashes.begin(), vOtherObjHashes.end(), GetRandInt);
+    Shuffle(vTriggerObjHashes.begin(), vTriggerObjHashes.end(), FastRandomContext());
+    Shuffle(vOtherObjHashes.begin(), vOtherObjHashes.end(), FastRandomContext());
 
     for (int i = 0; i < nMaxObjRequestsPerNode; ++i) {
         uint256 nHashGovobj;

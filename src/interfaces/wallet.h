@@ -280,6 +280,9 @@ public:
     //! Return result of automatic wallet backup.
     virtual bool DoAutoBackup(std::string walletIn, std::string& strBackupWarning, std::string& strBackupError) = 0;
 
+    //! Remove wallet.
+    virtual void remove() = 0;
+
     //! Register handler for unload message.
     using UnloadFn = std::function<void()>;
     virtual std::unique_ptr<Handler> handleUnload(UnloadFn fn) = 0;

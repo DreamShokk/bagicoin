@@ -544,6 +544,10 @@ public:
         return AutoBackupWallet(pwallet, WalletLocation(), strBackupWarning, strBackupError);
     }
 
+    void remove() override
+    {
+        RemoveWallet(m_shared_wallet);
+    }
     std::unique_ptr<Handler> handleUnload(UnloadFn fn) override
     {
         return MakeHandler(m_wallet.NotifyUnload.connect(fn));

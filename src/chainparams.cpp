@@ -121,6 +121,8 @@ public:
         pchMessageStart[3] = 0x03; // PM-Tech: ChainCoin
         nDefaultPort = 11994; // PM-Tech: ChainCoin
         nPruneAfterHeight = 100000;
+        m_assumed_blockchain_size = 2;
+        m_assumed_chain_state_size = 0;
 
         genesis = CreateGenesisBlock(1390078220, 2099366979, 0x1e0fffff, 1, 16 * COIN); // PM-Tech: ChainCoin
         consensus.hashGenesisBlock = genesis.GetHash();
@@ -246,6 +248,8 @@ public:
         pchMessageStart[3] = 0x02;
         nDefaultPort = 21994;
         nPruneAfterHeight = 1000;
+        m_assumed_blockchain_size = 0;
+        m_assumed_chain_state_size = 0;
 
         genesis = CreateGenesisBlock(1388868139, 423087994, 0x1e0fffff, 1, 16 * COIN);
         consensus.hashGenesisBlock = genesis.GetHash();
@@ -352,6 +356,8 @@ public:
         pchMessageStart[3] = 0x56;
         nDefaultPort = 18444;
         nPruneAfterHeight = 1000;
+        m_assumed_blockchain_size = 0;
+        m_assumed_chain_state_size = 0;
 
         UpdateVersionBitsParametersFromArgs(args);
 

@@ -119,7 +119,7 @@ bool CActiveMasternode::SendMasternodePing(CConnman* connman)
     return true;
 }
 
-bool CActiveMasternode::UpdateSentinelPing(int version)
+bool CActiveMasternode::UpdateSentinelPing(uint32_t version)
 {
     nSentinelVersion = version;
     nSentinelPingTime = GetAdjustedTime();
@@ -150,7 +150,7 @@ void CActiveMasternode::ManageStateInitial(CConnman* connman)
     }
 
     // Check our own IP to be useful
-    if(!fDiscover || !service.IsRoutable() || IsLimited(service.GetNetwork())) {
+    if(!fDiscover || !service.IsRoutable() || !IsReachable(service.GetNetwork())) {
         nState = ACTIVE_MASTERNODE_NOT_CAPABLE;
         strNotCapableReason = "Detected IP appears to be on a local network. Please consider using the externalip configuration option.";
         LogPrintf("CActiveMasternode::ManageStateInitial -- %s: %s\n", GetStateString(), strNotCapableReason);

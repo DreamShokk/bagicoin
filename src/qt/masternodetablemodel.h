@@ -24,7 +24,7 @@ class MasternodeTableModel : public QAbstractTableModel
     Q_OBJECT
 
 public:
-    explicit MasternodeTableModel(ClientModel *parent = 0);
+    explicit MasternodeTableModel(ClientModel *parent = nullptr);
     ~MasternodeTableModel();
 
     enum ColumnIndex {

@@ -74,7 +74,7 @@ public:
     std::string GetStatus() const;
     std::string GetTypeString() const;
 
-    bool UpdateSentinelPing(int version);
+    bool UpdateSentinelPing(uint32_t version);
 
     void Controller(CScheduler& scheduler, CConnman* connman);
 

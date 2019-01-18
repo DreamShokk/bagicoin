@@ -13,7 +13,7 @@
 
 uint256 CBlockHeader::GetHash() const
 {
-    return HashC11(BEGIN(nVersion), END(nNonce));
+    return HashC11((char*)&(nVersion), (char*)&((&(nNonce))[1]));
 }
 
 std::string CBlock::ToString() const

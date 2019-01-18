@@ -381,30 +381,28 @@ endif
 crypto_libchaincoin_crypto_c11_a_CPPFLAGS = $(AM_CPPFLAGS)
 crypto_libchaincoin_crypto_c11_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 crypto_libchaincoin_crypto_c11_a_SOURCES = \
-  crypto/aes_helper.c \
-  crypto/blake.c \
-  crypto/bmw.c \
-  crypto/cubehash.c \
-  crypto/echo.c \
-  crypto/groestl.c \
-  crypto/jh.c \
-  crypto/keccak.c \
-  crypto/luffa.c \
-  crypto/shavite.c \
-  crypto/simd.c \
-  crypto/skein.c \
-  crypto/sph_blake.h \
-  crypto/sph_bmw.h \
-  crypto/sph_cubehash.h \
-  crypto/sph_echo.h \
-  crypto/sph_groestl.h \
-  crypto/sph_jh.h \
-  crypto/sph_keccak.h \
-  crypto/sph_luffa.h \
-  crypto/sph_shavite.h \
-  crypto/sph_simd.h \
-  crypto/sph_skein.h \
-  crypto/sph_types.h
+  crypto/blake512.cpp \
+  crypto/blake512.h \
+  crypto/bmw512.cpp \
+  crypto/bmw512.h \
+  crypto/c11_types.h \
+  crypto/groestl512.cpp \
+  crypto/groestl512.h \
+  crypto/jh512.cpp \
+  crypto/jh512.h \
+  crypto/keccak512.cpp \
+  crypto/keccak512.h \
+  crypto/cubehash512.cpp \
+  crypto/cubehash512.h \
+  crypto/echo512.cpp \
+  crypto/echo512.h \
+  crypto/luffa512.cpp \
+  crypto/luffa512.h \
+  crypto/shavite512.cpp \
+  crypto/shavite512.h \
+  crypto/simd512.cpp \
+  crypto/skein512.cpp \
+  crypto/skein512.h
   
 crypto_libchaincoin_crypto_sse41_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 crypto_libchaincoin_crypto_sse41_a_CPPFLAGS = $(AM_CPPFLAGS)

@@ -3,10 +3,11 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include <modules/platform/funding_vote.h>
+
+#include <messagesigner.h>
 #include <modules/platform/funding_object.h>
 #include <modules/masternode/masternode_man.h>
 #include <modules/masternode/masternode_sync.h>
-#include <messagesigner.h>
 #include <util/system.h>
 
 std::string CGovernanceVoting::ConvertOutcomeToString(vote_outcome_enum_t nOutcome)

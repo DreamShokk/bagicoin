@@ -1,8 +1,12 @@
+// Copyright (c) 2014-2017 The Dash Core developers
+// Distributed under the MIT/X11 software license, see the accompanying
+// file COPYING or http://www.opensource.org/licenses/mit-license.php.
+
+#include <modules/masternode/masternode_config.h>
 
 #include <chainparams.h>
 #include <fs.h>
 #include <netbase.h>
-#include <modules/masternode/masternode_config.h>
 #include <util/system.h>
 #include <util/strencodings.h>
 

@@ -2,16 +2,17 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include <modules/masternode/activemasternode.h>
+#include <modules/masternode/masternode_man.h>
+
 #include <addrman.h>
 #include <clientversion.h>
-#include <modules/platform/funding.h>
 #include <init.h>
 #include <interfaces/chain.h>
+#include <messagesigner.h>
+#include <modules/platform/funding.h>
+#include <modules/masternode/activemasternode.h>
 #include <modules/masternode/masternode_payments.h>
 #include <modules/masternode/masternode_sync.h>
-#include <modules/masternode/masternode_man.h>
-#include <messagesigner.h>
 #include <netfulfilledman.h>
 #include <netmessagemaker.h>
 #include <scheduler.h>

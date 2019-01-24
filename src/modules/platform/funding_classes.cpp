@@ -4,8 +4,9 @@
 
 //#define ENABLE_DASH_DEBUG
 
-#include <core_io.h>
 #include <modules/platform/funding_classes.h>
+
+#include <core_io.h>
 #include <init.h>
 #include <validation.h>
 #include <util/strencodings.h>

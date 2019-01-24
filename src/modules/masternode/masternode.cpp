@@ -2,7 +2,8 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include <modules/masternode/activemasternode.h>
+#include <modules/masternode/masternode.h>
+
 #include <base58.h>
 #include <clientversion.h>
 #include <chainparams.h>
@@ -10,7 +11,7 @@
 #include <init.h>
 #include <interfaces/chain.h>
 #include <netbase.h>
-#include <modules/masternode/masternode.h>
+#include <modules/masternode/activemasternode.h>
 #include <modules/masternode/masternode_payments.h>
 #include <modules/masternode/masternode_sync.h>
 #include <modules/masternode/masternode_man.h>
@@ -231,7 +232,7 @@ void CMasternode::Check(bool fForce)
         // part 1: expire based on dashd ping
         bool fSentinelPingActive = masternodeSync.IsSynced() && mnodeman.IsSentinelPingActive();
         bool fSentinelPingExpired = fSentinelPingActive && !IsPingedWithin(MASTERNODE_SENTINEL_PING_MAX_SECONDS);
-                LogPrint(BCLog::MNODE, "CMasternode::Check -- outpoint=%s, GetAdjustedTime()=%d, fSentinelPingExpired=%d\n",
+        LogPrint(BCLog::MNODE, "CMasternode::Check -- outpoint=%s, GetAdjustedTime()=%d, fSentinelPingExpired=%d\n",
                 outpoint.ToStringShort(), GetAdjustedTime(), fSentinelPingExpired);
 
         if(fSentinelPingExpired) {
@@ -264,6 +265,8 @@ void CMasternode::Check(bool fForce)
 
         LogPrint(BCLog::MNODE, "CMasternode::Check -- outpoint=%s, GetAdjustedTime()=%d, fSentinelPingExpired=%d\n",
                 outpoint.ToStringShort(), GetAdjustedTime(), fSentinelPingExpired);
+        LogPrint(BCLog::MNODE, "CMasternode::Check -- sync=%d, IsSentinelPingActive()=%d, fSentinelIsCurrent=%d, Height=%d\n",
+                masternodeSync.IsSynced(), mnodeman.IsSentinelPingActive(), lastPing.fSentinelIsCurrent, nHeight);
 
         if(fSentinelPingExpired) {
             nActiveState = MASTERNODE_SENTINEL_PING_EXPIRED;
@@ -617,7 +620,6 @@ uint256 CMasternodeBroadcast::GetHash() const
 
 uint256 CMasternodeBroadcast::GetSignatureHash() const
 {
-    // TODO: replace with "return SerializeHash(*this);" after migration to 70209
     CHashWriter ss(SER_GETHASH, PROTOCOL_VERSION);
     ss << outpoint;
     ss << addr;
@@ -626,7 +628,6 @@ uint256 CMasternodeBroadcast::GetSignatureHash() const
     ss << sigTime;
     ss << nProtocolVersion;
     return SerializeHash(*this);
-    // return ss.GetHash();
 }
 
 bool CMasternodeBroadcast::Sign(const CKey& keyCollateralAddress)
@@ -852,7 +853,7 @@ bool CMasternodePing::CheckAndUpdate(CMasternode* pmn, bool fFromNewBroadcast, i
     // relay ping for nodes in ENABLED/EXPIRED/SENTINEL_PING_EXPIRED state only, skip everyone else
     if (!pmn->IsEnabled() && !pmn->IsExpired() && !pmn->IsSentinelPingExpired()) return false;
 
-    LogPrint(BCLog::MNODE, "CMasternodePing::CheckAndUpdate -- Masternode ping acceepted and relayed, masternode=%s\n", masternodeOutpoint.ToStringShort());
+    LogPrint(BCLog::MNODE, "CMasternodePing::CheckAndUpdate -- Masternode ping accepted and relayed, masternode=%s\n", masternodeOutpoint.ToStringShort());
     Relay(connman);
 
     return true;

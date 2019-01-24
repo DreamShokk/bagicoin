@@ -2,19 +2,20 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include <consensus/validation.h>
 #include <modules/platform/funding.h>
-#include <modules/platform/funding_object.h>
-#include <modules/platform/funding_validators.h>
-#include <modules/platform/funding_vote.h>
-#include <modules/platform/funding_classes.h>
-#include <net_processing.h>
-#include <netmessagemaker.h>
+
+#include <consensus/validation.h>
+#include <messagesigner.h>
 #include <modules/masternode/masternode.h>
 #include <modules/masternode/masternode_config.h>
 #include <modules/masternode/masternode_sync.h>
 #include <modules/masternode/masternode_man.h>
-#include <messagesigner.h>
+#include <modules/platform/funding_classes.h>
+#include <modules/platform/funding_object.h>
+#include <modules/platform/funding_validators.h>
+#include <modules/platform/funding_vote.h>
+#include <net_processing.h>
+#include <netmessagemaker.h>
 #include <netfulfilledman.h>
 #include <ui_interface.h>
 #include <util/system.h>
@@ -52,14 +53,15 @@ bool CGovernanceManager::HaveObjectForHash(const uint256& nHash) const
 bool CGovernanceManager::SerializeObjectForHash(const uint256& nHash, CDataStream& ss) const
 {
     LOCK(cs);
-    object_m_cit it = mapObjects.find(nHash);
-    if (it == mapObjects.end()) {
-        it = mapPostponedObjects.find(nHash);
-        if (it == mapPostponedObjects.end())
-            return false;
-    }
-    ss << it->second;
-    return true;
+    const auto& it1 = mapObjects.find(nHash);
+    const auto& it2 = mapPostponedObjects.find(nHash);
+    if (it1 !=mapObjects.end()) {
+        ss << it1->second;
+        return true;
+    } else if (it2 != mapPostponedObjects.end()) {
+        ss << it2->second;
+        return true;
+    } else return false;
 }
 
 bool CGovernanceManager::HaveVoteForHash(const uint256& nHash) const
@@ -380,7 +382,7 @@ void CGovernanceManager::UpdateCachesAndClean()
     LOCK2(cs_main, cs);
 
     for(size_t i = 0; i < vecDirtyHashes.size(); ++i) {
-        object_m_it it = mapObjects.find(vecDirtyHashes[i]);
+        const auto& it = mapObjects.find(vecDirtyHashes[i]);
         if(it == mapObjects.end()) {
             continue;
         }
@@ -393,7 +395,7 @@ void CGovernanceManager::UpdateCachesAndClean()
     // Clean up any expired or invalid triggers
     triggerman.CleanAndRemove();
 
-    object_m_it it = mapObjects.begin();
+    std::map<uint256, CGovernanceObject>::iterator it = mapObjects.begin();
     int64_t nNow = GetAdjustedTime();
 
     while(it != mapObjects.end())
@@ -430,8 +432,8 @@ void CGovernanceManager::UpdateCachesAndClean()
             mnodeman.RemoveGovernanceObject(pObj->GetHash());
 
             // Remove vote references
-            const object_ref_cm_t::list_t& listItems = cmapVoteToObject.GetItemList();
-            object_ref_cm_t::list_cit lit = listItems.begin();
+            const CacheMap<uint256, CGovernanceObject*>::list_t& listItems = cmapVoteToObject.GetItemList();
+            CacheMap<uint256, CGovernanceObject*>::list_cit lit = listItems.begin();
             while(lit != listItems.end()) {
                 if(lit->value == pObj) {
                     uint256 nKey = lit->key;
@@ -473,7 +475,7 @@ void CGovernanceManager::UpdateCachesAndClean()
     }
 
     // forget about expired deleted objects
-    hash_time_m_it s_it = mapErasedGovernanceObjects.begin();
+    std::map<uint256, int64_t>::const_iterator s_it = mapErasedGovernanceObjects.begin();
     while(s_it != mapErasedGovernanceObjects.end()) {
         if(s_it->second < nNow)
             mapErasedGovernanceObjects.erase(s_it++);
@@ -499,7 +501,7 @@ std::vector<CGovernanceVote> CGovernanceManager::GetMatchingVotes(const uint256&
     LOCK(cs);
     std::vector<CGovernanceVote> vecResult;
 
-    object_m_cit it = mapObjects.find(nParentHash);
+    const auto& it = mapObjects.find(nParentHash);
     if(it == mapObjects.end()) {
         return vecResult;
     }
@@ -513,7 +515,7 @@ std::vector<CGovernanceVote> CGovernanceManager::GetCurrentVotes(const uint256& 
     std::vector<CGovernanceVote> vecResult;
 
     // Find the governance object or short-circuit.
-    object_m_cit it = mapObjects.find(nParentHash);
+    const auto& it = mapObjects.find(nParentHash);
     if(it == mapObjects.end()) return vecResult;
     const CGovernanceObject& govobj = it->second;
 
@@ -626,7 +628,7 @@ bool CGovernanceManager::ConfirmInventoryRequest(const CInv& inv)
     }
 
 
-    hash_s_t* setHash = nullptr;
+    std::set<uint256>* setHash = nullptr;
     switch(inv.type) {
     case MSG_GOVERNANCE_OBJECT:
         setHash = &setRequestedObjects;
@@ -638,7 +640,7 @@ bool CGovernanceManager::ConfirmInventoryRequest(const CInv& inv)
         return false;
     }
 
-    hash_s_cit it = setHash->find(inv.hash);
+    const auto& it = setHash->find(inv.hash);
     if(it == setHash->end()) {
         setHash->insert(inv.hash);
         LogPrint(BCLog::GOV, "CGovernanceManager::ConfirmInventoryRequest added inv to requested set\n");
@@ -662,7 +664,7 @@ void CGovernanceManager::SyncSingleObjAndItsVotes(CNode* pnode, const uint256& n
     LOCK2(cs_main, cs);
 
     // single valid object and its valid votes
-    object_m_it it = mapObjects.find(nProp);
+    const auto& it = mapObjects.find(nProp);
     if(it == mapObjects.end()) {
         LogPrint(BCLog::GOV, "CGovernanceManager::%s -- no matching object for hash %s, peer=%d\n", __func__, nProp.ToString(), pnode->GetId());
         return;
@@ -754,10 +756,10 @@ void CGovernanceManager::MasternodeRateUpdate(const CGovernanceObject& govobj)
         return;
 
     const COutPoint& masternodeOutpoint = govobj.GetMasternodeOutpoint();
-    txout_m_it it  = mapLastMasternodeObject.find(masternodeOutpoint);
+    std::map<COutPoint, last_object_rec>::iterator it  = mapLastMasternodeObject.find(masternodeOutpoint);
 
     if(it == mapLastMasternodeObject.end())
-        it = mapLastMasternodeObject.insert(txout_m_t::value_type(masternodeOutpoint, last_object_rec(true))).first;
+        it = mapLastMasternodeObject.insert(std::map<COutPoint, last_object_rec>::value_type(masternodeOutpoint, last_object_rec(true))).first;
 
     int64_t nTimestamp = govobj.GetCreationTime();
     it->second.triggerBuffer.AddTimestamp(nTimestamp);
@@ -813,7 +815,7 @@ bool CGovernanceManager::MasternodeRateCheck(const CGovernanceObject& govobj, bo
         return false;
     }
 
-    txout_m_it it  = mapLastMasternodeObject.find(masternodeOutpoint);
+    const auto& it  = mapLastMasternodeObject.find(masternodeOutpoint);
     if(it == mapLastMasternodeObject.end())
         return true;
 
@@ -867,7 +869,7 @@ bool CGovernanceManager::ProcessVote(CNode* pfrom, const CGovernanceVote& vote, 
         return false;
     }
 
-    object_m_it it = mapObjects.find(nHashGovobj);
+    const auto& it = mapObjects.find(nHashGovobj);
     if(it == mapObjects.end()) {
         std::ostringstream ostr;
         ostr << "CGovernanceManager::ProcessVote -- Unknown parent object " << nHashGovobj.ToString()
@@ -917,7 +919,7 @@ void CGovernanceManager::CheckMasternodeOrphanObjects(CConnman* connman)
     LOCK2(cs_main, cs);
     int64_t nNow = GetAdjustedTime();
     ScopedLockBool guard(cs, fRateChecksEnabled, false);
-    object_info_m_it it = mapMasternodeOrphanObjects.begin();
+    std::map<uint256, object_info_pair_t>::iterator it = mapMasternodeOrphanObjects.begin();
     while(it != mapMasternodeOrphanObjects.end()) {
         object_info_pair_t& pair = it->second;
         CGovernanceObject& govobj = pair.first;
@@ -954,7 +956,7 @@ void CGovernanceManager::CheckPostponedObjects(CConnman* connman)
     LOCK2(cs_main, cs);
 
     // Check postponed proposals
-    for(object_m_it it = mapPostponedObjects.begin(); it != mapPostponedObjects.end();) {
+    for(std::map<uint256, CGovernanceObject>::iterator it = mapPostponedObjects.begin(); it != mapPostponedObjects.end();) {
 
         const uint256& nHash = it->first;
         CGovernanceObject& govobj = it->second;
@@ -985,9 +987,9 @@ void CGovernanceManager::CheckPostponedObjects(CConnman* connman)
     int64_t nNow = GetAdjustedTime();
     int64_t nSuperblockCycleSeconds = Params().GetConsensus().nSuperblockCycle * Params().GetConsensus().nPowTargetSpacing;
 
-    for(hash_s_it it = setAdditionalRelayObjects.begin(); it != setAdditionalRelayObjects.end();) {
+    for(std::set<uint256>::iterator it = setAdditionalRelayObjects.begin(); it != setAdditionalRelayObjects.end();) {
 
-        object_m_it itObject = mapObjects.find(*it);
+        const auto& itObject = mapObjects.find(*it);
         if(itObject != mapObjects.end()) {
 
             CGovernanceObject& govobj = itObject->second;
@@ -1179,8 +1181,8 @@ bool CGovernanceManager::VoteWithAll(const uint256& hash, const std::pair<std::s
         uint256 nTxHash;
         nTxHash.SetHex(mne.getTxHash());
 
-        int32_t nOutputIndex = 0;
-        if(!ParseInt32(mne.getOutputIndex(), &nOutputIndex)) {
+        uint32_t nOutputIndex = 0;
+        if(!ParseUInt32(mne.getOutputIndex(), &nOutputIndex)) {
             continue;
         }
 
@@ -1223,9 +1225,9 @@ bool CGovernanceManager::AcceptVoteMessage(const uint256& nHash)
     return AcceptMessage(nHash, setRequestedVotes);
 }
 
-bool CGovernanceManager::AcceptMessage(const uint256& nHash, hash_s_t& setHash)
+bool CGovernanceManager::AcceptMessage(const uint256& nHash, std::set<uint256>& setHash)
 {
-    hash_s_it it = setHash.find(nHash);
+    const auto& it = setHash.find(nHash);
     if(it == setHash.end()) {
         // We never requested this
         return false;
@@ -1388,15 +1390,15 @@ void CGovernanceManager::RequestOrphanObjects(CConnman* connman)
 void CGovernanceManager::CleanOrphanObjects()
 {
     LOCK(cs);
-    const vote_cmm_t::list_t& items = cmmapOrphanVotes.GetItemList();
+    const auto& items = cmmapOrphanVotes.GetItemList();
 
     int64_t nNow = GetAdjustedTime();
 
-    vote_cmm_t::list_cit it = items.begin();
+    CacheMultiMap<uint256, vote_time_pair_t>::list_cit it = items.begin();
     while(it != items.end()) {
-        vote_cmm_t::list_cit prevIt = it;
+        const auto& prevIt = it;
         ++it;
-        const vote_time_pair_t& pairVote = prevIt->value;
+        const auto& pairVote = prevIt->value;
         if(pairVote.second < nNow) {
             cmmapOrphanVotes.Erase(prevIt->key, prevIt->value);
         }

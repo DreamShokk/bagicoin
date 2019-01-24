@@ -2,15 +2,16 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
+#include <modules/platform/funding_object.h>
+
 #include <core_io.h>
+#include <messagesigner.h>
 #include <modules/platform/funding.h>
 #include <modules/platform/funding_classes.h>
-#include <modules/platform/funding_object.h>
 #include <modules/platform/funding_vote.h>
 #include <modules/platform/funding_validators.h>
 #include <modules/masternode/masternode_man.h>
 #include <modules/masternode/masternode_sync.h>
-#include <messagesigner.h>
 #include <ui_interface.h>
 #include <util/system.h>
 

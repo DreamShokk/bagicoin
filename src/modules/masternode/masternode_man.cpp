@@ -729,7 +729,7 @@ void CMasternodeMan::ProcessMasternodeConnections(CConnman* connman)
     //we don't care about this for regtest
     if(Params().NetworkIDString() == CBaseChainParams::REGTEST) return;
 
-    connman->ForEachNode([](CNode* pnode) {
+    connman->ForEachNode([&](CNode* pnode) {
         bool ismixing = false;
         for (const auto& client : g_mn_interfaces->chain_clients) {
             if (client->mixingMasternode(pnode))

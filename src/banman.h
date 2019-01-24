@@ -8,7 +8,7 @@
 #include <cstdint>
 #include <memory>
 
-#include <addrdb.h>
+#include <cachedb.h>
 #include <fs.h>
 #include <sync.h>
 

@@ -1461,7 +1461,7 @@ bool AppInitMain(InitInterfaces& interfaces)
     }
 #endif
 
-    pModuleNotificationInterface = new ModuleInterface(&connman);
+    pModuleNotificationInterface = new ModuleInterface(g_connman.get());
 
     if (pModuleNotificationInterface) {
         RegisterValidationInterface(pModuleNotificationInterface);
@@ -1839,13 +1839,13 @@ bool AppInitMain(InitInterfaces& interfaces)
 
     // ********************************************************* Step 11d: schedule modules
 
-    activeMasternode.Controller(scheduler, &connman);
-    privateSendServer.Controller(scheduler, &connman);
+    activeMasternode.Controller(scheduler, g_connman.get());
+    privateSendServer.Controller(scheduler, g_connman.get());
     netfulfilledman.Controller(scheduler);
-    mnodeman.Controller(scheduler, &connman);
-    masternodeSync.Controller(scheduler, &connman);
+    mnodeman.Controller(scheduler, g_connman.get());
+    masternodeSync.Controller(scheduler, g_connman.get());
     mnpayments.Controller(scheduler);
-    governance.Controller(scheduler, &connman);
+    governance.Controller(scheduler, g_connman.get());
 
     if (ShutdownRequested()) {
         return false;

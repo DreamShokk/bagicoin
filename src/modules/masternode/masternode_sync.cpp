@@ -4,17 +4,14 @@
 
 #include <modules/masternode/masternode_sync.h>
 
-#include <checkpoints.h>
 #include <consensus/validation.h>
 #include <modules/platform/funding.h>
 #include <modules/masternode/activemasternode.h>
-#include <modules/masternode/masternode.h>
 #include <modules/masternode/masternode_payments.h>
 #include <modules/masternode/masternode_man.h>
 #include <netfulfilledman.h>
 #include <netmessagemaker.h>
 #include <ui_interface.h>
-#include <util/system.h>
 #include <validation.h>
 
 
@@ -90,7 +87,7 @@ void CMasternodeSync::SwitchToNextAsset(CConnman* connman)
             //try to activate our masternode if possible
             activeMasternode.ManageState(connman);
 
-            connman->ForEachNode([](CNode* pnode) {
+            connman->ForEachNode([&](CNode* pnode) {
                 netfulfilledman.AddFulfilledRequest(pnode->addr, "full-sync");
             });
             LogPrintf("CMasternodeSync::SwitchToNextAsset -- Sync has finished\n");

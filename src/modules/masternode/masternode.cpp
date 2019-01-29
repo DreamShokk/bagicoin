@@ -27,14 +27,12 @@
 InitInterfaces* g_mn_interfaces = nullptr;
 
 CMasternode::CMasternode() :
-    masternode_info_t{ MASTERNODE_ENABLED, PROTOCOL_VERSION, GetAdjustedTime()},
-    fAllowMixingTx(true)
+    masternode_info_t{ MASTERNODE_ENABLED, PROTOCOL_VERSION, GetAdjustedTime()}
 {}
 
 CMasternode::CMasternode(CService addr, COutPoint outpoint, CPubKey pubKeyCollateralAddress, CTxDestination collDest, CPubKey pubKeyMasternode, int nProtocolVersionIn) :
     masternode_info_t{ MASTERNODE_ENABLED, nProtocolVersionIn, GetAdjustedTime(),
-                       outpoint, addr, collDest, pubKeyCollateralAddress, pubKeyMasternode},
-    fAllowMixingTx(true)
+                       outpoint, addr, collDest, pubKeyCollateralAddress, pubKeyMasternode}
 {}
 
 CMasternode::CMasternode(const CMasternode& other) :
@@ -45,7 +43,7 @@ CMasternode::CMasternode(const CMasternode& other) :
     nBlockLastPaid(other.nBlockLastPaid),
     nPoSeBanScore(other.nPoSeBanScore),
     nPoSeBanHeight(other.nPoSeBanHeight),
-    fAllowMixingTx(other.fAllowMixingTx),
+    nMixingTxCount(other.nMixingTxCount),
     fUnitTest(other.fUnitTest)
 {}
 
@@ -53,8 +51,7 @@ CMasternode::CMasternode(const CMasternodeBroadcast& mnb) :
     masternode_info_t{ mnb.nActiveState, mnb.nProtocolVersion, mnb.sigTime,
                        mnb.outpoint, mnb.addr, mnb.collDest, mnb.pubKeyCollateralAddress, mnb.pubKeyMasternode},
     lastPing(mnb.lastPing),
-    vchSig(mnb.vchSig),
-    fAllowMixingTx(true)
+    vchSig(mnb.vchSig)
 {}
 
 //

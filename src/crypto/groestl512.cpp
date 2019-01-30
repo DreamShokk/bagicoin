@@ -1391,7 +1391,6 @@ CGROESTL512& CGROESTL512::Write(const unsigned char* data, size_t len)
 
 void CGROESTL512::Finalize(unsigned char hash[OUTPUT_SIZE])
 {
-    unsigned char *buf;
     unsigned char pad[136];
     size_t ptr, pad_len, u;
     sph_u64 count;

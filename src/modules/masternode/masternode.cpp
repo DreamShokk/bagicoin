@@ -2,7 +2,8 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include <modules/masternode/activemasternode.h>
+#include <modules/masternode/masternode.h>
+
 #include <base58.h>
 #include <clientversion.h>
 #include <chainparams.h>
@@ -10,7 +11,7 @@
 #include <init.h>
 #include <interfaces/chain.h>
 #include <netbase.h>
-#include <modules/masternode/masternode.h>
+#include <modules/masternode/activemasternode.h>
 #include <modules/masternode/masternode_payments.h>
 #include <modules/masternode/masternode_sync.h>
 #include <modules/masternode/masternode_man.h>
@@ -26,14 +27,12 @@
 InitInterfaces* g_mn_interfaces = nullptr;
 
 CMasternode::CMasternode() :
-    masternode_info_t{ MASTERNODE_ENABLED, PROTOCOL_VERSION, GetAdjustedTime()},
-    fAllowMixingTx(true)
+    masternode_info_t{ MASTERNODE_ENABLED, PROTOCOL_VERSION, GetAdjustedTime()}
 {}
 
 CMasternode::CMasternode(CService addr, COutPoint outpoint, CPubKey pubKeyCollateralAddress, CTxDestination collDest, CPubKey pubKeyMasternode, int nProtocolVersionIn) :
     masternode_info_t{ MASTERNODE_ENABLED, nProtocolVersionIn, GetAdjustedTime(),
-                       outpoint, addr, collDest, pubKeyCollateralAddress, pubKeyMasternode},
-    fAllowMixingTx(true)
+                       outpoint, addr, collDest, pubKeyCollateralAddress, pubKeyMasternode}
 {}
 
 CMasternode::CMasternode(const CMasternode& other) :
@@ -44,7 +43,7 @@ CMasternode::CMasternode(const CMasternode& other) :
     nBlockLastPaid(other.nBlockLastPaid),
     nPoSeBanScore(other.nPoSeBanScore),
     nPoSeBanHeight(other.nPoSeBanHeight),
-    fAllowMixingTx(other.fAllowMixingTx),
+    nMixingTxCount(other.nMixingTxCount),
     fUnitTest(other.fUnitTest)
 {}
 
@@ -52,8 +51,7 @@ CMasternode::CMasternode(const CMasternodeBroadcast& mnb) :
     masternode_info_t{ mnb.nActiveState, mnb.nProtocolVersion, mnb.sigTime,
                        mnb.outpoint, mnb.addr, mnb.collDest, mnb.pubKeyCollateralAddress, mnb.pubKeyMasternode},
     lastPing(mnb.lastPing),
-    vchSig(mnb.vchSig),
-    fAllowMixingTx(true)
+    vchSig(mnb.vchSig)
 {}
 
 //
@@ -106,13 +104,13 @@ arith_uint256 CMasternode::CalculateScore(const uint256& blockHash) const
     return UintToArith256(ss.GetHash());
 }
 
-CMasternode::CollateralStatus CMasternode::CheckCollateral(const COutPoint& outpoint, const CPubKey& pubkey, const CTxDestination& collateralDest)
+CMasternode::CollateralStatus CMasternode::CheckCollateral(const COutPoint& outpoint, const CPubKey& pubkey)
 {
     int nHeight;
-    return CheckCollateral(outpoint, pubkey, collateralDest, nHeight);
+    return CheckCollateral(outpoint, pubkey, nHeight);
 }
 
-CMasternode::CollateralStatus CMasternode::CheckCollateral(const COutPoint& outpoint, const CPubKey& pubkey, const CTxDestination& collateralDest, int& nHeightRet)
+CMasternode::CollateralStatus CMasternode::CheckCollateral(const COutPoint& outpoint, const CPubKey& pubkey, int& nHeightRet)
 {
     AssertLockHeld(cs_main);
 
@@ -125,7 +123,7 @@ CMasternode::CollateralStatus CMasternode::CheckCollateral(const COutPoint& outp
         return COLLATERAL_INVALID_AMOUNT;
     }
 
-    if(pubkey == CPubKey() || collateralDest == CTxDestination() || coin.out.scriptPubKey != GetScriptForDestination(collateralDest)) {
+    if(pubkey == CPubKey() || coin.out.scriptPubKey != GetScriptForDestination(pubkey.GetID())) {
         return COLLATERAL_INVALID_PUBKEY;
     }
 
@@ -228,13 +226,12 @@ void CMasternode::Check(bool fForce)
             return;
         }
 
-        // part 1: expire based on dashd ping
-        bool fSentinelPingActive = masternodeSync.IsSynced() && mnodeman.IsSentinelPingActive();
-        bool fSentinelPingExpired = fSentinelPingActive && !IsPingedWithin(MASTERNODE_SENTINEL_PING_MAX_SECONDS);
-                LogPrint(BCLog::MNODE, "CMasternode::Check -- outpoint=%s, GetAdjustedTime()=%d, fSentinelPingExpired=%d\n",
-                outpoint.ToStringShort(), GetAdjustedTime(), fSentinelPingExpired);
+        // part 1: expire based on chaincoind ping
+        bool fDaemonPingExpired = !IsPingedWithin(MASTERNODE_SENTINEL_PING_MAX_SECONDS);
+        LogPrint(BCLog::MNODE, "CMasternode::Check -- outpoint=%s, GetAdjustedTime()=%d, fDaemonPingExpired=%d\n",
+                outpoint.ToStringShort(), GetAdjustedTime(), fDaemonPingExpired);
 
-        if(fSentinelPingExpired) {
+        if(fDaemonPingExpired) {
             nActiveState = MASTERNODE_SENTINEL_PING_EXPIRED;
             if(nActiveStatePrev != nActiveState) {
                 uiInterface.NotifyMasternodeChanged(outpoint, CT_UPDATED);
@@ -259,13 +256,10 @@ void CMasternode::Check(bool fForce)
 
     if(!fWaitForPing || fOurMasternode) {
         // part 2: expire based on sentinel info
-        bool fSentinelPingActive = masternodeSync.IsSynced() && mnodeman.IsSentinelPingActive();
-        bool fSentinelPingExpired = fSentinelPingActive && !lastPing.fSentinelIsCurrent;
+        LogPrint(BCLog::MNODE, "CMasternode::Check -- outpoint=%s, GetAdjustedTime()=%d, lastPing.fSentinelIsCurrent=%d\n",
+                outpoint.ToStringShort(), GetAdjustedTime(), lastPing.fSentinelIsCurrent);
 
-        LogPrint(BCLog::MNODE, "CMasternode::Check -- outpoint=%s, GetAdjustedTime()=%d, fSentinelPingExpired=%d\n",
-                outpoint.ToStringShort(), GetAdjustedTime(), fSentinelPingExpired);
-
-        if(fSentinelPingExpired) {
+        if(!mnodeman.IsSentinelPingActive() || !lastPing.fSentinelIsCurrent) {
             nActiveState = MASTERNODE_SENTINEL_PING_EXPIRED;
             if(nActiveStatePrev != nActiveState) {
                 uiInterface.NotifyMasternodeChanged(outpoint, CT_UPDATED);
@@ -554,7 +548,7 @@ bool CMasternodeBroadcast::CheckOutpoint(int& nDos)
     AssertLockHeld(cs_main);
 
     int nHeight;
-    CollateralStatus err = CheckCollateral(outpoint, pubKeyCollateralAddress, collDest, nHeight);
+    CollateralStatus err = CheckCollateral(outpoint, pubKeyCollateralAddress, nHeight);
     if (err == COLLATERAL_UTXO_NOT_FOUND) {
         LogPrint(BCLog::MNODE, "CMasternodeBroadcast::CheckOutpoint -- Failed to find Masternode UTXO, masternode=%s\n", outpoint.ToStringShort());
         return false;
@@ -617,16 +611,7 @@ uint256 CMasternodeBroadcast::GetHash() const
 
 uint256 CMasternodeBroadcast::GetSignatureHash() const
 {
-    // TODO: replace with "return SerializeHash(*this);" after migration to 70209
-    CHashWriter ss(SER_GETHASH, PROTOCOL_VERSION);
-    ss << outpoint;
-    ss << addr;
-    ss << pubKeyCollateralAddress;
-    ss << pubKeyMasternode;
-    ss << sigTime;
-    ss << nProtocolVersion;
     return SerializeHash(*this);
-    // return ss.GetHash();
 }
 
 bool CMasternodeBroadcast::Sign(const CKey& keyCollateralAddress)
@@ -680,13 +665,6 @@ void CMasternodeBroadcast::Relay(CConnman* connman) const
 
 uint256 CMasternodePing::GetHash() const
 {
-    CHashWriter ss(SER_GETHASH, PROTOCOL_VERSION);
-    ss << masternodeOutpoint;
-    ss << blockHash;
-    ss << sigTime;
-    ss << fSentinelIsCurrent;
-    ss << nSentinelVersion;
-    ss << nDaemonVersion;
     return SerializeHash(*this);
 }
 
@@ -852,7 +830,7 @@ bool CMasternodePing::CheckAndUpdate(CMasternode* pmn, bool fFromNewBroadcast, i
     // relay ping for nodes in ENABLED/EXPIRED/SENTINEL_PING_EXPIRED state only, skip everyone else
     if (!pmn->IsEnabled() && !pmn->IsExpired() && !pmn->IsSentinelPingExpired()) return false;
 
-    LogPrint(BCLog::MNODE, "CMasternodePing::CheckAndUpdate -- Masternode ping acceepted and relayed, masternode=%s\n", masternodeOutpoint.ToStringShort());
+    LogPrint(BCLog::MNODE, "CMasternodePing::CheckAndUpdate -- Masternode ping accepted and relayed, masternode=%s\n", masternodeOutpoint.ToStringShort());
     Relay(connman);
 
     return true;

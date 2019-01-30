@@ -1,10 +1,12 @@
-
 // Copyright (c) 2014-2017 The Dash Core developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #ifndef SRC_MASTERNODECONFIG_H_
 #define SRC_MASTERNODECONFIG_H_
+
+#include <string>
+#include <vector>
 
 class CMasternodeConfig;
 extern CMasternodeConfig masternodeConfig;
@@ -36,40 +38,20 @@ public:
             return alias;
         }
 
-        void setAlias(const std::string& _alias) {
-            this->alias = _alias;
-        }
-
         const std::string& getOutputIndex() const {
             return outputIndex;
-        }
-
-        void setOutputIndex(const std::string& _outputIndex) {
-            this->outputIndex = _outputIndex;
         }
 
         const std::string& getPrivKey() const {
             return privKey;
         }
 
-        void setPrivKey(const std::string& _privKey) {
-            this->privKey = _privKey;
-        }
-
         const std::string& getTxHash() const {
             return txHash;
         }
 
-        void setTxHash(const std::string& _txHash) {
-            this->txHash = _txHash;
-        }
-
         const std::string& getIp() const {
             return ip;
-        }
-
-        void setIp(const std::string& _ip) {
-            this->ip = _ip;
         }
     };
 
@@ -91,8 +73,6 @@ public:
 
 private:
     std::vector<CMasternodeEntry> entries;
-
-
 };
 
 

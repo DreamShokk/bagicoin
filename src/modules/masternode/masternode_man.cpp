@@ -2,16 +2,17 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include <modules/masternode/activemasternode.h>
+#include <modules/masternode/masternode_man.h>
+
 #include <addrman.h>
 #include <clientversion.h>
-#include <modules/platform/funding.h>
 #include <init.h>
 #include <interfaces/chain.h>
+#include <messagesigner.h>
+#include <modules/platform/funding.h>
+#include <modules/masternode/activemasternode.h>
 #include <modules/masternode/masternode_payments.h>
 #include <modules/masternode/masternode_sync.h>
-#include <modules/masternode/masternode_man.h>
-#include <messagesigner.h>
 #include <netfulfilledman.h>
 #include <netmessagemaker.h>
 #include <scheduler.h>
@@ -130,7 +131,7 @@ bool CMasternodeMan::AllowMixing(const COutPoint &outpoint)
     }
     nDsqCount++;
     pmn->nLastDsq = nDsqCount;
-    pmn->fAllowMixingTx = true;
+    pmn->nMixingTxCount = 0;
 
     return true;
 }
@@ -142,7 +143,7 @@ bool CMasternodeMan::DisallowMixing(const COutPoint &outpoint)
     if (!pmn) {
         return false;
     }
-    pmn->fAllowMixingTx = false;
+    pmn->nMixingTxCount++;
 
     return true;
 }
@@ -728,7 +729,7 @@ void CMasternodeMan::ProcessMasternodeConnections(CConnman* connman)
     //we don't care about this for regtest
     if(Params().NetworkIDString() == CBaseChainParams::REGTEST) return;
 
-    connman->ForEachNode([](CNode* pnode) {
+    connman->ForEachNode([&](CNode* pnode) {
         bool ismixing = false;
         for (const auto& client : g_mn_interfaces->chain_clients) {
             if (client->mixingMasternode(pnode))
@@ -1580,7 +1581,7 @@ bool CMasternodeMan::IsSentinelPingActive()
 {
     LOCK(cs);
     // Check if any masternodes have voted recently, otherwise return false
-    return (GetTime() - nLastSentinelPingTime) <= MASTERNODE_SENTINEL_PING_MAX_SECONDS;
+    return nLastSentinelPingTime == 0 ? false : (GetTime() - nLastSentinelPingTime) <= MASTERNODE_SENTINEL_PING_MAX_SECONDS;
 }
 
 bool CMasternodeMan::AddGovernanceVote(const COutPoint& outpoint, uint256 nGovernanceObjectHash)

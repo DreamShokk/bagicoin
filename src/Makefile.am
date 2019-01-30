@@ -100,6 +100,7 @@ endif
 BITCOIN_CORE_H = \
   addrman.h \
   attributes.h \
+  banman.h \
   base58.h \
   bech32.h \
   bloom.h \
@@ -167,6 +168,7 @@ BITCOIN_CORE_H = \
   netfulfilledman.h \
   netmessagemaker.h \
   noui.h \
+  optional.h \
   outputtype.h \
   policy/feerate.h \
   policy/fees.h \
@@ -247,6 +249,7 @@ libchaincoin_server_a_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES) $(MINIUPNPC_
 libchaincoin_server_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 libchaincoin_server_a_SOURCES = \
   addrman.cpp \
+  banman.cpp \
   bloom.cpp \
   blockencodings.cpp \
   blockfilter.cpp \

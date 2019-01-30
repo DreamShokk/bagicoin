@@ -207,7 +207,7 @@ public:
 
     void CheckTimeout();
 
-    void UpdatedBlockTip(const CBlockIndex *pindexNew, const CBlockIndex *pindexFork, bool fInitialDownload);
+    void UpdatedBlockTip(const int nHeight);
     void ClientTask();
 };
 

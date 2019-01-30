@@ -171,53 +171,6 @@ public: // Types
         bool fStatusOK;
     };
 
-
-    typedef std::map<uint256, CGovernanceObject> object_m_t;
-
-    typedef object_m_t::iterator object_m_it;
-
-    typedef object_m_t::const_iterator object_m_cit;
-
-    typedef CacheMap<uint256, CGovernanceObject*> object_ref_cm_t;
-
-    typedef std::map<uint256, CGovernanceVote> vote_m_t;
-
-    typedef vote_m_t::iterator vote_m_it;
-
-    typedef vote_m_t::const_iterator vote_m_cit;
-
-    typedef CacheMap<uint256, CGovernanceVote> vote_cm_t;
-
-    typedef CacheMultiMap<uint256, vote_time_pair_t> vote_cmm_t;
-
-    typedef object_m_t::size_type size_type;
-
-    typedef std::map<COutPoint, last_object_rec > txout_m_t;
-
-    typedef txout_m_t::iterator txout_m_it;
-
-    typedef txout_m_t::const_iterator txout_m_cit;
-
-    typedef std::map<COutPoint, int> txout_int_m_t;
-
-    typedef std::set<uint256> hash_s_t;
-
-    typedef hash_s_t::iterator hash_s_it;
-
-    typedef hash_s_t::const_iterator hash_s_cit;
-
-    typedef std::map<uint256, object_info_pair_t> object_info_m_t;
-
-    typedef object_info_m_t::iterator object_info_m_it;
-
-    typedef object_info_m_t::const_iterator object_info_m_cit;
-
-    typedef std::map<uint256, int64_t> hash_time_m_t;
-
-    typedef hash_time_m_t::iterator hash_time_m_it;
-
-    typedef hash_time_m_t::const_iterator hash_time_m_cit;
-
 private:
     static const int MAX_CACHE_SIZE = 1000000;
 
@@ -232,30 +185,30 @@ private:
     int nCachedBlockHeight;
 
     // keep track of the scanning errors
-    object_m_t mapObjects;
+    std::map<uint256, CGovernanceObject> mapObjects;
 
     // mapErasedGovernanceObjects contains key-value pairs, where
     //   key   - governance object's hash
     //   value - expiration time for deleted objects
-    hash_time_m_t mapErasedGovernanceObjects;
+    std::map<uint256, int64_t> mapErasedGovernanceObjects;
 
-    object_info_m_t mapMasternodeOrphanObjects;
-    txout_int_m_t mapMasternodeOrphanCounter;
+    std::map<uint256, object_info_pair_t> mapMasternodeOrphanObjects;
+    std::map<COutPoint, int> mapMasternodeOrphanCounter;
 
-    object_m_t mapPostponedObjects;
-    hash_s_t setAdditionalRelayObjects;
+    std::map<uint256, CGovernanceObject> mapPostponedObjects;
+    std::set<uint256> setAdditionalRelayObjects;
 
-    object_ref_cm_t cmapVoteToObject;
+    CacheMap<uint256, CGovernanceObject*> cmapVoteToObject;
 
-    vote_cm_t cmapInvalidVotes;
+    CacheMap<uint256, CGovernanceVote> cmapInvalidVotes;
 
-    vote_cmm_t cmmapOrphanVotes;
+    CacheMultiMap<uint256, vote_time_pair_t> cmmapOrphanVotes;
 
-    txout_m_t mapLastMasternodeObject;
+    std::map<COutPoint, last_object_rec> mapLastMasternodeObject;
 
-    hash_s_t setRequestedObjects;
+    std::set<uint256> setRequestedObjects;
 
-    hash_s_t setRequestedVotes;
+    std::set<uint256> setRequestedVotes;
 
     bool fRateChecksEnabled;
 
@@ -434,7 +387,7 @@ private:
     /// Called to indicate a requested vote has been received
     bool AcceptVoteMessage(const uint256& nHash);
 
-    static bool AcceptMessage(const uint256& nHash, hash_s_t& setHash);
+    static bool AcceptMessage(const uint256& nHash, std::set<uint256>& setHash);
 
     void CheckOrphanVotes(CGovernanceObject& govobj, CGovernanceException& exception, CConnman* connman);
 

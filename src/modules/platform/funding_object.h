@@ -240,10 +240,6 @@ public:
         return fExpired;
     }
 
-    void InvalidateVoteCache() {
-        fDirtyCache = true;
-    }
-
     const CGovernanceObjectVoteFile& GetVoteFile() const {
         return fileVotes;
     }

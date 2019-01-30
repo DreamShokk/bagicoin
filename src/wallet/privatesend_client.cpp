@@ -466,7 +466,7 @@ bool CPrivateSendClient::SendDenominate(const std::vector<CTxDSIn>& vecTxDSIn, c
     }
 
     // store our entry for later use
-    CDarkSendEntry entry(vecTxDSIn, vecTxOut, txMyCollateral);
+    CDarkSendEntry entry(vecTxDSIn, vecTxOut, CTransaction(txMyCollateral));
     vecEntries.push_back(entry);
     RelayIn(entry);
     nTimeLastSuccessfulStep = GetTime();
@@ -856,7 +856,7 @@ bool CPrivateSendClient::DoAutomaticDenominating(interfaces::Chain::Lock& locked
             return false;
         }
     } else {
-        if(!CPrivateSend::IsCollateralValid(txMyCollateral)) {
+        if(!CPrivateSend::IsCollateralValid(CTransaction(txMyCollateral))) {
             LogPrintf("CPrivateSendClient::DoAutomaticDenominating -- invalid collateral, recreating...\n");
             if(!m_wallet->CreateCollateralTransaction(txMyCollateral, strReason)) {
                 LogPrint(BCLog::PRIVSEND, "CPrivateSendClient::DoAutomaticDenominating -- create collateral error: %s\n", strReason);
@@ -1514,8 +1514,8 @@ void CPrivateSendClient::SetState(PoolState nStateNew)
     nState = nStateNew;
 }
 
-void CPrivateSendClient::UpdatedBlockTip(const CBlockIndex *pindexNew, const CBlockIndex *pindexFork, bool fInitialDownload) {
-    nCachedBlockHeight = pindexNew->nHeight;
+void CPrivateSendClient::UpdatedBlockTip(const int nHeight) {
+    nCachedBlockHeight = nHeight;
     LogPrint(BCLog::PRIVSEND, "CPrivateSendClient::UpdatedBlockTip -- nCachedBlockHeight: %d\n", nCachedBlockHeight);
 }
 

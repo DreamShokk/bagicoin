@@ -100,14 +100,15 @@ static UniValue getnetworkhashps(const JSONRPCRequest& request)
                 {
                     {"nblocks", RPCArg::Type::NUM, /* opt */ true, /* default_val */ "120", "The number of blocks, or -1 for blocks since last difficulty change."},
                     {"height", RPCArg::Type::NUM, /* opt */ true, /* default_val */ "-1", "To estimate at the time of the given height."},
-                }}
-                .ToString() +
-            "\nResult:\n"
+                },
+                RPCResult{
             "x             (numeric) Hashes per second estimated\n"
-            "\nExamples:\n"
-            + HelpExampleCli("getnetworkhashps", "")
+                },
+                RPCExamples{
+                    HelpExampleCli("getnetworkhashps", "")
             + HelpExampleRpc("getnetworkhashps", "")
-       );
+                },
+            }.ToString());
 
     LOCK(cs_main);
     return GetNetworkHashPS(!request.params[0].isNull() ? request.params[0].get_int() : 120, !request.params[1].isNull() ? request.params[1].get_int() : -1);
@@ -171,16 +172,17 @@ static UniValue generatetoaddress(const JSONRPCRequest& request)
                     {"nblocks", RPCArg::Type::NUM, /* opt */ false, /* default_val */ "", "How many blocks are generated immediately."},
                     {"address", RPCArg::Type::STR, /* opt */ false, /* default_val */ "", "The address to send the newly generated bitcoin to."},
                     {"maxtries", RPCArg::Type::NUM, /* opt */ true, /* default_val */ "1000000", "How many iterations to try."},
-                }}
-                .ToString() +
-            "\nResult:\n"
+                },
+                RPCResult{
             "[ blockhashes ]     (array) hashes of blocks generated\n"
-            "\nExamples:\n"
+                },
+                RPCExamples{
             "\nGenerate 11 blocks to myaddress\n"
             + HelpExampleCli("generatetoaddress", "11 \"myaddress\"")
             + "If you are running the bitcoin core wallet, you can get a new address to send the newly generated chaincoin to with:\n"
             + HelpExampleCli("getnewaddress", "")
-        );
+                },
+            }.ToString());
 
     int nGenerate = request.params[0].get_int();
     uint64_t nMaxTries = 1000000;
@@ -204,9 +206,9 @@ static UniValue getmininginfo(const JSONRPCRequest& request)
     if (request.fHelp || request.params.size() != 0)
         throw std::runtime_error(
             RPCHelpMan{"getmininginfo",
-                "\nReturns a json object containing mining-related information.", {}}
-                .ToString() +
-            "\nResult:\n"
+                "\nReturns a json object containing mining-related information.",
+                {},
+                RPCResult{
             "{\n"
             "  \"blocks\": nnn,             (numeric) The current block\n"
             "  \"currentblockweight\": nnn, (numeric) The last block weight\n"
@@ -217,10 +219,12 @@ static UniValue getmininginfo(const JSONRPCRequest& request)
             "  \"chain\": \"xxxx\",           (string) current network name as defined in BIP70 (main, test, regtest)\n"
             "  \"warnings\": \"...\"          (string) any network and blockchain warnings\n"
             "}\n"
-            "\nExamples:\n"
-            + HelpExampleCli("getmininginfo", "")
+                },
+                RPCExamples{
+                    HelpExampleCli("getmininginfo", "")
             + HelpExampleRpc("getmininginfo", "")
-        );
+                },
+            }.ToString());
 
 
     LOCK(cs_main);
@@ -253,14 +257,15 @@ static UniValue prioritisetransaction(const JSONRPCRequest& request)
             "                  Note, that this value is not a fee rate. It is a value to modify absolute fee of the TX.\n"
             "                  The fee is not actually paid, only the algorithm for selecting transactions into a block\n"
             "                  considers the transaction as it would have paid a higher (or lower) fee."},
-                }}
-                .ToString() +
-            "\nResult:\n"
+                },
+                RPCResult{
             "true              (boolean) Returns true\n"
-            "\nExamples:\n"
-            + HelpExampleCli("prioritisetransaction", "\"txid\" 0.0 10000")
+                },
+                RPCExamples{
+                    HelpExampleCli("prioritisetransaction", "\"txid\" 0.0 10000")
             + HelpExampleRpc("prioritisetransaction", "\"txid\", 0.0, 10000")
-        );
+                },
+            }.ToString());
 
     LOCK(cs_main);
 
@@ -332,9 +337,8 @@ static UniValue getblocktemplate(const JSONRPCRequest& request)
                                 },
                         },
                         "\"template_request\""},
-                }}
-                .ToString() +
-            "\nResult:\n"
+                },
+                RPCResult{
             "{\n"
             "  \"capabilities\" : [ \"capability\", ... ],    (array of strings) specific client side supported features\n"
             "  \"version\" : n,                    (numeric) The block version\n"
@@ -396,11 +400,12 @@ static UniValue getblocktemplate(const JSONRPCRequest& request)
             "  \"superblocks_started\" : true|false, (boolean) true, if superblock payments started\n"
             "  \"superblocks_enabled\" : true|false  (boolean) true, if superblock payments are enabled\n"
             "}\n"
-
-            "\nExamples:\n"
-            + HelpExampleCli("getblocktemplate", "{\"rules\": [\"segwit\"]}")
+                },
+                RPCExamples{
+                    HelpExampleCli("getblocktemplate", "{\"rules\": [\"segwit\"]}")
             + HelpExampleRpc("getblocktemplate", "{\"rules\": [\"segwit\"]}")
-         );
+                },
+            }.ToString());
 
     LOCK(cs_main);
 
@@ -777,13 +782,13 @@ static UniValue submitblock(const JSONRPCRequest& request)
                 {
                     {"hexdata", RPCArg::Type::STR_HEX, /* opt */ false, /* default_val */ "", "the hex-encoded block data to submit"},
                     {"dummy", RPCArg::Type::STR, /* opt */ true, /* default_val */ "ignored", "dummy value, for compatibility with BIP22. This value is ignored."},
-                }}
-                .ToString() +
-            "\nResult:\n"
-            "\nExamples:\n"
-            + HelpExampleCli("submitblock", "\"mydata\"")
+                },
+                RPCResults{},
+                RPCExamples{
+                    HelpExampleCli("submitblock", "\"mydata\"")
             + HelpExampleRpc("submitblock", "\"mydata\"")
-        );
+                },
+            }.ToString());
     }
 
     std::shared_ptr<CBlock> blockptr = std::make_shared<CBlock>();
@@ -841,13 +846,15 @@ static UniValue submitheader(const JSONRPCRequest& request)
                 "\nThrows when the header is invalid.\n",
                 {
                     {"hexdata", RPCArg::Type::STR_HEX, /* opt */ false, /* default_val */ "", "the hex-encoded block header data"},
-                }}
-                .ToString() +
-            "\nResult:\n"
+                },
+                RPCResult{
             "None"
-            "\nExamples:\n" +
-            HelpExampleCli("submitheader", "\"aabbcc\"") +
-            HelpExampleRpc("submitheader", "\"aabbcc\""));
+                },
+                RPCExamples{
+                    HelpExampleCli("submitheader", "\"aabbcc\"") +
+                    HelpExampleRpc("submitheader", "\"aabbcc\"")
+                },
+            }.ToString());
     }
 
     CBlockHeader h;
@@ -890,9 +897,8 @@ static UniValue estimatesmartfee(const JSONRPCRequest& request)
             "       \"UNSET\"\n"
             "       \"ECONOMICAL\"\n"
             "       \"CONSERVATIVE\""},
-                }}
-                .ToString() +
-            "\nResult:\n"
+                },
+                RPCResult{
             "{\n"
             "  \"feerate\" : x.x,     (numeric, optional) estimate fee rate in " + CURRENCY_UNIT + "/kB\n"
             "  \"errors\": [ str... ] (json array of strings, optional) Errors encountered during processing\n"
@@ -903,9 +909,11 @@ static UniValue estimatesmartfee(const JSONRPCRequest& request)
             "fee estimation is able to return based on how long it has been running.\n"
             "An error is returned if not enough transactions and blocks\n"
             "have been observed to make an estimate for any number of blocks.\n"
-            "\nExample:\n"
-            + HelpExampleCli("estimatesmartfee", "6")
-            );
+                },
+                RPCExamples{
+                    HelpExampleCli("estimatesmartfee", "6")
+                },
+            }.ToString());
 
     RPCTypeCheck(request.params, {UniValue::VNUM, UniValue::VSTR});
     RPCTypeCheckArgument(request.params[0], UniValue::VNUM);
@@ -950,9 +958,8 @@ static UniValue estimaterawfee(const JSONRPCRequest& request)
                     {"threshold", RPCArg::Type::NUM, /* opt */ true, /* default_val */ "0.95", "The proportion of transactions in a given feerate range that must have been\n"
             "               confirmed within conf_target in order to consider those feerates as high enough and proceed to check\n"
             "               lower buckets."},
-                }}
-                .ToString() +
-            "\nResult:\n"
+                },
+                RPCResult{
             "{\n"
             "  \"short\" : {            (json object, optional) estimate for short time horizon\n"
             "      \"feerate\" : x.x,        (numeric, optional) estimate fee rate in " + CURRENCY_UNIT + "/kB\n"
@@ -974,9 +981,11 @@ static UniValue estimaterawfee(const JSONRPCRequest& request)
             "}\n"
             "\n"
             "Results are returned for any horizon which tracks blocks up to the confirmation target.\n"
-            "\nExample:\n"
-            + HelpExampleCli("estimaterawfee", "6 0.9")
-            );
+                },
+                RPCExamples{
+                    HelpExampleCli("estimaterawfee", "6 0.9")
+                },
+            }.ToString());
 
     RPCTypeCheck(request.params, {UniValue::VNUM, UniValue::VNUM}, true);
     RPCTypeCheckArgument(request.params[0], UniValue::VNUM);

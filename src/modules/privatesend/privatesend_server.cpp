@@ -330,7 +330,7 @@ void CPrivateSendServer::CreateFinalTransaction(CConnman* connman)
     LogPrint(BCLog::PRIVSEND, "CPrivateSendServer::CreateFinalTransaction -- finalMutableTransaction=%s\n", txNew.GetHash().ToString());
 
     // request signatures from clients
-    RelayFinalTransaction(finalMutableTransaction, connman);
+    RelayFinalTransaction(CTransaction(finalMutableTransaction), connman);
     SetState(POOL_STATE_SIGNING);
 }
 
@@ -601,7 +601,7 @@ bool CPrivateSendServer::AddEntry(const CDarkSendEntry& entryNew, PoolMessage& n
         }
     }
 
-    if(!CPrivateSend::IsCollateralValid(*entryNew.txCollateral)) {
+    if(!CPrivateSend::IsCollateralValid(CTransaction(*entryNew.txCollateral))) {
         LogPrint(BCLog::PRIVSEND, "CPrivateSendServer::AddEntry -- collateral not valid!\n");
         nMessageIDRet = ERR_INVALID_COLLATERAL;
         return false;
@@ -708,7 +708,7 @@ bool CPrivateSendServer::IsAcceptableDSA(const CDarksendAccept& dsa, PoolMessage
     }
 
     // check collateral
-    if(!fUnitTest && !CPrivateSend::IsCollateralValid(dsa.txCollateral)) {
+    if(!fUnitTest && !CPrivateSend::IsCollateralValid(CTransaction(dsa.txCollateral))) {
         LogPrint(BCLog::PRIVSEND, "CPrivateSendServer::%s -- collateral not valid!\n", __func__);
         nMessageIDRet = ERR_INVALID_COLLATERAL;
         return false;

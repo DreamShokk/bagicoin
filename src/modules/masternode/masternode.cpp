@@ -226,13 +226,12 @@ void CMasternode::Check(bool fForce)
             return;
         }
 
-        // part 1: expire based on dashd ping
-        bool fSentinelPingActive = masternodeSync.IsSynced() && mnodeman.IsSentinelPingActive();
-        bool fSentinelPingExpired = fSentinelPingActive && !IsPingedWithin(MASTERNODE_SENTINEL_PING_MAX_SECONDS);
-        LogPrint(BCLog::MNODE, "CMasternode::Check -- outpoint=%s, GetAdjustedTime()=%d, fSentinelPingExpired=%d\n",
-                outpoint.ToStringShort(), GetAdjustedTime(), fSentinelPingExpired);
+        // part 1: expire based on chaincoind ping
+        bool fDaemonPingExpired = !IsPingedWithin(MASTERNODE_SENTINEL_PING_MAX_SECONDS);
+        LogPrint(BCLog::MNODE, "CMasternode::Check -- outpoint=%s, GetAdjustedTime()=%d, fDaemonPingExpired=%d\n",
+                outpoint.ToStringShort(), GetAdjustedTime(), fDaemonPingExpired);
 
-        if(fSentinelPingExpired) {
+        if(fDaemonPingExpired) {
             nActiveState = MASTERNODE_SENTINEL_PING_EXPIRED;
             if(nActiveStatePrev != nActiveState) {
                 uiInterface.NotifyMasternodeChanged(outpoint, CT_UPDATED);
@@ -257,15 +256,10 @@ void CMasternode::Check(bool fForce)
 
     if(!fWaitForPing || fOurMasternode) {
         // part 2: expire based on sentinel info
-        bool fSentinelPingActive = masternodeSync.IsSynced() && mnodeman.IsSentinelPingActive();
-        bool fSentinelPingExpired = fSentinelPingActive && !lastPing.fSentinelIsCurrent;
+        LogPrint(BCLog::MNODE, "CMasternode::Check -- outpoint=%s, GetAdjustedTime()=%d, lastPing.fSentinelIsCurrent=%d\n",
+                outpoint.ToStringShort(), GetAdjustedTime(), lastPing.fSentinelIsCurrent);
 
-        LogPrint(BCLog::MNODE, "CMasternode::Check -- outpoint=%s, GetAdjustedTime()=%d, fSentinelPingExpired=%d\n",
-                outpoint.ToStringShort(), GetAdjustedTime(), fSentinelPingExpired);
-        LogPrint(BCLog::MNODE, "CMasternode::Check -- sync=%d, IsSentinelPingActive()=%d, fSentinelIsCurrent=%d, Height=%d\n",
-                masternodeSync.IsSynced(), mnodeman.IsSentinelPingActive(), lastPing.fSentinelIsCurrent, nHeight);
-
-        if(fSentinelPingExpired) {
+        if(!mnodeman.IsSentinelPingActive() || !lastPing.fSentinelIsCurrent) {
             nActiveState = MASTERNODE_SENTINEL_PING_EXPIRED;
             if(nActiveStatePrev != nActiveState) {
                 uiInterface.NotifyMasternodeChanged(outpoint, CT_UPDATED);
@@ -617,13 +611,6 @@ uint256 CMasternodeBroadcast::GetHash() const
 
 uint256 CMasternodeBroadcast::GetSignatureHash() const
 {
-    CHashWriter ss(SER_GETHASH, PROTOCOL_VERSION);
-    ss << outpoint;
-    ss << addr;
-    ss << pubKeyCollateralAddress;
-    ss << pubKeyMasternode;
-    ss << sigTime;
-    ss << nProtocolVersion;
     return SerializeHash(*this);
 }
 
@@ -678,13 +665,6 @@ void CMasternodeBroadcast::Relay(CConnman* connman) const
 
 uint256 CMasternodePing::GetHash() const
 {
-    CHashWriter ss(SER_GETHASH, PROTOCOL_VERSION);
-    ss << masternodeOutpoint;
-    ss << blockHash;
-    ss << sigTime;
-    ss << fSentinelIsCurrent;
-    ss << nSentinelVersion;
-    ss << nDaemonVersion;
     return SerializeHash(*this);
 }
 

@@ -1204,7 +1204,7 @@ void CWallet::BlockConnected(const std::shared_ptr<const CBlock>& pblock, const 
 
     m_last_block_processed = pindex->GetBlockHash();
     // quick & dirty
-    privateSendClient->UpdatedBlockTip(pindex, nullptr, IsInitialBlockDownload());
+    privateSendClient->UpdatedBlockTip(pindex->nHeight);
 }
 
 void CWallet::BlockDisconnected(const std::shared_ptr<const CBlock>& pblock) {

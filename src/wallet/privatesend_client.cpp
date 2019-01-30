@@ -1514,8 +1514,8 @@ void CPrivateSendClient::SetState(PoolState nStateNew)
     nState = nStateNew;
 }
 
-void CPrivateSendClient::UpdatedBlockTip(const CBlockIndex *pindexNew, const CBlockIndex *pindexFork, bool fInitialDownload) {
-    nCachedBlockHeight = pindexNew->nHeight;
+void CPrivateSendClient::UpdatedBlockTip(const int nHeight) {
+    nCachedBlockHeight = nHeight;
     LogPrint(BCLog::PRIVSEND, "CPrivateSendClient::UpdatedBlockTip -- nCachedBlockHeight: %d\n", nCachedBlockHeight);
 }
 

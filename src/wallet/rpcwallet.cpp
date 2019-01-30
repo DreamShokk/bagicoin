@@ -4033,14 +4033,14 @@ UniValue walletprocesspsct(const JSONRPCRequest& request)
 
     if (request.fHelp || request.params.size() < 1 || request.params.size() > 4)
         throw std::runtime_error(
-            RPCHelpMan{"walletprocesspsbt",
-                "\nUpdate a PSBT with input information from our wallet and then sign inputs\n"
+            RPCHelpMan{"walletprocesspsct",
+                "\nUpdate a PSCT with input information from our wallet and then sign inputs\n"
                 "that we can sign for." +
                     HelpRequiringPassphrase(pwallet) + "\n",
                 {
                     {"psct", RPCArg::Type::STR, RPCArg::Optional::NO, "The transaction base64 string"},
                     {"sign", RPCArg::Type::BOOL, /* default */ "true", "Also sign the transaction when updating"},
-                    {"sighashtype", RPCArg::Type::STR, /* default */ "ALL", "The signature hash type to sign with if not specified by the PSBT. Must be one of\n"
+                    {"sighashtype", RPCArg::Type::STR, /* default */ "ALL", "The signature hash type to sign with if not specified by the PSCT. Must be one of\n"
             "       \"ALL\"\n"
             "       \"NONE\"\n"
             "       \"SINGLE\"\n"
@@ -4066,7 +4066,7 @@ UniValue walletprocesspsct(const JSONRPCRequest& request)
     // Unserialize the transaction
     PartiallySignedTransaction psctx;
     std::string error;
-    if (!DecodePSCT(psctx, request.params[0].get_str(), error)) {
+    if (!DecodeBase64PSCT(psCtx, request.params[0].get_str(), error)) {
         throw JSONRPCError(RPC_DESERIALIZATION_ERROR, strprintf("TX decode failed %s", error));
     }
 

@@ -37,7 +37,11 @@ bool DecodeHexBlockHeader(CBlockHeader&, const std::string& hex_header);
  */
 bool ParseHashStr(const std::string& strHex, uint256& result);
 std::vector<unsigned char> ParseHexUV(const UniValue& v, const std::string& strName);
-NODISCARD bool DecodePSCT(PartiallySignedTransaction& psct, const std::string& base64_tx, std::string& error);
+
+//! Decode a base64ed PSCT into a PartiallySignedTransaction
+NODISCARD bool DecodeBase64PSCT(PartiallySignedTransaction& decoded_psct, const std::string& base64_psct, std::string& error);
+//! Decode a raw (binary blob) PSCT into a PartiallySignedTransaction
+NODISCARD bool DecodeRawPSCT(PartiallySignedTransaction& decoded_psct, const std::string& raw_psct, std::string& error);
 int ParseSighashString(const UniValue& sighash);
 
 // core_write.cpp

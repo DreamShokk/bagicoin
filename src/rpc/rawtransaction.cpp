@@ -1324,7 +1324,7 @@ UniValue decodepsct(const JSONRPCRequest& request)
     // Unserialize the transactions
     PartiallySignedTransaction psctx;
     std::string error;
-    if (!DecodePSCT(psctx, request.params[0].get_str(), error)) {
+    if (!DecodeBase64PSCT(psctx, request.params[0].get_str(), error)) {
         throw JSONRPCError(RPC_DESERIALIZATION_ERROR, strprintf("TX decode failed %s", error));
     }
 
@@ -1525,7 +1525,7 @@ UniValue combinepsct(const JSONRPCRequest& request)
     for (unsigned int i = 0; i < txs.size(); ++i) {
         PartiallySignedTransaction psctx;
         std::string error;
-        if (!DecodePSCT(psctx, txs[i].get_str(), error)) {
+        if (!DecodeBase64PSCT(psctx, txs[i].get_str(), error)) {
             throw JSONRPCError(RPC_DESERIALIZATION_ERROR, strprintf("TX decode failed %s", error));
         }
         psctxs.push_back(psctx);
@@ -1582,7 +1582,7 @@ UniValue finalizepsct(const JSONRPCRequest& request)
     // Unserialize the transactions
     PartiallySignedTransaction psctx;
     std::string error;
-    if (!DecodePSCT(psctx, request.params[0].get_str(), error)) {
+    if (!DecodeBase64PSCT(psctx, request.params[0].get_str(), error)) {
         throw JSONRPCError(RPC_DESERIALIZATION_ERROR, strprintf("TX decode failed %s", error));
     }
 

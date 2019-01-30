@@ -1482,10 +1482,9 @@ UniValue combinepsct(const JSONRPCRequest& request)
 
     // Merge
     for (auto it = std::next(psctxs.begin()); it != psctxs.end(); ++it) {
-        if (*it != merged_psct) {
+        if (!merged_psct.Merge(*it)) {
             throw JSONRPCError(RPC_INVALID_PARAMETER, "PSCTs do not refer to the same transactions.");
         }
-        merged_psct.Merge(*it);
     }
     if (!merged_psct.IsSane()) {
         throw JSONRPCError(RPC_INVALID_PARAMETER, "Merged PSCT is inconsistent");

@@ -16,8 +16,13 @@ bool PartiallySignedTransaction::IsNull() const
     return !tx && inputs.empty() && outputs.empty() && unknown.empty();
 }
 
-void PartiallySignedTransaction::Merge(const PartiallySignedTransaction& psct)
+bool PartiallySignedTransaction::Merge(const PartiallySignedTransaction& psct)
 {
+    // Prohibited to merge two PSCTs over different transactions
+    if (tx->GetHash() != psct.tx->GetHash()) {
+        return false;
+    }
+
     for (unsigned int i = 0; i < inputs.size(); ++i) {
         inputs[i].Merge(psct.inputs[i]);
     }
@@ -25,6 +30,8 @@ void PartiallySignedTransaction::Merge(const PartiallySignedTransaction& psct)
         outputs[i].Merge(psct.outputs[i]);
     }
     unknown.insert(psct.unknown.begin(), psct.unknown.end());
+
+    return true;
 }
 
 bool PartiallySignedTransaction::IsSane() const

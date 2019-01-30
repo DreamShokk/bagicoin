@@ -28,7 +28,7 @@ const char* TransactionErrorString(const TransactionError err)
         case TransactionError::MEMPOOL_ERROR:
             return "AcceptToMemoryPool failed";
         case TransactionError::INVALID_PSCT:
-            return "PSBT is not sane";
+            return "PSCT is not sane";
         case TransactionError::SIGHASH_MISMATCH:
             return "Specified sighash value does not match existing value";
 

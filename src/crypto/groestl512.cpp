@@ -1397,7 +1397,6 @@ void CGROESTL512::Finalize(unsigned char hash[OUTPUT_SIZE])
     unsigned z;
     DECL_STATE_BIG
 
-    buf = s.buf;
     ptr = s.ptr;
     z = 0x80 >> 0;
     pad[0] = ((0 & -z) | z) & 0xFF;

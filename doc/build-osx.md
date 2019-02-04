@@ -67,7 +67,7 @@ Build Chaincoin Core
 
 Disable-wallet mode
 --------------------
-When the intention is to run only a P2P node without a wallet, Bitcoin Core may be compiled in
+When the intention is to run only a P2P node without a wallet, Chaincoin Core may be compiled in
 disable-wallet mode with:
 
     ./configure --disable-wallet
@@ -203,7 +203,7 @@ build process to remain somewhat deterministic. Here's how it works:
   that have been previously (deterministically) built in order to create a
   final dmg.
 - The Apple keyholder uses this unsigned app to create a detached signature,
-  using the script that is also included there. Detached signatures are available from this [repository](https://github.com/bitcoin-core/bitcoin-detached-sigs).
+  using the script that is also included there. Detached signatures are available from this [repository](https://github.com/chaincoin/chaincoin-detached-sigs).
 - Builders feed the unsigned app + detached signature back into Gitian. It
   uses the pre-built tools to recombine the pieces into a deterministic dmg.
 

@@ -39,11 +39,11 @@ static const int PRIVATESEND_KEYS_THRESHOLD_STOP    = 50;
 class CKeyHolderStorage
 {
 private:
-    std::vector<std::unique_ptr<CReserveKey> > storage;
+    std::vector<std::shared_ptr<CReserveKey> > storage;
     mutable CCriticalSection cs_storage;
 
 public:
-    CScript AddKey(CWallet *pwalletIn);
+    void AddKey(std::shared_ptr<CReserveScript> &script, CWallet *pwalletIn);
     void KeepAll();
     void ReturnAll();
 

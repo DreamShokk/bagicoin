@@ -22,18 +22,18 @@
 #include <memory>
 
 
-CScript CKeyHolderStorage::AddKey(CWallet* pwalletIn)
+void CKeyHolderStorage::AddKey(std::shared_ptr<CReserveScript> &script, CWallet* pwalletIn)
 {
-    std::unique_ptr<CReserveKey> keyHolder = MakeUnique<CReserveKey>(pwalletIn);
+    std::shared_ptr<CReserveKey> rKey = std::make_shared<CReserveKey>(pwalletIn);
     CPubKey pubkey;
-    if (!keyHolder->GetReservedKey(pubkey))
-        return CScript();
-    auto script = GetScriptForDestination(pubkey.GetID());
+    if (!rKey->GetReservedKey(pubkey))
+        return;
+    script = rKey;
 
     LOCK(cs_storage);
-    storage.emplace_back(std::move(keyHolder));
+    storage.emplace_back(std::move(rKey));
+    script->reserveScript = CScript() << ToByteVector(pubkey) << OP_CHECKSIG;
     LogPrintf("CKeyHolderStorage::%s -- storage size %lld\n", __func__, storage.size());
-    return script;
 }
 
 void CKeyHolderStorage::KeepAll()
@@ -1208,10 +1208,16 @@ bool CPrivateSendClient::PrepareDenominate(int nMinRounds, int nMaxRounds, std::
                     vecTxDSIn.erase(it);
                     vCoins.erase(it2);
 
-                    CScript scriptDenom = keyHolderStorage.AddKey(m_wallet);
+                    std::shared_ptr<CReserveScript> scriptDenom;
+                    keyHolderStorage.AddKey(scriptDenom, m_wallet);
+
+                    if (!scriptDenom || scriptDenom->reserveScript.empty()) {
+                        strErrorRet = "No script available, Keypool exhausted?";
+                        return false;
+                    }
 
                     // add new output
-                    CTxOut txout(nValueDenom, scriptDenom);
+                    CTxOut txout(nValueDenom, scriptDenom->reserveScript);
                     vecTxOutRet.push_back(txout);
 
                     // subtract denomination amount
@@ -1401,8 +1407,15 @@ bool CPrivateSendClient::CreateDenominated(interfaces::Chain::Lock& locked_chain
     // ****** Add an output for mixing collaterals ************ /
 
     if(fCreateMixingCollaterals) {
-        CScript scriptCollateral = keyHolderStorageDenom.AddKey(m_wallet);
-        vecSend.push_back((CRecipient){ scriptCollateral, CPrivateSend::GetMaxCollateralAmount(), false });
+        std::shared_ptr<CReserveScript> scriptCollateral;
+        keyHolderStorageDenom.AddKey(scriptCollateral, m_wallet);
+
+        if (!scriptCollateral || scriptCollateral->reserveScript.empty()) {
+            LogPrintf("CPrivateSendClient::CreateDenominated -- No script available, Keypool exhausted?");
+            return false;
+        }
+
+        vecSend.push_back((CRecipient){ scriptCollateral->reserveScript, CPrivateSend::GetMaxCollateralAmount(), false });
         nValueLeft -= CPrivateSend::GetMaxCollateralAmount();
     }
 
@@ -1437,9 +1450,15 @@ bool CPrivateSendClient::CreateDenominated(interfaces::Chain::Lock& locked_chain
 
             // add each output up to 11 times until it can't be added again
             while(nValueLeft - nDenomValue >= 0 && nOutputs <= 10) {
-                CScript scriptDenom = keyHolderStorageDenom.AddKey(m_wallet);
+                std::shared_ptr<CReserveScript> scriptDenom;
+                keyHolderStorageDenom.AddKey(scriptDenom, m_wallet);
 
-                vecSend.push_back((CRecipient){ scriptDenom, nDenomValue, false });
+                if (!scriptDenom || scriptDenom->reserveScript.empty()) {
+                    LogPrintf("CPrivateSendClient::CreateDenominated -- No script available, Keypool exhausted?");
+                    return false;
+                }
+
+                vecSend.push_back((CRecipient){ scriptDenom->reserveScript, nDenomValue, false });
 
                 //increment outputs and subtract denomination amount
                 nOutputs++;

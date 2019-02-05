@@ -115,7 +115,7 @@ When a new block is found on the network, a masternode quorum will be determined
 
 ### DSTX - "dstx"
 
-CDarksendBroadcastTx
+CPrivateSendBroadcastTx
 
 Masternodes can broadcast subsidised transactions without fees for the sake of security in mixing. This is done via the DSTX message.
 

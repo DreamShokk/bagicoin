@@ -4314,7 +4314,7 @@ UniValue privatesend(const JSONRPCRequest& request)
         }
         auto locked_chain = pwallet->chain().lock();
         bool result = pwallet->privateSendClient->DoAutomaticDenominating(*locked_chain);
-        return "Mixing " + (result ? "started successfully" : ("start failed: " + pwallet->privateSendClient->GetStatus() + ", will retry"));
+        return "Mixing " + (result ? "started successfully" : ("start failed: " + pwallet->privateSendClient->GetStatuses() + ", will retry"));
     }
 
     if(request.params[0].get_str() == "stop") {
@@ -4345,12 +4345,18 @@ UniValue getpoolinfo(const JSONRPCRequest& request)
 
     UniValue obj(UniValue::VOBJ);
     obj.pushKV("mixing_mode",       (!fMasternodeMode && pwallet->privateSendClient->fPrivateSendMultiSession) ? "multi-session" : "normal");
-    obj.pushKV("status",            pwallet->privateSendClient->GetStatus());
+    obj.pushKV("status",            pwallet->privateSendClient->GetStatuses());
 
-    masternode_info_t mnInfo;
-    if (pwallet->privateSendClient->GetMixingMasternodeInfo(mnInfo)) {
-        obj.pushKV("outpoint",      mnInfo.outpoint.ToStringShort());
-        obj.pushKV("addr",          mnInfo.addr.ToString());
+    std::vector<masternode_info_t> vecMnInfo;
+    if (pwallet->privateSendClient->GetMixingMasternodesInfo(vecMnInfo)) {
+        UniValue pools(UniValue::VARR);
+        for (const auto& mnInfo : vecMnInfo) {
+            UniValue pool(UniValue::VOBJ);
+            pool.pushKV("outpoint",      mnInfo.outpoint.ToStringShort());
+            pool.pushKV("addr",          mnInfo.addr.ToString());
+            pools.push_back(pool);
+        }
+        obj.pushKV("pools", pools);
     }
 
     if (pwallet) {

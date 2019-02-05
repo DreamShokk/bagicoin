@@ -51,9 +51,6 @@ QT_TRANSLATE_NOOP("chaincoin-core", ""
 "Fee estimation failed. Fallbackfee is disabled. Wait a few blocks or enable -"
 "fallbackfee."),
 QT_TRANSLATE_NOOP("chaincoin-core", ""
-"Found unconfirmed denominated outputs, will wait till they confirm to "
-"continue."),
-QT_TRANSLATE_NOOP("chaincoin-core", ""
 "Invalid amount for -maxtxfee=<amount>: '%s' (must be at least the minrelay "
 "fee of %s to prevent stuck transactions)"),
 QT_TRANSLATE_NOOP("chaincoin-core", ""
@@ -168,7 +165,6 @@ QT_TRANSLATE_NOOP("chaincoin-core", "Cannot write to data directory '%s'; check 
 QT_TRANSLATE_NOOP("chaincoin-core", "Change index out of range"),
 QT_TRANSLATE_NOOP("chaincoin-core", "Collateral not valid."),
 QT_TRANSLATE_NOOP("chaincoin-core", "Config setting for %s only applied on %s network when in [%s] section."),
-QT_TRANSLATE_NOOP("chaincoin-core", "Connecting to masternode..."),
 QT_TRANSLATE_NOOP("chaincoin-core", "Copyright (C) %i-%i"),
 QT_TRANSLATE_NOOP("chaincoin-core", "Corrupted block database detected"),
 QT_TRANSLATE_NOOP("chaincoin-core", "Could not parse masternode.conf"),
@@ -191,6 +187,7 @@ QT_TRANSLATE_NOOP("chaincoin-core", "Error reading from database, shutting down.
 QT_TRANSLATE_NOOP("chaincoin-core", "Error upgrading chainstate database"),
 QT_TRANSLATE_NOOP("chaincoin-core", "Error"),
 QT_TRANSLATE_NOOP("chaincoin-core", "Error: A fatal internal error occurred, see debug.log for details"),
+QT_TRANSLATE_NOOP("chaincoin-core", "Error: Disk space is low for %s"),
 QT_TRANSLATE_NOOP("chaincoin-core", "Error: Disk space is low!"),
 QT_TRANSLATE_NOOP("chaincoin-core", "Failed to create backup %s!"),
 QT_TRANSLATE_NOOP("chaincoin-core", "Failed to create backup, error: %s"),
@@ -216,7 +213,6 @@ QT_TRANSLATE_NOOP("chaincoin-core", "Invalid amount for -%s=<amount>: '%s'"),
 QT_TRANSLATE_NOOP("chaincoin-core", "Invalid amount for -discardfee=<amount>: '%s'"),
 QT_TRANSLATE_NOOP("chaincoin-core", "Invalid amount for -fallbackfee=<amount>: '%s'"),
 QT_TRANSLATE_NOOP("chaincoin-core", "Invalid amount for -paytxfee=<amount>: '%s' (must be at least %s)"),
-QT_TRANSLATE_NOOP("chaincoin-core", "Invalid input count."),
 QT_TRANSLATE_NOOP("chaincoin-core", "Invalid masternodeprivkey. Please see documenation."),
 QT_TRANSLATE_NOOP("chaincoin-core", "Invalid netmask specified in -whitelist: '%s'"),
 QT_TRANSLATE_NOOP("chaincoin-core", "Invalid port detected in masternode.conf"),
@@ -290,8 +286,9 @@ QT_TRANSLATE_NOOP("chaincoin-core", "This is not a Masternode."),
 QT_TRANSLATE_NOOP("chaincoin-core", "This is the minimum transaction fee you pay on every transaction."),
 QT_TRANSLATE_NOOP("chaincoin-core", "This is the transaction fee you will pay if you send a transaction."),
 QT_TRANSLATE_NOOP("chaincoin-core", "Too many %f denominations, removing."),
+QT_TRANSLATE_NOOP("chaincoin-core", "Too many %f denominations, skipping."),
 QT_TRANSLATE_NOOP("chaincoin-core", "Transaction amount too small"),
-QT_TRANSLATE_NOOP("chaincoin-core", "Transaction amounts must be positive"),
+QT_TRANSLATE_NOOP("chaincoin-core", "Transaction amounts must not be negative"),
 QT_TRANSLATE_NOOP("chaincoin-core", "Transaction created successfully."),
 QT_TRANSLATE_NOOP("chaincoin-core", "Transaction fee and change calculation failed"),
 QT_TRANSLATE_NOOP("chaincoin-core", "Transaction fees are too high."),

@@ -5,20 +5,44 @@
 # See "man systemd.service" for details.
 
 # Note that almost all daemon options could be specified in
-# /etc/chaincoin/chaincoin.conf
+# /etc/chaincoin/chaincoin.conf, except for those explicitly specified as arguments
+# in ExecStart=
 
 [Unit]
 Description=Chaincoin daemon
 After=network.target
 
 [Service]
-ExecStart=/usr/bin/chaincoind -daemon -conf=/etc/chaincoin/chaincoin.conf -pid=/run/chaincoind/chaincoind.pid
-# Creates /run/bitcoind owned by bitcoin
-RuntimeDirectory=chaincoind
-User=chaincoin
+ExecStart=/usr/bin/chaincoind -daemon \
+                            -pid=/run/chaincoind/chaincoind.pid \
+                            -conf=/etc/chaincoin/chaincoin.conf \
+                            -datadir=/var/lib/chaincoind
+
+# Process management
+####################
+
 Type=forking
 PIDFile=/run/chaincoind/chaincoind.pid
 Restart=on-failure
+
+# Directory creation and permissions
+####################################
+
+# Run as chaincoin:chaincoin
+User=chaincoin
+Group=chaincoin
+
+# /run/chaincoind
+RuntimeDirectory=chaincoind
+RuntimeDirectoryMode=0710
+
+# /etc/chaincoin
+ConfigurationDirectory=chaincoin
+ConfigurationDirectoryMode=0710
+
+# /var/lib/chaincoind
+StateDirectory=chaincoind
+StateDirectoryMode=0710
 
 # Hardening measures
 ####################

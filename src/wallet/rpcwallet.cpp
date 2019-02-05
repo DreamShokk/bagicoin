@@ -1606,7 +1606,8 @@ static UniValue listsinceblock(const JSONRPCRequest& request)
     auto locked_chain = pwallet->chain().lock();
     LOCK(pwallet->cs_wallet);
 
-    Optional<int> height;    // Height of the specified block or the common ancestor, if the block provided was in a deactivated chain.
+    // The way the 'height' is initialized is just a workaround for the gcc bug #47679 since version 4.6.0.
+    Optional<int> height = MakeOptional(false, int()); // Height of the specified block or the common ancestor, if the block provided was in a deactivated chain.
     Optional<int> altheight; // Height of the specified block, even if it's in a deactivated chain.
     int target_confirms = 1;
     isminefilter filter = ISMINE_SPENDABLE;
@@ -3437,12 +3438,12 @@ UniValue rescanblockchain(const JSONRPCRequest& request)
                 "\nRescan the local blockchain for wallet related transactions.\n",
                 {
                     {"start_height", RPCArg::Type::NUM, /* opt */ true, /* default_val */ "0", "block height where the rescan should start"},
-                    {"stop_height", RPCArg::Type::NUM, /* opt */ true, /* default_val */ "tip height", "the last block height that should be scanned"},
+                    {"stop_height", RPCArg::Type::NUM, /* opt */ true, /* default_val */ "", "the last block height that should be scanned. If none is provided it will rescan up to the tip at return time of this call."},
                 },
                 RPCResult{
             "{\n"
-            "  \"start_height\"     (numeric) The block height where the rescan has started. If omitted, rescan started from the genesis block.\n"
-            "  \"stop_height\"      (numeric) The height of the last rescanned block. If omitted, rescan stopped at the chain tip.\n"
+            "  \"start_height\"     (numeric) The block height where the rescan has started.\n"
+            "  \"stop_height\"      (numeric) The height of the last rescanned block.\n"
             "}\n"
                 },
                 RPCExamples{
@@ -3899,6 +3900,10 @@ UniValue sethdseed(const JSONRPCRequest& request)
 
     if (IsInitialBlockDownload()) {
         throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, "Cannot set a new HD seed while still in Initial Block Download");
+    }
+
+    if (pwallet->IsWalletFlagSet(WALLET_FLAG_DISABLE_PRIVATE_KEYS)) {
+        throw JSONRPCError(RPC_WALLET_ERROR, "Cannot set a HD seed to a wallet with private keys disabled");
     }
 
     auto locked_chain = pwallet->chain().lock();

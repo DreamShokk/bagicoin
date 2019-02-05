@@ -98,6 +98,9 @@ public:
     */
     bool hasTrayIcon() const { return trayIcon; }
 
+    /** Disconnect core signals from GUI client */
+    void unsubscribeFromCoreSignals();
+
 protected:
     void changeEvent(QEvent *e);
     void closeEvent(QCloseEvent *event);
@@ -193,8 +196,6 @@ private:
 
     /** Connect core signals to GUI client */
     void subscribeToCoreSignals();
-    /** Disconnect core signals from GUI client */
-    void unsubscribeFromCoreSignals();
 
     /** Update UI with latest network info from model. */
     void updateNetworkState();

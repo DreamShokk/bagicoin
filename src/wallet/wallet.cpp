@@ -266,6 +266,9 @@ bool CWallet::AddKeyPubKeyWithDB(WalletBatch &batch, const CKey& secret, const C
 {
     AssertLockHeld(cs_wallet); // mapKeyMetadata
 
+    // Make sure we aren't adding private keys to private key disabled wallets
+    assert(!IsWalletFlagSet(WALLET_FLAG_DISABLE_PRIVATE_KEYS));
+
     // CCryptoKeyStore has no concept of wallet databases, but calls AddCryptedKey
     // which is overridden below.  To avoid flushes, the database handle is
     // tunneled through to it.
@@ -413,7 +416,7 @@ bool CWallet::LoadWatchOnly(const CScript &dest)
     return CCryptoKeyStore::AddWatchOnly(dest);
 }
 
-bool CWallet::Unlock(const SecureString& strWalletPassphrase, bool fForMixingOnly)
+bool CWallet::Unlock(const SecureString& strWalletPassphrase, bool accept_no_keys, bool fForMixingOnly)
 {
     CCrypter crypter;
     CKeyingMaterial _vMasterKey;
@@ -426,7 +429,7 @@ bool CWallet::Unlock(const SecureString& strWalletPassphrase, bool fForMixingOnl
                 return false;
             if (!crypter.Decrypt(pMasterKey.second.vchCryptedKey, _vMasterKey))
                 continue; // try another master key
-            if (CCryptoKeyStore::Unlock(_vMasterKey, fForMixingOnly)) {
+            if (CCryptoKeyStore::Unlock(_vMasterKey, accept_no_keys, fForMixingOnly)) {
                 if(nWalletBackups == -2) {
                     TopUpKeyPool();
                     WalletLogPrintf("Keypool replenished, re-initializing automatic backups.\n");
@@ -1785,7 +1788,8 @@ CWallet::ScanResult CWallet::ScanForWalletTransactions(const uint256& start_bloc
         fAbortRescan = false;
         ShowProgress(strprintf("%s " + _("Rescanning..."), GetDisplayName()), 0); // show rescan progress in GUI as dialog or on splashscreen, if -rescan on startup
         uint256 tip_hash;
-        Optional<int> block_height;
+        // The way the 'block_height' is initialized is just a workaround for the gcc bug #47679 since version 4.6.0.
+        Optional<int> block_height = MakeOptional(false, int());
         double progress_begin;
         double progress_end;
         {
@@ -1858,10 +1862,10 @@ CWallet::ScanResult CWallet::ScanForWalletTransactions(const uint256& start_bloc
         }
         ShowProgress(strprintf("%s " + _("Rescanning..."), GetDisplayName()), 100); // hide progress dialog in GUI
         if (block_height && fAbortRescan) {
-            WalletLogPrintf("Rescan aborted at block %d. Progress=%f\n", block_height.value_or(0), progress_current);
+            WalletLogPrintf("Rescan aborted at block %d. Progress=%f\n", block_height.get_value_or(0), progress_current);
             result.status = ScanResult::USER_ABORT;
         } else if (block_height && ShutdownRequested()) {
-            WalletLogPrintf("Rescan interrupted by shutdown request at block %d. Progress=%f\n", block_height.value_or(0), progress_current);
+            WalletLogPrintf("Rescan interrupted by shutdown request at block %d. Progress=%f\n", block_height.get_value_or(0), progress_current);
             result.status = ScanResult::USER_ABORT;
         }
     }
@@ -3374,7 +3378,7 @@ static bool IsCurrentForAntiFeeSniping(interfaces::Chain::Lock& locked_chain)
  */
 static uint32_t GetLocktimeForNewTransaction(interfaces::Chain::Lock& locked_chain)
 {
-    uint32_t const height = locked_chain.getHeight().value_or(-1);
+    uint32_t const height = locked_chain.getHeight().get_value_or(-1);
     uint32_t locktime;
     // Discourage fee sniping.
     //
@@ -4743,6 +4747,9 @@ bool CWallet::Verify(interfaces::Chain& chain, const WalletLocation& location, b
             return false;
         }
     }
+
+    // Keep same database environment instance across Verify/Recover calls below.
+    std::unique_ptr<WalletDatabase> database = WalletDatabase::Create(wallet_path);
 
     try {
         if (!WalletBatch::VerifyEnvironment(wallet_path, error_string)) {

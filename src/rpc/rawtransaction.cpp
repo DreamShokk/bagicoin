@@ -1519,6 +1519,9 @@ UniValue combinepsct(const JSONRPCRequest& request)
     // Unserialize the transactions
     std::vector<PartiallySignedTransaction> psctxs;
     UniValue txs = request.params[0].get_array();
+    if (txs.empty()) {
+        throw JSONRPCError(RPC_INVALID_PARAMETER, "Parameter 'txs' cannot be empty");
+    }
     for (unsigned int i = 0; i < txs.size(); ++i) {
         PartiallySignedTransaction psctx;
         std::string error;

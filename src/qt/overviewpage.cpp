@@ -517,12 +517,7 @@ void OverviewPage::privateSendStatus(const interfaces::PrivateSendStatus& status
 
     ui->labelPrivateSendLastMessage->setText(s);
 
-    if(m_privsendstatus.denom == 0){
-        ui->labelSubmittedDenom->setText(tr("N/A"));
-    } else {
-        QString strDenom = QString::number(m_privsendstatus.denom);
-        ui->labelSubmittedDenom->setText(strDenom);
-    }
+    ui->labelSubmittedDenom->setText(QString::fromStdString(m_privsendstatus.denom));
 
 }
 
@@ -587,18 +582,9 @@ void OverviewPage::togglePrivateSend(){
 
     if(!m_privsendstatus.enabled){
         ui->togglePrivateSend->setText(tr("Start Mixing"));
-        walletModel->unlockCoins();
+        walletModel->resetPool();
     } else {
         ui->togglePrivateSend->setText(tr("Stop Mixing"));
-
-        /* show darksend configuration if client has defaults set */
-
-        if(m_privsendstatus.amount == 0){
-            DarksendConfig dlg(this);
-            dlg.setModel(walletModel);
-            dlg.exec();
-        }
-
     }
 }
 

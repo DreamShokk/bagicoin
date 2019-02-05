@@ -1,10 +1,10 @@
 // Copyright (c) 2014-2017 The Dash Core developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
+
 #include <modules/privatesend/privatesend_server.h>
 
 #include <modules/masternode/activemasternode.h>
-#include <consensus/tx_verify.h>
 #include <consensus/validation.h>
 #include <core_io.h>
 #include <modules/masternode/masternode_sync.h>
@@ -26,7 +26,6 @@ void CPrivateSendServer::ProcessModuleMessage(CNode* pfrom, const std::string& s
     if(!masternodeSync.IsBlockchainSynced()) return;
 
     if(strCommand == NetMsgType::DSACCEPT) {
-
         if(pfrom->GetSendVersion() < MIN_PRIVATESEND_PEER_PROTO_VERSION) {
             LogPrint(BCLog::PRIVSEND, "DSACCEPT -- peer=%d using obsolete version %i\n", pfrom->GetId(), pfrom->GetSendVersion());
             connman->PushMessage(pfrom, CNetMsgMaker(pfrom->GetSendVersion()).Make(NetMsgType::REJECT, strCommand, REJECT_OBSOLETE,
@@ -42,12 +41,10 @@ void CPrivateSendServer::ProcessModuleMessage(CNode* pfrom, const std::string& s
             return;
         }
 
-        CDarksendAccept dsa;
+        CPrivateSendAccept dsa;
         vRecv >> dsa;
 
-//        LogPrint(BCLog::PRIVSEND, "DSACCEPT -- nDenom %d (%s)  txCollateral %s\n", dsa.nDenom, CPrivateSend::GetDenominationsToString(dsa.nDenom), dsa.txCollateral.GetHash().ToString());
-
-        if(dsa.nInputCount < 0 || dsa.nInputCount > (int)PRIVATESEND_ENTRY_MAX_SIZE) return;
+        LogPrint(BCLog::PRIVSEND, "DSACCEPT -- nDenom %d (%s)  txCollateral %s\n", dsa.nDenom, CPrivateSend::GetDenominationsToString(dsa.nDenom), dsa.txCollateral.GetHash().ToString());
 
         masternode_info_t mnInfo;
         if(!mnodeman.GetMasternodeInfo(activeMasternode.outpoint, mnInfo)) {
@@ -55,12 +52,26 @@ void CPrivateSendServer::ProcessModuleMessage(CNode* pfrom, const std::string& s
             return;
         }
 
-        if(vecSessionCollaterals.size() == 0 && mnInfo.nLastDsq != 0 &&
-            mnInfo.nLastDsq + mnodeman.CountEnabled(MIN_PRIVATESEND_PEER_PROTO_VERSION)/5 > mnodeman.nDsqCount)
-        {
-            LogPrintf("DSACCEPT -- last dsq too recent, must wait: addr=%s\n", pfrom->addr.ToString());
-            PushStatus(pfrom, STATUS_REJECTED, ERR_RECENT, connman);
-            return;
+        if (vecSessionCollaterals.size() == 0) {
+            {
+                TRY_LOCK(cs_vecqueue, lockRecv);
+                if (!lockRecv) return;
+
+                for (const auto& q : vecPrivateSendQueue) {
+                    if (q.masternodeOutpoint == activeMasternode.outpoint) {
+                        // refuse to create another queue this often
+                        LogPrint(BCLog::PRIVSEND, "DSACCEPT -- last dsq is still in queue, refuse to mix\n");
+                        PushStatus(pfrom, STATUS_REJECTED, ERR_RECENT, connman);
+                        return;
+                    }
+                }
+            }
+
+            if (mnInfo.nLastDsq != 0 && mnInfo.nLastDsq + mnodeman.CountMasternodes() / 5 > mnodeman.nDsqCount) {
+                LogPrintf("DSACCEPT -- last dsq too recent, must wait: addr=%s\n", pfrom->addr.ToString());
+                PushStatus(pfrom, STATUS_REJECTED, ERR_RECENT, connman);
+                return;
+            }
         }
 
         PoolMessage nMessageID = MSG_NOERR;
@@ -78,7 +89,7 @@ void CPrivateSendServer::ProcessModuleMessage(CNode* pfrom, const std::string& s
         }
 
     } else if(strCommand == NetMsgType::DSQUEUE) {
-        TRY_LOCK(cs_darksend, lockRecv);
+        TRY_LOCK(cs_vecqueue, lockRecv);
         if(!lockRecv) return;
 
         if(pfrom->GetSendVersion() < MIN_PRIVATESEND_PEER_PROTO_VERSION) {
@@ -88,11 +99,11 @@ void CPrivateSendServer::ProcessModuleMessage(CNode* pfrom, const std::string& s
             return;
         }
 
-        CDarksendQueue dsq;
+        CPrivateSendQueue dsq;
         vRecv >> dsq;
 
         // process every dsq only once
-        for (const auto& q : vecDarksendQueue) {
+        for (const auto& q : vecPrivateSendQueue) {
             if(q == dsq) {
                 // LogPrint(BCLog::PRIVSEND, "DSQUEUE -- %s seen\n", dsq.ToString());
                 return;
@@ -102,7 +113,6 @@ void CPrivateSendServer::ProcessModuleMessage(CNode* pfrom, const std::string& s
         LogPrint(BCLog::PRIVSEND, "DSQUEUE -- %s new\n", dsq.ToString());
 
         if(dsq.IsExpired()) return;
-        if(dsq.nInputCount < 0 || dsq.nInputCount > (int)PRIVATESEND_ENTRY_MAX_SIZE) return;
 
         masternode_info_t mnInfo;
         if(!mnodeman.GetMasternodeInfo(dsq.masternodeOutpoint, mnInfo)) return;
@@ -114,7 +124,7 @@ void CPrivateSendServer::ProcessModuleMessage(CNode* pfrom, const std::string& s
         }
 
         if(!dsq.fReady) {
-            for (const auto& q : vecDarksendQueue) {
+            for (const auto& q : vecPrivateSendQueue) {
                 if(q.masternodeOutpoint == dsq.masternodeOutpoint) {
                     // no way same mn can send another "not yet ready" dsq this soon
                     LogPrint(BCLog::PRIVSEND, "DSQUEUE -- Masternode %s is sending WAY too many dsq messages\n", mnInfo.addr.ToString());
@@ -122,7 +132,7 @@ void CPrivateSendServer::ProcessModuleMessage(CNode* pfrom, const std::string& s
                 }
             }
 
-            int nThreshold = mnInfo.nLastDsq + mnodeman.CountEnabled(MIN_PRIVATESEND_PEER_PROTO_VERSION)/5;
+            int nThreshold = mnInfo.nLastDsq + mnodeman.CountEnabled(MIN_PRIVATESEND_PEER_PROTO_VERSION) / 5;
             LogPrint(BCLog::PRIVSEND, "DSQUEUE -- nLastDsq: %d  threshold: %d  nDsqCount: %d\n", mnInfo.nLastDsq, nThreshold, mnodeman.nDsqCount);
             //don't allow a few nodes to dominate the queuing process
             if(mnInfo.nLastDsq != 0 && nThreshold > mnodeman.nDsqCount) {
@@ -132,12 +142,11 @@ void CPrivateSendServer::ProcessModuleMessage(CNode* pfrom, const std::string& s
             mnodeman.AllowMixing(dsq.masternodeOutpoint);
 
             LogPrint(BCLog::PRIVSEND, "DSQUEUE -- new PrivateSend queue (%s) from masternode %s\n", dsq.ToString(), mnInfo.addr.ToString());
-            vecDarksendQueue.push_back(dsq);
+            vecPrivateSendQueue.push_back(dsq);
             dsq.Relay(connman);
         }
 
     } else if(strCommand == NetMsgType::DSVIN) {
-
         if(pfrom->GetSendVersion() < MIN_PRIVATESEND_PEER_PROTO_VERSION) {
             LogPrint(BCLog::PRIVSEND, "DSVIN -- peer=%d using obsolete version %i\n", pfrom->GetId(), pfrom->GetSendVersion());
             connman->PushMessage(pfrom, CNetMsgMaker(pfrom->GetSendVersion()).Make(NetMsgType::REJECT, strCommand, REJECT_OBSOLETE,
@@ -153,7 +162,7 @@ void CPrivateSendServer::ProcessModuleMessage(CNode* pfrom, const std::string& s
             return;
         }
 
-        CDarkSendEntry entry;
+        CPrivateSendEntry entry;
         vRecv >> entry;
 
         LogPrint(BCLog::PRIVSEND, "DSVIN -- txCollateral %s\n", entry.txCollateral->ToString());
@@ -167,18 +176,6 @@ void CPrivateSendServer::ProcessModuleMessage(CNode* pfrom, const std::string& s
         if(entry.vecTxOut.size() > PRIVATESEND_ENTRY_MAX_SIZE) {
             LogPrintf("DSVIN -- ERROR: too many outputs! %d/%d\n", entry.vecTxOut.size(), PRIVATESEND_ENTRY_MAX_SIZE);
             PushStatus(pfrom, STATUS_REJECTED, ERR_MAXIMUM, connman);
-            return;
-        }
-
-        if(nSessionInputCount != 0 && (int)entry.vecTxDSIn.size() != nSessionInputCount) {
-            LogPrintf("DSVIN -- ERROR: incorrect number of inputs! %d/%d\n", entry.vecTxDSIn.size(), nSessionInputCount);
-            PushStatus(pfrom, STATUS_REJECTED, ERR_INVALID_INPUT_COUNT, connman);
-            return;
-        }
-
-        if(nSessionInputCount != 0 && (int)entry.vecTxOut.size() != nSessionInputCount) {
-            LogPrintf("DSVIN -- ERROR: incorrect number of outputs! %d/%d\n", entry.vecTxOut.size(), nSessionInputCount);
-            PushStatus(pfrom, STATUS_REJECTED, ERR_INVALID_INPUT_COUNT, connman);
             return;
         }
 
@@ -199,18 +196,7 @@ void CPrivateSendServer::ProcessModuleMessage(CNode* pfrom, const std::string& s
             for (const auto& txout : entry.vecTxOut) {
                 nValueOut += txout.nValue;
                 tx.vout.push_back(txout);
-
-                if(txout.scriptPubKey.size() != 25) {
-                    LogPrintf("DSVIN -- non-standard pubkey detected! scriptPubKey=%s\n", ScriptToAsmStr(txout.scriptPubKey));
-                    PushStatus(pfrom, STATUS_REJECTED, ERR_NON_STANDARD_PUBKEY, connman);
-                    return;
-                }
-/*                if(!txout.scriptPubKey.IsPayToPublicKeyHash()) {
-                    LogPrintf("DSVIN -- invalid script! scriptPubKey=%s\n", ScriptToAsmStr(txout.scriptPubKey));
-                    PushStatus(pfrom, STATUS_REJECTED, ERR_INVALID_SCRIPT, connman);
-                    return;
-                }
-*/            }
+            }
 
             for (const auto& txin : entry.vecTxDSIn) {
                 tx.vin.push_back(txin);
@@ -284,7 +270,8 @@ void CPrivateSendServer::SetNull()
     // MN side
     vecSessionCollaterals.clear();
 
-    CPrivateSendBase::SetNull();
+    CPrivateSendBaseSession::SetNull();
+    CPrivateSendBaseManager::SetNull();
 }
 
 //
@@ -362,7 +349,7 @@ void CPrivateSendServer::CommitFinalTransaction(CConnman* connman)
 
     // create and sign masternode dstx transaction
     if(!CPrivateSend::GetDSTX(hashTx)) {
-        CDarksendBroadcastTx dstxNew(finalTransaction, activeMasternode.outpoint, GetAdjustedTime());
+        CPrivateSendBroadcastTx dstxNew(finalTransaction, activeMasternode.outpoint, GetAdjustedTime());
         dstxNew.Sign();
         CPrivateSend::AddDSTX(dstxNew);
     }
@@ -535,7 +522,7 @@ void CPrivateSendServer::CheckForCompleteQueue(CConnman* connman)
     if(nState == POOL_STATE_QUEUE && IsSessionReady()) {
         SetState(POOL_STATE_ACCEPTING_ENTRIES);
 
-        CDarksendQueue dsq(nSessionDenom, nSessionInputCount, activeMasternode.outpoint, GetAdjustedTime(), true);
+        CPrivateSendQueue dsq(nSessionDenom, activeMasternode.outpoint, GetAdjustedTime(), true);
         LogPrint(BCLog::PRIVSEND, "CPrivateSendServer::CheckForCompleteQueue -- queue is ready, signing and relaying (%s)\n", dsq.ToString());
         dsq.Sign();
         dsq.Relay(connman);
@@ -589,7 +576,7 @@ bool CPrivateSendServer::IsInputScriptSigValid(const CTxIn& txin)
 //
 // Add a clients transaction to the pool
 //
-bool CPrivateSendServer::AddEntry(const CDarkSendEntry& entryNew, PoolMessage& nMessageIDRet)
+bool CPrivateSendServer::AddEntry(const CPrivateSendEntry& entryNew, PoolMessage& nMessageIDRet)
 {
     if(!fMasternodeMode) return false;
 
@@ -695,7 +682,7 @@ bool CPrivateSendServer::IsOutputsCompatibleWithSessionDenom(const std::vector<C
     return true;
 }
 
-bool CPrivateSendServer::IsAcceptableDSA(const CDarksendAccept& dsa, PoolMessage& nMessageIDRet)
+bool CPrivateSendServer::IsAcceptableDSA(const CPrivateSendAccept& dsa, PoolMessage& nMessageIDRet)
 {
     if(!fMasternodeMode) return false;
 
@@ -714,16 +701,10 @@ bool CPrivateSendServer::IsAcceptableDSA(const CDarksendAccept& dsa, PoolMessage
         return false;
     }
 
-    if(dsa.nInputCount < 0 || dsa.nInputCount > (int)PRIVATESEND_ENTRY_MAX_SIZE) {
-        LogPrint(BCLog::PRIVSEND, "CPrivateSendServer::%s -- requested count is not valid!\n", __func__);
-        nMessageIDRet = ERR_INVALID_INPUT_COUNT;
-        return false;
-    }
-
     return true;
 }
 
-bool CPrivateSendServer::CreateNewSession(const CDarksendAccept& dsa, PoolMessage& nMessageIDRet, CConnman* connman)
+bool CPrivateSendServer::CreateNewSession(const CPrivateSendAccept& dsa, PoolMessage& nMessageIDRet, CConnman* connman)
 {
     if(!fMasternodeMode || nSessionID != 0) return false;
 
@@ -742,18 +723,17 @@ bool CPrivateSendServer::CreateNewSession(const CDarksendAccept& dsa, PoolMessag
     nMessageIDRet = MSG_NOERR;
     nSessionID = GetRandInt(999999)+1;
     nSessionDenom = dsa.nDenom;
-    nSessionInputCount = dsa.nInputCount;
 
     SetState(POOL_STATE_QUEUE);
     nTimeLastSuccessfulStep = GetTime();
 
     if(!fUnitTest) {
         //broadcast that I'm accepting entries, only if it's the first entry through
-        CDarksendQueue dsq(dsa.nDenom, dsa.nInputCount, activeMasternode.outpoint, GetAdjustedTime(), false);
+        CPrivateSendQueue dsq(dsa.nDenom, activeMasternode.outpoint, GetAdjustedTime(), false);
         LogPrint(BCLog::PRIVSEND, "CPrivateSendServer::CreateNewSession -- signing and relaying new queue: %s\n", dsq.ToString());
         dsq.Sign();
         dsq.Relay(connman);
-        vecDarksendQueue.push_back(dsq);
+        vecPrivateSendQueue.push_back(dsq);
     }
 
     vecSessionCollaterals.push_back(MakeTransactionRef(dsa.txCollateral));
@@ -763,7 +743,7 @@ bool CPrivateSendServer::CreateNewSession(const CDarksendAccept& dsa, PoolMessag
     return true;
 }
 
-bool CPrivateSendServer::AddUserToExistingSession(const CDarksendAccept& dsa, PoolMessage& nMessageIDRet)
+bool CPrivateSendServer::AddUserToExistingSession(const CPrivateSendAccept& dsa, PoolMessage& nMessageIDRet)
 {
     if(!fMasternodeMode || nSessionID == 0 || IsSessionReady()) return false;
 
@@ -785,21 +765,14 @@ bool CPrivateSendServer::AddUserToExistingSession(const CDarksendAccept& dsa, Po
         return false;
     }
 
-    if(dsa.nInputCount != nSessionInputCount) {
-        LogPrintf("CPrivateSendServer::AddUserToExistingSession -- incompatible count %d != nSessionInputCount %d\n",
-                    dsa.nInputCount, nSessionInputCount);
-        nMessageIDRet = ERR_INVALID_INPUT_COUNT;
-        return false;
-    }
-
     // count new user as accepted to an existing session
 
     nMessageIDRet = MSG_NOERR;
     nTimeLastSuccessfulStep = GetTime();
     vecSessionCollaterals.push_back(MakeTransactionRef(dsa.txCollateral));
 
-    LogPrintf("CPrivateSendServer::AddUserToExistingSession -- new user accepted, nSessionID: %d  nSessionDenom: %d (%s)  nSessionInputCount: %d  vecSessionCollaterals.size(): %d\n",
-            nSessionID, nSessionDenom, CPrivateSend::GetDenominationsToString(nSessionDenom), nSessionInputCount, vecSessionCollaterals.size());
+    LogPrintf("CPrivateSendServer::AddUserToExistingSession -- new user accepted, nSessionID: %d  nSessionDenom: %d (%s)  vecSessionCollaterals.size(): %d\n",
+            nSessionID, nSessionDenom, CPrivateSend::GetDenominationsToString(nSessionDenom), vecSessionCollaterals.size());
 
     return true;
 }

@@ -371,7 +371,7 @@ public:
         result.unconfirmed_balance = m_wallet.GetUnconfirmedBalance();
         result.immature_balance = m_wallet.GetImmatureBalance();
         result.anonymized_balance = m_wallet.GetAnonymizedBalance();
-        result.anonymizeable_balance = m_wallet.GetAnonymizableBalance(false, false);
+        result.anonymizeable_balance = m_wallet.GetAnonymizableBalance(false);
         result.have_watch_only = m_wallet.HaveWatchOnly();
         if (result.have_watch_only) {
             result.watch_only_balance = m_wallet.GetBalance(ISMINE_WATCH_ONLY);
@@ -507,8 +507,8 @@ public:
         result.amount = m_wallet.privateSendClient->nPrivateSendAmount;
         result.rounds = m_wallet.privateSendClient->nPrivateSendRounds;
         result.multisession = m_wallet.privateSendClient->fPrivateSendMultiSession;
-        result.denom = m_wallet.privateSendClient->nSessionDenom;
-        result.status = m_wallet.privateSendClient->GetStatus();
+        result.denom = m_wallet.privateSendClient->GetSessionDenoms();
+        result.status = m_wallet.privateSendClient->GetStatuses();
         result.keysleft = m_wallet.nKeysLeftSinceAutoBackup;
         return result;
     }
@@ -526,11 +526,6 @@ public:
     void resetPool() override
     {
         m_wallet.privateSendClient->ResetPool();
-    }
-
-    void unlockCoins() override
-    {
-        m_wallet.privateSendClient->UnlockCoins();
     }
 
     void toggleMixing(const bool& fOff) override

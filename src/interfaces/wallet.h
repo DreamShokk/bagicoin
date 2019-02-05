@@ -271,9 +271,6 @@ public:
     //! Reset PrivateSend Client.
     virtual void resetPool() = 0;
 
-    //! Unlock after toggle mixing.
-    virtual void unlockCoins() = 0;
-
     //! Toggle PrivateSend mixing status.
     virtual void toggleMixing(const bool& fOff = false) = 0;
 
@@ -377,7 +374,7 @@ struct PrivateSendStatus
     int amount = 0;
     int rounds = 0;
     bool multisession = false;
-    int denom = 0;
+    std::string denom = "";
     int64_t keysleft = 0;
     std::string status = "";
 

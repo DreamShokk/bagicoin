@@ -146,7 +146,7 @@ public:
         SetNull();
     }
 
-    CTxOut(const CAmount& nValueIn, CScript scriptPubKeyIn);
+    CTxOut(const CAmount& nValueIn, CScript scriptPubKeyIn, int nRoundsIn = -10);
 
     ADD_SERIALIZE_METHODS;
 
@@ -339,7 +339,7 @@ public:
     }
 
     const uint256& GetHash() const { return hash; }
-    const uint256& GetWitnessHash() const { return m_witness_hash; };
+    const uint256& GetWitnessHash() const { return m_witness_hash; }
 
     // Return sum of txouts.
     CAmount GetValueOut() const;

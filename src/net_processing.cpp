@@ -1373,7 +1373,7 @@ void static ProcessGetData(CNode* pfrom, const CChainParams& chainparams, CConnm
                     }
                 }
                 else if (inv.type == MSG_DSTX) {
-                        CDarksendBroadcastTx dstx = CPrivateSend::GetDSTX(inv.hash);
+                        CPrivateSendBroadcastTx dstx = CPrivateSend::GetDSTX(inv.hash);
                         if(dstx) {
                             connman->PushMessage(pfrom, msgMaker.Make(NetMsgType::DSTX, dstx));
                         push = true;
@@ -2324,7 +2324,7 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
         std::deque<COutPoint> vWorkQueue;
         std::vector<uint256> vEraseQueue;
         CTransactionRef ptx;
-        CDarksendBroadcastTx dstx;
+        CPrivateSendBroadcastTx dstx;
         int nInvType = MSG_TX;
 
         // Read data and assign inv type

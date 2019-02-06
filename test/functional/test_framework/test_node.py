@@ -17,6 +17,9 @@ import subprocess
 import tempfile
 import time
 import urllib.parse
+import collections
+import shlex
+import sys
 
 from .authproxy import JSONRPCException
 from .util import (
@@ -58,7 +61,13 @@ class TestNode():
     To make things easier for the test writer, any unrecognised messages will
     be dispatched to the RPC connection."""
 
-    def __init__(self, i, datadir, *, rpchost, timewait, bitcoind, bitcoin_cli, mocktime, coverage_dir, extra_conf=None, extra_args=None, use_cli=False):
+    def __init__(self, i, datadir, *, rpchost, timewait, bitcoind, bitcoin_cli, mocktime, coverage_dir, extra_conf=None, extra_args=None, use_cli=False, start_perf=False):
+        """
+        Kwargs:
+            start_perf (bool): If True, begin profiling the node with `perf` as soon as
+                the node starts.
+        """
+
         self.index = i
         self.datadir = datadir
         self.stdout_dir = os.path.join(self.datadir, "stdout")
@@ -86,6 +95,7 @@ class TestNode():
 
         self.cli = TestNodeCLI(bitcoin_cli, self.datadir)
         self.use_cli = use_cli
+        self.start_perf = start_perf
 
         self.running = False
         self.process = None
@@ -94,22 +104,25 @@ class TestNode():
         self.url = None
         self.log = logging.getLogger('TestFramework.node%d' % i)
         self.cleanup_on_exit = True # Whether to kill the node when this object goes away
+        # Cache perf subprocesses here by their data output filename.
+        self.perf_subprocesses = {}
 
         self.p2ps = []
 
     def get_deterministic_priv_key(self):
         """Return a deterministic priv key in base58, that only depends on the node's index"""
+        AddressKeyPair = collections.namedtuple('AddressKeyPair', ['address', 'key'])
         PRIV_KEYS = [
             # address , privkey
-            ('mjTkW3DjgyZck4KbiRusZsqTgaYTxdSz6z', 'cVpF924EspNh8KjYsfhgY96mmxvT6DgdWiTYMtMjuM74hJaU5psW'),
-            ('msX6jQXvxiNhx3Q62PKeLPrhrqZQdSimTg', 'cUxsWyKyZ9MAQTaAhUQWJmBbSvHMwSmuv59KgxQV7oZQU3PXN3KE'),
-            ('mnonCMyH9TmAsSj3M59DsbH8H63U3RKoFP', 'cTrh7dkEAeJd6b3MRX9bZK8eRmNqVCMH3LSUkE3dSFDyzjU38QxK'),
-            ('mqJupas8Dt2uestQDvV2NH3RU8uZh2dqQR', 'cVuKKa7gbehEQvVq717hYcbE9Dqmq7KEBKqWgWrYBa2CKKrhtRim'),
-            ('msYac7Rvd5ywm6pEmkjyxhbCDKqWsVeYws', 'cQDCBuKcjanpXDpCqacNSjYfxeQj8G6CAtH1Dsk3cXyqLNC4RPuh'),
-            ('n2rnuUnwLgXqf9kk2kjvVm8R5BZK1yxQBi', 'cQakmfPSLSqKHyMFGwAqKHgWUiofJCagVGhiB4KCainaeCSxeyYq'),
-            ('myzuPxRwsf3vvGzEuzPfK9Nf2RfwauwYe6', 'cQMpDLJwA8DBe9NcQbdoSb1BhmFxVjWD5gRyrLZCtpuF9Zi3a9RK'),
-            ('mumwTaMtbxEPUswmLBBN3vM9oGRtGBrys8', 'cSXmRKXVcoouhNNVpcNKFfxsTsToY5pvB9DVsFksF1ENunTzRKsy'),
-            ('mpV7aGShMkJCZgbW7F6iZgrvuPHjZjH9qg', 'cSoXt6tm3pqy43UMabY6eUTmR3eSUYFtB2iNQDGgb3VUnRsQys2k'),
+            AddressKeyPair('mjTkW3DjgyZck4KbiRusZsqTgaYTxdSz6z', 'cVpF924EspNh8KjYsfhgY96mmxvT6DgdWiTYMtMjuM74hJaU5psW'),
+            AddressKeyPair('msX6jQXvxiNhx3Q62PKeLPrhrqZQdSimTg', 'cUxsWyKyZ9MAQTaAhUQWJmBbSvHMwSmuv59KgxQV7oZQU3PXN3KE'),
+            AddressKeyPair('mnonCMyH9TmAsSj3M59DsbH8H63U3RKoFP', 'cTrh7dkEAeJd6b3MRX9bZK8eRmNqVCMH3LSUkE3dSFDyzjU38QxK'),
+            AddressKeyPair('mqJupas8Dt2uestQDvV2NH3RU8uZh2dqQR', 'cVuKKa7gbehEQvVq717hYcbE9Dqmq7KEBKqWgWrYBa2CKKrhtRim'),
+            AddressKeyPair('msYac7Rvd5ywm6pEmkjyxhbCDKqWsVeYws', 'cQDCBuKcjanpXDpCqacNSjYfxeQj8G6CAtH1Dsk3cXyqLNC4RPuh'),
+            AddressKeyPair('n2rnuUnwLgXqf9kk2kjvVm8R5BZK1yxQBi', 'cQakmfPSLSqKHyMFGwAqKHgWUiofJCagVGhiB4KCainaeCSxeyYq'),
+            AddressKeyPair('myzuPxRwsf3vvGzEuzPfK9Nf2RfwauwYe6', 'cQMpDLJwA8DBe9NcQbdoSb1BhmFxVjWD5gRyrLZCtpuF9Zi3a9RK'),
+            AddressKeyPair('mumwTaMtbxEPUswmLBBN3vM9oGRtGBrys8', 'cSXmRKXVcoouhNNVpcNKFfxsTsToY5pvB9DVsFksF1ENunTzRKsy'),
+            AddressKeyPair('mpV7aGShMkJCZgbW7F6iZgrvuPHjZjH9qg', 'cSoXt6tm3pqy43UMabY6eUTmR3eSUYFtB2iNQDGgb3VUnRsQys2k'),
         ]
         return PRIV_KEYS[self.index]
 
@@ -184,6 +197,9 @@ class TestNode():
         self.running = True
         self.log.debug("bitcoind started, waiting for RPC to come up")
 
+        if self.start_perf:
+            self._start_perf()
+
     def wait_for_rpc_connection(self):
         """Sets up an RPC connection to the bitcoind process. Returns False if unable to connect."""
         # Poll at a rate of four times per second
@@ -235,6 +251,10 @@ class TestNode():
             self.stop(wait=wait)
         except http.client.CannotSendRequest:
             self.log.exception("Unable to stop node.")
+
+        # If there are any running perf processes, stop them.
+        for profile_name in tuple(self.perf_subprocesses.keys()):
+            self._stop_perf(profile_name)
 
         # Check that stderr is as expected
         self.stderr.seek(0)
@@ -314,6 +334,84 @@ class TestNode():
                 "Memory usage increased over threshold of {:.3f}% from {} to {} ({:.3f}%)".format(
                     increase_allowed * 100, before_memory_usage, after_memory_usage,
                     perc_increase_memory_usage * 100))
+
+    @contextlib.contextmanager
+    def profile_with_perf(self, profile_name):
+        """
+        Context manager that allows easy profiling of node activity using `perf`.
+
+        See `test/functional/README.md` for details on perf usage.
+
+        Args:
+            profile_name (str): This string will be appended to the
+                profile data filename generated by perf.
+        """
+        subp = self._start_perf(profile_name)
+
+        yield
+
+        if subp:
+            self._stop_perf(profile_name)
+
+    def _start_perf(self, profile_name=None):
+        """Start a perf process to profile this node.
+
+        Returns the subprocess running perf."""
+        subp = None
+
+        def test_success(cmd):
+            return subprocess.call(
+                # shell=True required for pipe use below
+                cmd, shell=True,
+                stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL) == 0
+
+        if not sys.platform.startswith('linux'):
+            self.log.warning("Can't profile with perf; only availabe on Linux platforms")
+            return None
+
+        if not test_success('which perf'):
+            self.log.warning("Can't profile with perf; must install perf-tools")
+            return None
+
+        if not test_success('readelf -S {} | grep .debug_str'.format(shlex.quote(self.binary))):
+            self.log.warning(
+                "perf output won't be very useful without debug symbols compiled into bitcoind")
+
+        output_path = tempfile.NamedTemporaryFile(
+            dir=self.datadir,
+            prefix="{}.perf.data.".format(profile_name or 'test'),
+            delete=False,
+        ).name
+
+        cmd = [
+            'perf', 'record',
+            '-g',                     # Record the callgraph.
+            '--call-graph', 'dwarf',  # Compatibility for gcc's --fomit-frame-pointer.
+            '-F', '101',              # Sampling frequency in Hz.
+            '-p', str(self.process.pid),
+            '-o', output_path,
+        ]
+        subp = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        self.perf_subprocesses[profile_name] = subp
+
+        return subp
+
+    def _stop_perf(self, profile_name):
+        """Stop (and pop) a perf subprocess."""
+        subp = self.perf_subprocesses.pop(profile_name)
+        output_path = subp.args[subp.args.index('-o') + 1]
+
+        subp.terminate()
+        subp.wait(timeout=10)
+
+        stderr = subp.stderr.read().decode()
+        if 'Consider tweaking /proc/sys/kernel/perf_event_paranoid' in stderr:
+            self.log.warning(
+                "perf couldn't collect data! Try "
+                "'sudo sysctl -w kernel.perf_event_paranoid=-1'")
+        else:
+            report_cmd = "perf report -i {}".format(output_path)
+            self.log.info("See perf output by running '{}'".format(report_cmd))
 
     def assert_start_raises_init_error(self, extra_args=None, expected_msg=None, match=ErrorMatch.FULL_TEXT, *args, **kwargs):
         """Attempt to start the node and expect it to raise an error.
@@ -400,14 +498,6 @@ class TestNodeCLIAttr:
     def get_request(self, *args, **kwargs):
         return lambda: self(*args, **kwargs)
 
-def arg_to_cli(arg):
-    if isinstance(arg, bool):
-        return str(arg).lower()
-    elif isinstance(arg, dict) or isinstance(arg, list):
-        return json.dumps(arg)
-    else:
-        return str(arg)
-
 class TestNodeCLI():
     """Interface to bitcoin-cli for an individual node"""
 
@@ -439,8 +529,8 @@ class TestNodeCLI():
 
     def send_cli(self, command=None, *args, **kwargs):
         """Run bitcoin-cli command. Deserializes returned string as python object."""
-        pos_args = [arg_to_cli(arg) for arg in args]
-        named_args = [str(key) + "=" + arg_to_cli(value) for (key, value) in kwargs.items()]
+        pos_args = [str(arg).lower() if type(arg) is bool else str(arg) for arg in args]
+        named_args = [str(key) + "=" + str(value) for (key, value) in kwargs.items()]
         assert not (pos_args and named_args), "Cannot use positional arguments and named arguments in the same bitcoin-cli call"
         p_args = [self.binary, "-datadir=" + self.datadir] + self.options
         if named_args:

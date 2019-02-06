@@ -4318,9 +4318,8 @@ UniValue privatesend(const JSONRPCRequest& request)
             if (pwallet->IsLocked(true))
                 throw JSONRPCError(RPC_WALLET_UNLOCK_NEEDED, "Error: Please unlock wallet for mixing with walletpassphrase first.");
         }
-        auto locked_chain = pwallet->chain().lock();
-        bool result = pwallet->privateSendClient->DoAutomaticDenominating(*locked_chain);
-        return "Mixing " + (result ? "started successfully" : ("start failed: " + pwallet->privateSendClient->GetStatuses() + ", will retry"));
+        pwallet->privateSendClient->fEnablePrivateSend = true;
+        return "Mixing was started";
     }
 
     if(request.params[0].get_str() == "stop") {

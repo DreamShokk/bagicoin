@@ -24,14 +24,24 @@
 void CKeyHolderStorage::AddKey(std::shared_ptr<CReserveScript> &script, CWallet* pwalletIn)
 {
     std::shared_ptr<CReserveKey> rKey = std::make_shared<CReserveKey>(pwalletIn);
-    CPubKey pubkey;
-    if (!rKey->GetReservedKey(pubkey))
+    OutputType output_type = pwalletIn->m_default_address_type;
+    CPubKey newKey;
+    if (!pwalletIn->GetKeyFromPool(newKey)) {
+        LogPrintf("Error: Keypool ran out, please call keypoolrefill first");
         return;
+    }
+    pwalletIn->LearnRelatedScripts(newKey, output_type);
+    CTxDestination dest = GetDestinationForKey(newKey, output_type);
+
+    if (!rKey->GetReservedKey(newKey)) {
+        LogPrintf("Error: Keypool ran out, please call keypoolrefill first");
+        return;
+    }
     script = rKey;
+    script->reserveScript = GetScriptForDestination(dest);
 
     LOCK(cs_storage);
     storage.emplace_back(std::move(rKey));
-    script->reserveScript = CScript() << ToByteVector(pubkey) << OP_CHECKSIG;
     LogPrintf("CKeyHolderStorage::%s -- storage size %lld\n", __func__, storage.size());
 }
 
@@ -374,7 +384,6 @@ std::string CPrivateSendClientSession::GetStatus(bool fWaitForBlock)
 
 std::string CPrivateSendClientManager::GetStatuses()
 {
-    LOCK(cs_deqsessions);
     std::string strStatus;
     bool fWaitForBlock = WaitForAnotherBlock();
 
@@ -386,7 +395,6 @@ std::string CPrivateSendClientManager::GetStatuses()
 
 std::string CPrivateSendClientManager::GetSessionDenoms()
 {
-    LOCK(cs_deqsessions);
     std::string strSessionDenoms;
 
     for (auto& session : deqSessions) {
@@ -415,7 +423,6 @@ bool CPrivateSendClientManager::GetMixingMasternodesInfo(std::vector<masternode_
 
 bool CPrivateSendClientManager::IsMixingMasternode(const CNode* pnode)
 {
-    LOCK(cs_deqsessions);
     for (const auto& session : deqSessions) {
         masternode_info_t mnInfo;
         if (session.GetMixingMasternodeInfo(mnInfo)) {
@@ -485,8 +492,6 @@ bool CPrivateSendClientSession::CheckTimeout()
 void CPrivateSendClientManager::CheckTimeout()
 {
     CheckQueue();
-
-    if (!fEnablePrivateSend) return;
 
     LOCK(cs_deqsessions);
     for (auto& session : deqSessions) {
@@ -809,7 +814,6 @@ bool CPrivateSendClientManager::CheckAutomaticBackup()
 bool CPrivateSendClientManager::DoOnceDenominating()
 {
     if (fEnablePrivateSend) return false;
-    fEnablePrivateSend = false;
     auto locked_chain = m_wallet->chain().lock();
     return DoAutomaticDenominating(*locked_chain);
 }
@@ -880,7 +884,7 @@ bool CPrivateSendClientSession::DoAutomaticDenominating(interfaces::Chain::Lock&
         // denoms
         CAmount nBalanceDenominated = m_wallet_session->GetDenominatedBalance();
 
-        LogPrint(BCLog::PRIVSEND, "CPrivateSendClientSession::DoAutomaticDenominating -- nValueMin: %f, nBalanceNeedsAnonymized: %f, nBalanceAnonimizableNonDenom: %f, nBalanceDenominatedConf: %f, nBalanceDenominatedUnconf: %f, nBalanceDenominated: %f\n",
+        LogPrint(BCLog::PRIVSEND, "CPrivateSendClientSession::DoAutomaticDenominating -- nValueMin: %f, nBalanceNeedsAnonymized: %f, nBalanceAnonimizableNonDenom: %f, nBalanceDenominated: %f\n",
             (float)nValueMin / COIN,
             (float)nBalanceNeedsAnonymized / COIN,
             (float)nBalanceAnonimizableNonDenom / COIN,
@@ -942,22 +946,19 @@ bool CPrivateSendClientSession::DoAutomaticDenominating(interfaces::Chain::Lock&
 
 bool CPrivateSendClientManager::DoAutomaticDenominating(interfaces::Chain::Lock& locked_chain)
 {
-    if (fMasternodeMode) return false; // no client-side mixing on masternodes
-    if (!fEnablePrivateSend) return false;
-
     if (!masternodeSync.IsMasternodeListSynced()) {
         strAutoDenomResult = _("Can't mix while sync in progress.");
-        return false;
+        fEnablePrivateSend = false;
     }
 
     if (!m_wallet) {
         strAutoDenomResult = _("Wallet is not initialized");
-        return false;
+        fEnablePrivateSend = false;
     }
 
     if (m_wallet->IsLocked(true)) {
         strAutoDenomResult = _("Wallet is locked.");
-        return false;
+        fEnablePrivateSend = false;
     }
 
     int nMnCountEnabled = mnodeman.CountEnabled(MIN_PRIVATESEND_PEER_PROTO_VERSION);
@@ -973,24 +974,22 @@ bool CPrivateSendClientManager::DoAutomaticDenominating(interfaces::Chain::Lock&
     }
 
     LOCK(cs_deqsessions);
-    bool fResult = true;
     if ((int)deqSessions.size() < nPrivateSendSessions) {
         deqSessions.emplace_back(m_wallet);
     }
     for (auto& session : deqSessions) {
         if (!CheckAutomaticBackup())
-            return false;
+            fEnablePrivateSend = false;
 
         if (WaitForAnotherBlock()) {
             LogPrintf("CPrivateSendClientManager::DoAutomaticDenominating -- Last successful PrivateSend action was too recent\n");
             strAutoDenomResult = _("Last successful PrivateSend action was too recent.");
-            return false;
+            fEnablePrivateSend = false;
         }
 
-        fResult &= session.DoAutomaticDenominating(locked_chain);
+        fEnablePrivateSend &= session.DoAutomaticDenominating(locked_chain);
     }
-
-    return fResult;
+    return fEnablePrivateSend;
 }
 
 void CPrivateSendClientManager::AddUsedMasternode(const COutPoint& outpointMn)
@@ -1502,7 +1501,7 @@ bool CPrivateSendClientSession::CreateDenominated(interfaces::Chain::Lock& locke
         keyHolderStorageDenom.AddKey(scriptCollateral, m_wallet_session);
 
         if (!scriptCollateral || scriptCollateral->reserveScript.empty()) {
-            LogPrintf("CPrivateSendClient::CreateDenominated -- No script available, Keypool exhausted?");
+            LogPrintf("CPrivateSendClient::CreateDenominated -- No script available, Keypool exhausted?\n");
             return false;
         }
 
@@ -1549,7 +1548,7 @@ bool CPrivateSendClientSession::CreateDenominated(interfaces::Chain::Lock& locke
                 keyHolderStorageDenom.AddKey(scriptDenom, m_wallet_session);
 
                 if (!scriptDenom || scriptDenom->reserveScript.empty()) {
-                    LogPrintf("CPrivateSendClient::CreateDenominated -- No script available, Keypool exhausted?");
+                    LogPrintf("CPrivateSendClient::CreateDenominated -- No script available, Keypool exhausted?\n");
                     return false;
                 }
 
@@ -1609,7 +1608,7 @@ bool CPrivateSendClientSession::CreateDenominated(interfaces::Chain::Lock& locke
 
     // use the same nCachedLastSuccessBlock as for DS mixing to prevent race
     m_wallet_session->privateSendClient->UpdatedSuccessBlock();
-    LogPrintf("CPrivateSendClient::CreateDenominated -- txid=%s\n", wtx.GetHash().GetHex());
+    LogPrintf("CPrivateSendClient::CreateDenominated -- Success!\n");
 
     return true;
 }
@@ -1645,12 +1644,14 @@ void CPrivateSendClientManager::ClientTask()
     static unsigned int nTick = 0;
     static unsigned int nDoAutoNextRun = nTick + PRIVATESEND_AUTO_TIMEOUT_MIN;
 
-    nTick++;
-    CheckTimeout();
-    ProcessPendingDsaRequest();
-    if(nDoAutoNextRun == nTick) {
-        nDoAutoNextRun = nTick + PRIVATESEND_AUTO_TIMEOUT_MIN + GetRandInt(PRIVATESEND_AUTO_TIMEOUT_MAX - PRIVATESEND_AUTO_TIMEOUT_MIN);
-        auto locked_chain = m_wallet->chain().lock();
-        DoAutomaticDenominating(*locked_chain);
+    if(fEnablePrivateSend) {
+        CheckTimeout();
+        ProcessPendingDsaRequest();
+        nTick++;
+        if(nDoAutoNextRun == nTick) {
+            nDoAutoNextRun = nTick + PRIVATESEND_AUTO_TIMEOUT_MIN + GetRandInt(PRIVATESEND_AUTO_TIMEOUT_MAX - PRIVATESEND_AUTO_TIMEOUT_MIN);
+            auto locked_chain = m_wallet->chain().lock();
+            DoAutomaticDenominating(*locked_chain);
+        }
     }
 }

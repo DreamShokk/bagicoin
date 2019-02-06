@@ -123,7 +123,11 @@ CMasternode::CollateralStatus CMasternode::CheckCollateral(const COutPoint& outp
         return COLLATERAL_INVALID_AMOUNT;
     }
 
-    if(pubkey == CPubKey() || coin.out.scriptPubKey != GetScriptForDestination(pubkey.GetID())) {
+    CTxDestination dest1;
+    CTxDestination dest2;
+    if(pubkey == CPubKey() ||
+            !ExtractDestination(coin.out.scriptPubKey, dest1) ||
+            !ExtractDestination(GetScriptForDestination(pubkey.GetID()), dest2)) {
         return COLLATERAL_INVALID_PUBKEY;
     }
 

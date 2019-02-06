@@ -231,6 +231,7 @@ public:
         nMinBlocksToWait(1),
         strAutoDenomResult(),
         nCachedBlockHeight(0),
+        nPrivateSendSessions(DEFAULT_PRIVATESEND_SESSIONS),
         nPrivateSendRounds(DEFAULT_PRIVATESEND_ROUNDS),
         nPrivateSendAmount(DEFAULT_PRIVATESEND_AMOUNT),
         nLiquidityProvider(DEFAULT_PRIVATESEND_LIQUIDITY),

@@ -899,7 +899,7 @@ void CMasternodeMan::ProcessModuleMessage(CNode* pfrom, const std::string& strCo
         if(masternodeOutpoint.IsNull()) {
             SyncAll(pfrom, connman);
         } else {
-            SyncSingle(pfrom, masternodeOutpoint, connman);
+            SyncSingle(pfrom, masternodeOutpoint);
         }
 
     } else if (strCommand == NetMsgType::MNVERIFY) { // Masternode Verify
@@ -927,7 +927,7 @@ void CMasternodeMan::ProcessModuleMessage(CNode* pfrom, const std::string& strCo
     }
 }
 
-void CMasternodeMan::SyncSingle(CNode* pnode, const COutPoint& outpoint, CConnman* connman)
+void CMasternodeMan::SyncSingle(CNode* pnode, const COutPoint& outpoint)
 {
     // do not provide any data until our node is synced
     if (!masternodeSync.IsSynced()) return;

@@ -21,7 +21,7 @@ void ModuleInterface::ProcessModuleMessage(CNode* pfrom, const std::string& strC
 {
     governance.ProcessModuleMessage(pfrom, strCommand, vRecv, connman);
     mnodeman.ProcessModuleMessage(pfrom, strCommand, vRecv, connman);
-    masternodeSync.ProcessModuleMessage(pfrom, strCommand, vRecv, connman);
+    masternodeSync.ProcessModuleMessage(pfrom, strCommand, vRecv);
     mnpayments.ProcessModuleMessage(pfrom, strCommand, vRecv, connman);
     privateSendServer.ProcessModuleMessage(pfrom, strCommand, vRecv, connman);
 }

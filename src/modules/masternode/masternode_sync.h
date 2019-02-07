@@ -69,7 +69,7 @@ public:
 
     void ProcessTick(CConnman* connman);
     double getModuleSyncStatus() { return (nRequestedMasternodeAttempt + (nRequestedMasternodeAssets - 1) * 8.0) / 32.0;}
-    void ProcessModuleMessage(CNode* pfrom, const std::string& strCommand, CDataStream& vRecv, CConnman* connman);
+    void ProcessModuleMessage(CNode* pfrom, const std::string& strCommand, CDataStream& vRecv);
     void UpdatedBlockTip(const CBlockIndex *pindexNew, bool fInitialDownload, CConnman* connman);
 
     void Controller(CScheduler& scheduler, CConnman* connman);

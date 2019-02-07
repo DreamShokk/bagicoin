@@ -83,7 +83,7 @@ private:
 
     bool GetMasternodeScores(const uint256& nBlockHash, score_pair_vec_t& vecMasternodeScoresRet, int nMinProtocol = 0);
 
-    void SyncSingle(CNode* pnode, const COutPoint& outpoint, CConnman* connman);
+    void SyncSingle(CNode* pnode, const COutPoint& outpoint);
     void SyncAll(CNode* pnode, CConnman* connman);
 
     void PushDsegInvs(CNode* pnode, const CMasternode& mn);

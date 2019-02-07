@@ -183,6 +183,7 @@ const CWalletTx* CWallet::GetWalletTx(const uint256& hash) const
 CPubKey CWallet::GenerateNewKey(WalletBatch &batch, bool internal)
 {
     assert(!IsWalletFlagSet(WALLET_FLAG_DISABLE_PRIVATE_KEYS));
+    assert(!IsWalletFlagSet(WALLET_FLAG_BLANK_WALLET));
     AssertLockHeld(cs_wallet); // mapKeyMetadata
     bool fCompressed = CanSupportFeature(FEATURE_COMPRPUBKEY); // default to compressed public keys if we want 0.6.0 wallets
 
@@ -192,7 +193,7 @@ CPubKey CWallet::GenerateNewKey(WalletBatch &batch, bool internal)
     int64_t nCreationTime = GetTime();
     CKeyMetadata metadata(nCreationTime);
 
-    // use HD key derivation if HD was enabled during wallet creation
+    // use HD key derivation if HD was enabled during wallet creation and a seed is present
     if (IsHDEnabled()) {
         DeriveNewChildKey(batch, metadata, secret, (CanSupportFeature(FEATURE_HD_SPLIT) ? internal : false));
     } else {
@@ -298,6 +299,7 @@ bool CWallet::AddKeyPubKeyWithDB(WalletBatch &batch, const CKey& secret, const C
                                                  secret.GetPrivKey(),
                                                  mapKeyMetadata[pubkey.GetID()]);
     }
+    UnsetWalletFlag(WALLET_FLAG_BLANK_WALLET);
     return true;
 }
 
@@ -364,7 +366,11 @@ bool CWallet::AddCScript(const CScript& redeemScript)
 {
     if (!CCryptoKeyStore::AddCScript(redeemScript))
         return false;
-    return WalletBatch(*database).WriteCScript(Hash160(redeemScript), redeemScript);
+    if (WalletBatch(*database).WriteCScript(Hash160(redeemScript), redeemScript)) {
+        UnsetWalletFlag(WALLET_FLAG_BLANK_WALLET);
+        return true;
+    }
+    return false;
 }
 
 bool CWallet::LoadCScript(const CScript& redeemScript)
@@ -389,7 +395,11 @@ bool CWallet::AddWatchOnly(const CScript& dest)
     const CKeyMetadata& meta = m_script_metadata[CScriptID(dest)];
     UpdateTimeFirstKey(meta.nCreateTime);
     NotifyWatchonlyChanged(true);
-    return WalletBatch(*database).WriteWatchOnly(dest, meta);
+    if (WalletBatch(*database).WriteWatchOnly(dest, meta)) {
+        UnsetWalletFlag(WALLET_FLAG_BLANK_WALLET);
+        return true;
+    }
+    return false;
 }
 
 bool CWallet::AddWatchOnly(const CScript& dest, int64_t nCreateTime)
@@ -1544,6 +1554,8 @@ void CWallet::SetHDSeed(const CPubKey& seed)
     newHdChain.nVersion = CanSupportFeature(FEATURE_HD_SPLIT) ? CHDChain::VERSION_HD_CHAIN_SPLIT : CHDChain::VERSION_HD_BASE;
     newHdChain.seed_id = seed.GetID();
     SetHDChain(newHdChain, false);
+    NotifyCanGetAddressesChanged();
+    UnsetWalletFlag(WALLET_FLAG_BLANK_WALLET);
 }
 
 void CWallet::SetHDChain(const CHDChain& chain, bool memonly)
@@ -1560,10 +1572,42 @@ bool CWallet::IsHDEnabled() const
     return !hdChain.seed_id.IsNull();
 }
 
+bool CWallet::CanGenerateKeys()
+{
+    // A wallet can generate keys if it has an HD seed (IsHDEnabled) or it is a non-HD wallet (pre FEATURE_HD)
+    LOCK(cs_wallet);
+    return IsHDEnabled() || !CanSupportFeature(FEATURE_HD);
+}
+
+bool CWallet::CanGetAddresses(bool internal)
+{
+    LOCK(cs_wallet);
+    // Check if the keypool has keys
+    bool keypool_has_keys;
+    if (internal && CanSupportFeature(FEATURE_HD_SPLIT)) {
+        keypool_has_keys = setInternalKeyPool.size() > 0;
+    } else {
+        keypool_has_keys = KeypoolCountExternalKeys() > 0;
+    }
+    // If the keypool doesn't have keys, check if we can generate them
+    if (!keypool_has_keys) {
+        return CanGenerateKeys();
+    }
+    return keypool_has_keys;
+}
+
 void CWallet::SetWalletFlag(uint64_t flags)
 {
     LOCK(cs_wallet);
     m_wallet_flags |= flags;
+    if (!WalletBatch(*database).WriteWalletFlags(m_wallet_flags))
+        throw std::runtime_error(std::string(__func__) + ": writing wallet flags failed");
+}
+
+void CWallet::UnsetWalletFlag(uint64_t flag)
+{
+    LOCK(cs_wallet);
+    m_wallet_flags &= ~flag;
     if (!WalletBatch(*database).WriteWalletFlags(m_wallet_flags))
         throw std::runtime_error(std::string(__func__) + ": writing wallet flags failed");
 }
@@ -3941,7 +3985,8 @@ DBErrors CWallet::LoadWallet(bool& fFirstRunRet)
     {
         LOCK(cs_KeyStore);
         // This wallet is in its first run if all of these are empty
-        fFirstRunRet = mapKeys.empty() && mapCryptedKeys.empty() && mapWatchKeys.empty() && setWatchOnly.empty() && mapScripts.empty() && !IsWalletFlagSet(WALLET_FLAG_DISABLE_PRIVATE_KEYS);
+        fFirstRunRet = mapKeys.empty() && mapCryptedKeys.empty() && mapWatchKeys.empty() && setWatchOnly.empty() && mapScripts.empty()
+            && !IsWalletFlagSet(WALLET_FLAG_DISABLE_PRIVATE_KEYS) && !IsWalletFlagSet(WALLET_FLAG_BLANK_WALLET);
     }
 
     if (nLoadWalletRet != DBErrors::LOAD_OK)
@@ -4130,7 +4175,7 @@ void CWallet::LoadKeyPool(int64_t nIndex, const CKeyPool &keypool)
 
 bool CWallet::TopUpKeyPool(unsigned int kpSize)
 {
-    if (IsWalletFlagSet(WALLET_FLAG_DISABLE_PRIVATE_KEYS)) {
+    if (!CanGenerateKeys()) {
         return false;
     }
     {
@@ -4258,7 +4303,7 @@ void CWallet::ReturnKey(int64_t nIndex, bool fInternal, const CPubKey& pubkey)
 
 bool CWallet::GetKeyFromPool(CPubKey& result, bool internal)
 {
-    if (IsWalletFlagSet(WALLET_FLAG_DISABLE_PRIVATE_KEYS)) {
+    if (!CanGetAddresses(internal)) {
         return false;
     }
 
@@ -4459,6 +4504,10 @@ std::set<CTxDestination> CWallet::GetLabelAddresses(const std::string& label) co
 
 bool CReserveKey::GetReservedKey(CPubKey& pubkey, bool internal)
 {
+    if (!pwallet->CanGetAddresses(internal)) {
+        return false;
+    }
+
     if (nIndex == -1)
     {
         CKeyPool keypool;
@@ -4924,14 +4973,16 @@ std::shared_ptr<CWallet> CWallet::CreateWalletFromFile(interfaces::Chain& chain,
         if ((wallet_creation_flags & WALLET_FLAG_DISABLE_PRIVATE_KEYS)) {
             //selective allow to set flags
             walletInstance->SetWalletFlag(WALLET_FLAG_DISABLE_PRIVATE_KEYS);
+        } else if (wallet_creation_flags & WALLET_FLAG_BLANK_WALLET) {
+            walletInstance->SetWalletFlag(WALLET_FLAG_BLANK_WALLET);
         } else {
             // generate a new seed
             CPubKey seed = walletInstance->GenerateNewSeed();
             walletInstance->SetHDSeed(seed);
-        }
+        } // Otherwise, do not generate a new seed
 
         // Top up the keypool
-        if (!walletInstance->IsWalletFlagSet(WALLET_FLAG_DISABLE_PRIVATE_KEYS) && !walletInstance->TopUpKeyPool()) {
+        if (walletInstance->CanGenerateKeys() && !walletInstance->TopUpKeyPool()) {
             InitError(_("Unable to generate initial keys"));
             return nullptr;
         }

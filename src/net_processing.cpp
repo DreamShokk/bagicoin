@@ -69,6 +69,21 @@ static constexpr int STALE_RELAY_AGE_LIMIT = 30 * 24 * 60 * 60;
 /// Age after which a block is considered historical for purposes of rate
 /// limiting block relay. Set to one week, denominated in seconds.
 static constexpr int HISTORICAL_BLOCK_AGE = 7 * 24 * 60 * 60;
+/** Maximum number of in-flight inventory items from a peer */
+static constexpr int32_t MAX_PEER_INV_IN_FLIGHT = 100;
+/** Maximum number of announced inventory items from a peer */
+static constexpr int32_t MAX_PEER_INV_ANNOUNCEMENTS = 2 * MAX_INV_SZ;
+/** How many microseconds to delay requesting inventory items from inbound peers */
+static constexpr int64_t INBOUND_PEER_INV_DELAY = 2 * 1000000;
+/** How long to wait (in microseconds) before downloading a inventory item from an additional peer */
+static constexpr int64_t GETDATA_INV_INTERVAL = 60 * 1000000;
+/** Maximum delay (in microseconds) for inventory item requests to avoid biasing some peers over others. */
+static constexpr int64_t MAX_GETDATA_RANDOM_DELAY = 2 * 1000000;
+static_assert(INBOUND_PEER_INV_DELAY >= MAX_GETDATA_RANDOM_DELAY,
+"To preserve security, MAX_GETDATA_RANDOM_DELAY should not exceed INBOUND_PEER_DELAY");
+/** Limit to avoid sending big packets. Not used in processing incoming GETDATA for compatibility */
+static const unsigned int MAX_GETDATA_SZ = 1000;
+
 
 struct COrphanTx {
     // When modifying, adapt the copy of this definition in tests/DoS_tests.
@@ -277,6 +292,66 @@ struct CNodeState {
     //! Time of last new block announcement
     int64_t m_last_block_announcement;
 
+    /*
+     * State associated with transaction download.
+     *
+     * Tx download algorithm:
+     *
+     *   When inv comes in, queue up (process_time, hash) inside the peer's
+     *   CNodeState (m_inv_process_time) as long as m_inv_announced for the peer
+     *   isn't too big (MAX_PEER_INV_ANNOUNCEMENTS).
+     *
+     *   The process_time for a transaction is set to nNow for outbound peers,
+     *   nNow + 2 seconds for inbound peers. This is the time at which we'll
+     *   consider trying to request the transaction from the peer in
+     *   SendMessages(). The delay for inbound peers is to allow outbound peers
+     *   a chance to announce before we request from inbound peers, to prevent
+     *   an adversary from using inbound connections to blind us to a
+     *   transaction (InvBlock).
+     *
+     *   When we call SendMessages() for a given peer,
+     *   we will loop over the transactions in m_inv_process_time, looking
+     *   at the transactions whose process_time <= nNow. We'll request each
+     *   such transaction that we don't have already and that hasn't been
+     *   requested from another peer recently, up until we hit the
+     *   MAX_PEER_INV_IN_FLIGHT limit for the peer. Then we'll update
+     *   g_already_asked_for for each requested hash, storing the time of the
+     *   GETDATA request. We use g_already_asked_for to coordinate transaction
+     *   requests amongst our peers.
+     *
+     *   For transactions that we still need but we have already recently
+     *   requested from some other peer, we'll reinsert (process_time, hash)
+     *   back into the peer's m_inv_process_time at the point in the future at
+     *   which the most recent GETDATA request would time out (ie
+     *   GETDATA_INV_INTERVAL + the request time stored in g_already_asked_for).
+     *   We add an additional delay for inbound peers, again to prefer
+     *   attempting download from outbound peers first.
+     *   We also add an extra small random delay up to 2 seconds
+     *   to avoid biasing some peers over others. (e.g., due to fixed ordering
+     *   of peer processing in ThreadMessageHandler).
+     *
+     *   When we receive a transaction from a peer, we remove the hash from the
+     *   peer's m_inv_in_flight set and from their recently announced set
+     *   (m_inv_announced).  We also clear g_already_asked_for for that entry, so
+     *   that if somehow the transaction is not accepted but also not added to
+     *   the reject filter, then we will eventually redownload from other
+     *   peers.
+     */
+    struct InvDownloadState {
+        /* Track when to attempt download of announced transactions (process
+         * time in micros -> hash)
+         */
+        std::multimap<int64_t, CInv> m_inv_process_time;
+
+        //! Store all the inventory items a peer has recently announced
+        std::set<uint256> m_inv_announced;
+
+        //! Store transactions which were requested by us
+        std::set<uint256> m_inv_in_flight;
+    };
+
+    InvDownloadState m_inv_download;
+
     CNodeState(CAddress addrIn, std::string addrNameIn) : address(addrIn), name(addrNameIn) {
         fCurrentlyConnected = false;
         nMisbehavior = 0;
@@ -303,6 +378,9 @@ struct CNodeState {
         m_last_block_announcement = 0;
     }
 };
+
+// Keeps track of the time (in microseconds) when transactions were requested last time
+limitedmap<uint256, int64_t> g_already_asked_for GUARDED_BY(cs_main)(MAX_INV_SZ);
 
 /** Map maintaining per-node state. */
 static std::map<NodeId, CNodeState> mapNodeState GUARDED_BY(cs_main);
@@ -592,6 +670,58 @@ static void FindNextBlocksToDownload(NodeId nodeid, unsigned int count, std::vec
             }
         }
     }
+}
+
+void EraseInvRequest(const uint256& hash) EXCLUSIVE_LOCKS_REQUIRED(cs_main)
+{
+    g_already_asked_for.erase(hash);
+}
+
+int64_t GetInvRequestTime(const uint256& hash) EXCLUSIVE_LOCKS_REQUIRED(cs_main)
+{
+    auto it = g_already_asked_for.find(hash);
+    if (it != g_already_asked_for.end()) {
+        return it->second;
+    }
+    return 0;
+}
+
+void UpdateInvRequestTime(const uint256& hash, int64_t request_time) EXCLUSIVE_LOCKS_REQUIRED(cs_main)
+{
+    auto it = g_already_asked_for.find(hash);
+    if (it == g_already_asked_for.end()) {
+        g_already_asked_for.insert(std::make_pair(hash, request_time));
+    } else {
+        g_already_asked_for.update(it, request_time);
+    }
+}
+
+
+void RequestInv(CNodeState* state, const CInv& inv, int64_t nNow) EXCLUSIVE_LOCKS_REQUIRED(cs_main)
+{
+    CNodeState::InvDownloadState& peer_download_state = state->m_inv_download;
+    if (peer_download_state.m_inv_announced.size() >= MAX_PEER_INV_ANNOUNCEMENTS || peer_download_state.m_inv_announced.count(inv.hash)) {
+        // Too many queued announcements from this peer, or we already have
+        // this announcement
+        return;
+    }
+    peer_download_state.m_inv_announced.insert(inv.hash);
+
+    int64_t process_time;
+    int64_t last_request_time = GetInvRequestTime(inv.hash);
+    // First time requesting this tx
+    if (last_request_time == 0) {
+        process_time = nNow;
+    } else {
+        // Randomize the delay to avoid biasing some peers over others (such as due to
+        // fixed ordering of peer processing in ThreadMessageHandler)
+        process_time = last_request_time + GETDATA_INV_INTERVAL + GetRand(MAX_GETDATA_RANDOM_DELAY);
+    }
+
+    // We delay processing announcements from non-preferred (eg inbound) peers
+    if (!state->fPreferredDownload) process_time += INBOUND_PEER_INV_DELAY;
+
+    peer_download_state.m_inv_process_time.emplace(process_time, inv);
 }
 
 } // namespace
@@ -1090,7 +1220,7 @@ bool static AlreadyHave(const CInv& inv) EXCLUSIVE_LOCKS_REQUIRED(cs_main)
 
     case MSG_GOVERNANCE_OBJECT:
     case MSG_GOVERNANCE_OBJECT_VOTE:
-        return ! governance.ConfirmInventoryRequest(inv);
+        return !governance.ConfirmInventoryRequest(inv);
 
     case MSG_MASTERNODE_VERIFY:
         return mnodeman.mapSeenMasternodeVerification.count(inv.hash);
@@ -2069,6 +2199,7 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
         LOCK(cs_main);
 
         uint32_t nFetchFlags = GetFetchFlags(pfrom);
+        int64_t nNow = GetTimeMicros();
 
         for (CInv &inv : vInv)
         {
@@ -2100,7 +2231,7 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
                 if (fBlocksOnly) {
                     LogPrint(BCLog::NET, "transaction (%s) inv sent in violation of protocol peer=%d\n", inv.hash.ToString(), pfrom->GetId());
                 } else if (!fAlreadyHave && !fImporting && !fReindex && !IsInitialBlockDownload()) {
-                    pfrom->AskFor(inv);
+                    RequestInv(State(pfrom->GetId()), inv, nNow);
                 }
             }
         }
@@ -2383,8 +2514,10 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
         bool fMissingInputs = false;
         CValidationState state;
 
-        pfrom->setAskFor.erase(inv.hash);
-        mapAlreadyAskedFor.erase(inv.hash);
+        CNodeState* nodestate = State(pfrom->GetId());
+        nodestate->m_inv_download.m_inv_announced.erase(inv.hash);
+        nodestate->m_inv_download.m_inv_in_flight.erase(inv.hash);
+        EraseInvRequest(inv.hash);
 
         std::list<CTransactionRef> lRemovedTxn;
 
@@ -2392,7 +2525,7 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
                 AcceptToMemoryPool(mempool, state, ptx, &fMissingInputs, &lRemovedTxn, strCommand == NetMsgType::DSTX ? true : false /* bypass_limits */, 0 /* nAbsurdFee */)) {
             // Process custom txes, this changes AlreadyHave to "true"
             if (strCommand == NetMsgType::DSTX) {
-                LogPrintf("DSTX -- Masternode transaction accepted, txid=%s, peer=%d\n",
+                LogPrintf("DSTX -- Masternode transaction accepted, hash=%s, peer=%d\n",
                         tx.GetHash().ToString(), pfrom->GetId());
                 if (!fHaveDSTX) CPrivateSend::AddDSTX(dstx);
             }
@@ -2482,10 +2615,12 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
             }
             if (!fRejectedParents) {
                 uint32_t nFetchFlags = GetFetchFlags(pfrom);
+                int64_t nNow = GetTimeMicros();
+
                 for (const CTxIn& txin : tx.vin) {
                     CInv _inv(MSG_TX | nFetchFlags, txin.prevout.hash);
                     pfrom->AddInventoryKnown(_inv);
-                    if (!AlreadyHave(_inv)) pfrom->AskFor(_inv);
+                    if (!AlreadyHave(_inv)) RequestInv(State(pfrom->GetId()), _inv, nNow);
                 }
                 AddOrphanTx(ptx, pfrom->GetId());
 
@@ -3941,25 +4076,38 @@ bool PeerLogicValidation::SendMessages(CNode* pto)
         //
         // Message: getdata (non-blocks)
         //
-        while (!pto->fDisconnect && !pto->mapAskFor.empty() && (*pto->mapAskFor.begin()).first <= nNow)
-        {
-            const CInv& inv = (*pto->mapAskFor.begin()).second;
-            if (!AlreadyHave(inv))
-            {
-                LogPrint(BCLog::NET, "Requesting %s peer=%d\n", inv.ToString(), pto->GetId());
-                vGetData.push_back(inv);
-                if (vGetData.size() >= 1000)
-                {
-                    connman->PushMessage(pto, msgMaker.Make(NetMsgType::GETDATA, vGetData));
-                    vGetData.clear();
+        auto& inv_process_time = state.m_inv_download.m_inv_process_time;
+        while (!inv_process_time.empty() && inv_process_time.begin()->first <= nNow && state.m_inv_download.m_inv_in_flight.size() < MAX_PEER_INV_IN_FLIGHT) {
+            const CInv& inv = inv_process_time.begin()->second;
+            if (!AlreadyHave(inv)) {
+                // If this inventory was last requested more than 1 minute ago,
+                // then request.
+                int64_t last_request_time = GetInvRequestTime(inv.hash);
+                if (last_request_time <= nNow - GETDATA_INV_INTERVAL) {
+                    LogPrint(BCLog::NET, "Requesting %s peer=%d\n", inv.ToString(), pto->GetId());
+                    vGetData.push_back(inv);
+                    if (vGetData.size() >= MAX_GETDATA_SZ) {
+                        connman->PushMessage(pto, msgMaker.Make(NetMsgType::GETDATA, vGetData));
+                        vGetData.clear();
+                    }
+                    UpdateInvRequestTime(inv.hash, nNow);
+                    state.m_inv_download.m_inv_in_flight.insert(inv.hash);
+                } else {
+                    // This inventory is in flight from someone else; queue
+                    // up processing to happen after the download times out
+                    // (with a slight delay for inbound peers, to prefer
+                    // requests to outbound peers).
+                    RequestInv(&state, inv, nNow);
                 }
             } else {
-                //If we're not going to ask, don't expect a response.
-                LogPrint(BCLog::NET, "SendMessages -- GETDATA -- already have inv = %s peer=%d\n", inv.ToString(), pto->GetId());
-                pto->setAskFor.erase(inv.hash);
+                // We have already seen this inventory, no need to download.
+                state.m_inv_download.m_inv_announced.erase(inv.hash);
+                state.m_inv_download.m_inv_in_flight.erase(inv.hash);
             }
-            pto->mapAskFor.erase(pto->mapAskFor.begin());
+            inv_process_time.erase(inv_process_time.begin());
         }
+
+
         if (!vGetData.empty())
             connman->PushMessage(pto, msgMaker.Make(NetMsgType::GETDATA, vGetData));
 

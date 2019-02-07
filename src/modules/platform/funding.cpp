@@ -138,8 +138,6 @@ void CGovernanceManager::ProcessModuleMessage(CNode* pfrom, const std::string& s
 
         uint256 nHash = govobj.GetHash();
 
-        pfrom->setAskFor.erase(nHash);
-
         if(pfrom->GetSendVersion() < MIN_GOVERNANCE_PEER_PROTO_VERSION) {
             LogPrint(BCLog::GOV, "MNGOVERNANCEOBJECT -- peer=%d using obsolete version %i\n", pfrom->GetId(), pfrom->GetSendVersion());
             connman->PushMessage(pfrom, CNetMsgMaker(pfrom->GetSendVersion()).Make(NetMsgType::REJECT, strCommand, REJECT_OBSOLETE,
@@ -192,20 +190,9 @@ void CGovernanceManager::ProcessModuleMessage(CNode* pfrom, const std::string& s
 
         if(!fIsValid) {
             if(fMasternodeMissing) {
-
-                int& count = mapMasternodeOrphanCounter[govobj.GetMasternodeOutpoint()];
-                if (count >= 10) {
-                    LogPrint(BCLog::GOV, "MNGOVERNANCEOBJECT -- Too many orphan objects, missing masternode=%s\n", govobj.GetMasternodeOutpoint().ToStringShort());
-                    // ask for this object again in 2 minutes
-                    CInv inv(MSG_GOVERNANCE_OBJECT, govobj.GetHash());
-                    pfrom->AskFor(inv);
-                    return;
-                }
-
-                count++;
                 ExpirationInfo info(pfrom->GetId(), GetAdjustedTime() + GOVERNANCE_ORPHAN_EXPIRATION_TIME);
                 mapMasternodeOrphanObjects.insert(std::make_pair(nHash, object_info_pair_t(govobj, info)));
-                LogPrintf("MNGOVERNANCEOBJECT -- Missing masternode for: %s, strError = %s\n", strHash, strError);
+                LogPrintf("MNGOVERNANCEOBJECT -- Missing masternode %s for: %s, strError = %s\n", govobj.GetMasternodeOutpoint().ToStringShort(), strHash, strError);
             } else if(fMissingConfirmations) {
                 AddPostponedObject(govobj);
                 LogPrintf("MNGOVERNANCEOBJECT -- Not enough fee confirmations for: %s, strError = %s\n", strHash, strError);
@@ -228,8 +215,6 @@ void CGovernanceManager::ProcessModuleMessage(CNode* pfrom, const std::string& s
         vRecv >> vote;
 
         uint256 nHash = vote.GetHash();
-
-        pfrom->setAskFor.erase(nHash);
 
         if(pfrom->GetSendVersion() < MIN_GOVERNANCE_PEER_PROTO_VERSION) {
             LogPrint(BCLog::GOV, "MNGOVERNANCEOBJECTVOTE -- peer=%d using obsolete version %i\n", pfrom->GetId(), pfrom->GetSendVersion());
@@ -1093,19 +1078,19 @@ int CGovernanceManager::RequestGovernanceObjectVotes(const std::vector<CNode*>& 
 
         for (const auto& objPair : mapObjects) {
             uint256 nHash = objPair.first;
-            if(mapAskedRecently.count(nHash)) {
+            if (mapAskedRecently.count(nHash)) {
                 auto it = mapAskedRecently[nHash].begin();
-                while(it != mapAskedRecently[nHash].end()) {
-                    if(it->second < nNow) {
+                while (it != mapAskedRecently[nHash].end()) {
+                    if (it->second < nNow) {
                         mapAskedRecently[nHash].erase(it++);
                     } else {
                         ++it;
                     }
                 }
-                if(mapAskedRecently[nHash].size() >= nPeersPerHashMax) continue;
+                if (mapAskedRecently[nHash].size() >= nPeersPerHashMax) continue;
             }
 
-            if(objPair.second.nObjectType == GOVERNANCE_OBJECT_TRIGGER) {
+            if (objPair.second.nObjectType == GOVERNANCE_OBJECT_TRIGGER) {
                 vTriggerObjHashes.push_back(nHash);
             } else {
                 vOtherObjHashes.push_back(nHash);
@@ -1138,9 +1123,6 @@ int CGovernanceManager::RequestGovernanceObjectVotes(const std::vector<CNode*>& 
             if(pnode->fMasternode || (fMasternodeMode && pnode->fInbound)) continue;
             // only use up to date peers
             if(pnode->nVersion < MIN_GOVERNANCE_PEER_PROTO_VERSION) continue;
-            // stop early to prevent setAskFor overflow
-            size_t nProjectedSize = pnode->setAskFor.size() + nProjectedVotes;
-            if(nProjectedSize > SETASKFOR_MAX_SZ/2) continue;
             // to early to ask the same node
             if(mapAskedRecently[nHashGovobj].count(pnode->addr)) continue;
 

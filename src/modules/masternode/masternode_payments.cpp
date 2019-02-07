@@ -286,10 +286,6 @@ void CMasternodePayments::ProcessModuleMessage(CNode* pfrom, const std::string& 
 
         uint256 nHash = vote.GetHash();
 
-        pfrom->setAskFor.erase(nHash);
-
-        // TODO: clear setAskFor for MSG_MASTERNODE_PAYMENT_BLOCK too
-
         // Ignore any payments messages until masternode list is synced
         if(!masternodeSync.IsMasternodeListSynced()) return;
 

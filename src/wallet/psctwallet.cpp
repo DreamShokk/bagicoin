@@ -2,14 +2,13 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include <rpc/protocol.h>
 #include <wallet/psctwallet.h>
 
-bool FillPSCT(const CWallet* pwallet, PartiallySignedTransaction& psctx, int sighash_type, bool sign, bool bip32derivs)
+bool FillPSCT(const CWallet* pwallet, PartiallySignedTransaction& psctx, TransactionError& error, bool& complete, int sighash_type, bool sign, bool bip32derivs)
 {
     LOCK(pwallet->cs_wallet);
     // Get all of the previous transactions
-    bool complete = true;
+    complete = true;
     for (unsigned int i = 0; i < psctx.tx->vin.size(); ++i) {
         const CTxIn& txin = psctx.tx->vin[i];
         PSCTInput& input = psctx.inputs.at(i);
@@ -20,7 +19,8 @@ bool FillPSCT(const CWallet* pwallet, PartiallySignedTransaction& psctx, int sig
 
         // Verify input looks sane. This will check that we have at most one uxto, witness or non-witness.
         if (!input.IsSane()) {
-            throw JSONRPCError(RPC_DESERIALIZATION_ERROR, "PSCT input is not sane.");
+            error = TransactionError::INVALID_PSCT;
+            return false;
         }
 
         // If we have no utxo, grab it from the wallet.
@@ -37,7 +37,8 @@ bool FillPSCT(const CWallet* pwallet, PartiallySignedTransaction& psctx, int sig
 
         // Get the Sighash type
         if (sign && input.sighash_type > 0 && input.sighash_type != sighash_type) {
-            throw JSONRPCError(RPC_DESERIALIZATION_ERROR, "Specified Sighash and sighash in PSCT do not match.");
+            error = TransactionError::SIGHASH_MISMATCH;
+            return false;
         }
 
         complete &= SignPSCTInput(HidingSigningProvider(pwallet, !sign, !bip32derivs), psctx, i, sighash_type);
@@ -56,5 +57,6 @@ bool FillPSCT(const CWallet* pwallet, PartiallySignedTransaction& psctx, int sig
         ProduceSignature(HidingSigningProvider(pwallet, true, !bip32derivs), creator, out.scriptPubKey, sigdata);
         psct_out.FromSignatureData(sigdata);
     }
-    return complete;
+
+    return true;
 }

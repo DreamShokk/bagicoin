@@ -61,7 +61,9 @@ BOOST_AUTO_TEST_CASE(psct_updater_test)
     ssData >> psctx;
 
     // Fill transaction with our data
-    FillPSCT(&m_wallet, psctx, SIGHASH_ALL, false, true);
+    TransactionError err;
+    bool complete = true;
+    FillPSCT(&m_wallet, psctx, err, complete, SIGHASH_ALL, false, true);
 
     // Get the final tx
     CDataStream ssTx(SER_NETWORK, PROTOCOL_VERSION);

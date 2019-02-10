@@ -17,6 +17,7 @@
 #include <modules/platform/funding_object.h>
 #include <modules/platform/funding_validators.h>
 #include <net.h>
+#include <node/transaction.h>
 #include <outputtype.h>
 #include <policy/feerate.h>
 #include <policy/fees.h>
@@ -4023,7 +4024,11 @@ UniValue walletprocesspsct(const JSONRPCRequest& request)
     // Fill transaction with our data and also sign
     bool sign = request.params[1].isNull() ? true : request.params[1].get_bool();
     bool bip32derivs = request.params[3].isNull() ? false : request.params[3].get_bool();
-    bool complete = FillPSCT(pwallet, psctx, nHashType, sign, bip32derivs);
+    bool complete = true;
+    TransactionError err;
+    if (!FillPSCT(pwallet, psctx, err, complete, nHashType, sign, bip32derivs)) {
+        throw JSONRPCTransactionError(err);
+    }
 
     UniValue result(UniValue::VOBJ);
     CDataStream ssTx(SER_NETWORK, PROTOCOL_VERSION);
@@ -4137,7 +4142,11 @@ UniValue walletcreatefundedpsct(const JSONRPCRequest& request)
 
     // Fill transaction with out data but don't sign
     bool bip32derivs = request.params[4].isNull() ? false : request.params[4].get_bool();
-    FillPSCT(pwallet, psctx, 1, false, bip32derivs);
+    bool complete = true;
+    TransactionError err;
+    if (!FillPSCT(pwallet, psctx, err, complete, 1, false, bip32derivs)) {
+        throw JSONRPCTransactionError(err);
+    }
 
     // Serialize the PSCT
     CDataStream ssTx(SER_NETWORK, PROTOCOL_VERSION);

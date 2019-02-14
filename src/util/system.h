@@ -58,7 +58,6 @@ extern int nWalletBackups;
 int64_t GetStartupTime();
 
 extern const char * const CHAINCOIN_CONF_FILENAME;
-extern const char * const BITCOIN_PID_FILENAME;
 extern const char * const MASTERNODE_CONF_FILENAME;
 
 /** Translate a message to the native language of the user. */
@@ -106,9 +105,6 @@ const fs::path &GetDataDir(bool fNetSpecific = true);
 fs::path GetBackupsDir();
 void ClearDatadirCache();
 fs::path GetConfigFile(const std::string& confPath);
-#ifndef WIN32
-fs::path GetPidFile();
-#endif
 #ifdef WIN32
 fs::path GetSpecialFolderPath(int nFolder, bool fCreate = true);
 #endif

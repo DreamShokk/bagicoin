@@ -113,6 +113,30 @@ static ModuleInterface* pModuleNotificationInterface = nullptr;
 
 static const char* FEE_ESTIMATES_FILENAME="fee_estimates.dat";
 
+/**
+ * The PID file facilities.
+ */
+#ifndef WIN32
+static const char* CHAINCOIN_PID_FILENAME = "chaincoind.pid";
+
+static fs::path GetPidFile()
+{
+    return AbsPathForConfigVal(fs::path(gArgs.GetArg("-pid", CHAINCOIN_PID_FILENAME)));
+}
+
+NODISCARD static bool CreatePidFile()
+{
+    FILE* file = fsbridge::fopen(GetPidFile(), "w");
+    if (file) {
+        fprintf(file, "%d\n", getpid());
+        fclose(file);
+        return true;
+    } else {
+        return InitError(strprintf(_("Unable to create the PID file '%s': %s"), GetPidFile().string(), std::strerror(errno)));
+    }
+}
+#endif
+
 //////////////////////////////////////////////////////////////////////////////
 //
 // Shutdown
@@ -406,7 +430,7 @@ void SetupServerArgs()
         -GetNumCores(), MAX_SCRIPTCHECK_THREADS, DEFAULT_SCRIPTCHECK_THREADS), false, OptionsCategory::OPTIONS);
     gArgs.AddArg("-persistmempool", strprintf("Whether to save the mempool on shutdown and load on restart (default: %u)", DEFAULT_PERSIST_MEMPOOL), false, OptionsCategory::OPTIONS);
 #ifndef WIN32
-    gArgs.AddArg("-pid=<file>", strprintf("Specify pid file. Relative paths will be prefixed by a net-specific datadir location. (default: %s)", BITCOIN_PID_FILENAME), false, OptionsCategory::OPTIONS);
+    gArgs.AddArg("-pid=<file>", strprintf("Specify pid file. Relative paths will be prefixed by a net-specific datadir location. (default: %s)", CHAINCOIN_PID_FILENAME), false, OptionsCategory::OPTIONS);
 #else
     hidden_args.emplace_back("-pid");
 #endif
@@ -1260,20 +1284,6 @@ bool AppInitLockDataDirectory()
     }
     return true;
 }
-
-#ifndef WIN32
-NODISCARD static bool CreatePidFile()
-{
-    FILE* file = fsbridge::fopen(GetPidFile(), "w");
-    if (file) {
-        fprintf(file, "%d\n", getpid());
-        fclose(file);
-        return true;
-    } else {
-        return InitError(strprintf(_("Unable to create the PID file '%s': %s"), GetPidFile().string(), std::strerror(errno)));
-    }
-}
-#endif
 
 bool AppInitMain(InitInterfaces& interfaces)
 {

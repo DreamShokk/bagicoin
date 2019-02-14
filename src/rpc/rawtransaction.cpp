@@ -1066,10 +1066,11 @@ static UniValue sendrawtransaction(const JSONRPCRequest& request)
 
     bool allowhighfees = false;
     if (!request.params[1].isNull()) allowhighfees = request.params[1].get_bool();
+    const CAmount highfee{allowhighfees ? 0 : ::maxTxFee};
     uint256 txid;
-    TransactionError err;
     std::string err_string;
-    if (!BroadcastTransaction(tx, txid, err, err_string, allowhighfees)) {
+    const TransactionError err = BroadcastTransaction(tx, txid, err_string, highfee);
+    if (TransactionError::OK != err) {
         throw JSONRPCTransactionError(err, err_string);
     }
 
@@ -1494,8 +1495,8 @@ UniValue combinepsct(const JSONRPCRequest& request)
     }
 
     PartiallySignedTransaction merged_psct;
-    TransactionError error;
-    if (!CombinePSCTs(merged_psct, error, psctxs)) {
+    const TransactionError error = CombinePSCTs(merged_psct, psctxs);
+    if (error != TransactionError::OK) {
         throw JSONRPCTransactionError(error);
     }
 

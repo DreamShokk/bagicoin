@@ -309,21 +309,19 @@ bool FinalizeAndExtractPSCT(PartiallySignedTransaction& psctx, CMutableTransacti
     return true;
 }
 
-bool CombinePSCTs(PartiallySignedTransaction& out, TransactionError& error, const std::vector<PartiallySignedTransaction>& psctxs)
+TransactionError CombinePSCTs(PartiallySignedTransaction& out, const std::vector<PartiallySignedTransaction>& psctxs)
 {
     out = psctxs[0]; // Copy the first one
 
     // Merge
     for (auto it = std::next(psctxs.begin()); it != psctxs.end(); ++it) {
         if (!out.Merge(*it)) {
-            error = TransactionError::PSCT_MISMATCH;
-            return false;
+            return TransactionError::PSCT_MISMATCH;
         }
     }
     if (!out.IsSane()) {
-        error = TransactionError::INVALID_PSCT;
-        return false;
+        return TransactionError::INVALID_PSCT;
     }
 
-    return true;
+    return TransactionError::OK;
 }

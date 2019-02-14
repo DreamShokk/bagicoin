@@ -1,4 +1,4 @@
-// Copyright (c) 2009-2018 The Bitcoin Core developers
+// Copyright (c) 2009-2019 The Bitcoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -18,16 +18,14 @@
  *
  * @param[in]  pwallet pointer to a wallet
  * @param[in]  &psctx reference to PartiallySignedTransaction to fill in
- * @param[out] &error reference to UniValue to fill with error info on failure
  * @param[out] &complete indicates whether the PSCT is now complete
  * @param[in]  sighash_type the sighash type to use when signing (if PSCT does not specify)
  * @param[in]  sign whether to sign or not
  * @param[in]  bip32derivs whether to fill in bip32 derivation information if available
- * return true on success, false on error (and fills in `error`)
+ * return error
  */
-bool FillPSCT(const CWallet* pwallet,
+NODISCARD TransactionError FillPSCT(const CWallet* pwallet,
               PartiallySignedTransaction& psctx,
-              TransactionError& error,
               bool& complete,
               int sighash_type = 1 /* SIGHASH_ALL */,
               bool sign = true,

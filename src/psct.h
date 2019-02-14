@@ -1,4 +1,4 @@
-// Copyright (c) 2009-2018 The Bitcoin Core developers
+// Copyright (c) 2009-2019 The Bitcoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -575,10 +575,9 @@ bool FinalizeAndExtractPSCT(PartiallySignedTransaction& psctx, CMutableTransacti
  * Combines PSCTs with the same underlying transaction, resulting in a single PSCT with all partial signatures from each input.
  *
  * @param[out] &out   the combined PSCT, if successful
- * @param[out] &error reference to TransactionError to fill with error info on failure
  * @param[in]  psctxs the PSCTs to combine
- * @return True if we successfully combined the transactions, false if they were not compatible
+ * @return error (OK if we successfully combined the transactions, other error if they were not compatible)
  */
-bool CombinePSCTs(PartiallySignedTransaction& out, TransactionError& error, const std::vector<PartiallySignedTransaction>& psctxs);
+NODISCARD TransactionError CombinePSCTs(PartiallySignedTransaction& out, const std::vector<PartiallySignedTransaction>& psctxs);
 
 #endif // BITCOIN_PSCT_H

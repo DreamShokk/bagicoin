@@ -274,9 +274,6 @@ public:
     //! Toggle PrivateSend mixing status.
     virtual void toggleMixing(const bool& fOff = false) = 0;
 
-    //! One shot PrivateSend mixing.
-    virtual void oneShotDenominate() = 0;
-
     //! Return result of automatic wallet backup.
     virtual bool DoAutoBackup(std::string walletIn, std::string& strBackupWarning, std::string& strBackupError) = 0;
 

@@ -4071,6 +4071,9 @@ bool CWallet::NewKeyPool()
     }
     {
         LOCK(cs_wallet);
+        privateSendClient->fEnablePrivateSend = false;
+        nKeysLeftSinceAutoBackup = 0;
+
         WalletBatch batch(*database);
 
         for (const int64_t nIndex : setInternalKeyPool) {
@@ -4082,8 +4085,6 @@ bool CWallet::NewKeyPool()
             batch.ErasePool(nIndex);
         }
         setExternalKeyPool.clear();
-        privateSendClient->fEnablePrivateSend = false;
-        nKeysLeftSinceAutoBackup = 0;
 
         for (const int64_t nIndex : set_pre_split_keypool) {
             batch.ErasePool(nIndex);

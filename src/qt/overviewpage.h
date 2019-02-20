@@ -62,7 +62,6 @@ private:
 
 private Q_SLOTS:
     void togglePrivateSend();
-    void privateSendAuto();
     void privateSendReset();
     void privateSendInfo();
     void updateDisplayUnit();

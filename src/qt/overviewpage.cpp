@@ -282,13 +282,11 @@ void OverviewPage::setWalletModel(WalletModel *model)
 
         connect(model->getOptionsModel(), &OptionsModel::advancedPSUIChanged, this, &OverviewPage::updateAdvancedPSUI);
 
-        connect(ui->privateSendAuto, &QPushButton::clicked, this, &OverviewPage::privateSendAuto);
         connect(ui->privateSendReset, &QPushButton::clicked, this, &OverviewPage::privateSendReset);
         connect(ui->privateSendInfo, &QPushButton::clicked, this, &OverviewPage::privateSendInfo);
         connect(ui->togglePrivateSend, &QPushButton::clicked, this, &OverviewPage::togglePrivateSend);
 
         // privatesend buttons will not react to spacebar must be clicked on
-        ui->privateSendAuto->setFocusPolicy(Qt::NoFocus);
         ui->privateSendReset->setFocusPolicy(Qt::NoFocus);
         ui->privateSendInfo->setFocusPolicy(Qt::NoFocus);
         ui->togglePrivateSend->setFocusPolicy(Qt::NoFocus);
@@ -303,6 +301,7 @@ void OverviewPage::updateDisplayUnit()
 {
     if(walletModel && walletModel->getOptionsModel())
     {
+        nDisplayUnit = walletModel->getOptionsModel()->getDisplayUnit();
         if (m_balances.balance != -1) {
             setBalance(m_balances);
         }
@@ -340,7 +339,7 @@ void OverviewPage::updatePrivateSendProgress()
 
         // when balance is zero just show info from settings
         strPrivateSendAmount = strPrivateSendAmount.remove(strPrivateSendAmount.indexOf("."), BitcoinUnits::decimals(nDisplayUnit) + 1);
-        strAmountAndRounds = strPrivateSendAmount + " / " + tr("%n Rounds", "", m_privsendstatus.rounds);
+        strAmountAndRounds = strPrivateSendAmount + " / " + tr("%n Rounds", nullptr, m_privsendstatus.rounds);
 
         ui->labelAmountRounds->setToolTip(tr("No inputs detected"));
         ui->labelAmountRounds->setText(strAmountAndRounds);
@@ -358,7 +357,7 @@ void OverviewPage::updatePrivateSendProgress()
         ui->labelAmountRounds->setToolTip(tr("Found enough compatible inputs to anonymize %1")
                                           .arg(strPrivateSendAmount));
         strPrivateSendAmount = strPrivateSendAmount.remove(strPrivateSendAmount.indexOf("."), BitcoinUnits::decimals(nDisplayUnit) + 1);
-        strAmountAndRounds = strPrivateSendAmount + " / " + tr("%n Rounds", "", m_privsendstatus.rounds);
+        strAmountAndRounds = strPrivateSendAmount + " / " + tr("%n Rounds", nullptr, m_privsendstatus.rounds);
     } else {
         QString strMaxToAnonymize = BitcoinUnits::formatHtmlWithUnit(nDisplayUnit, nMaxToAnonymize, false, BitcoinUnits::separatorAlways);
         ui->labelAmountRounds->setToolTip(tr("Not enough compatible inputs to anonymize <span style='color:red;'>%1</span>,<br>"
@@ -368,7 +367,7 @@ void OverviewPage::updatePrivateSendProgress()
         strMaxToAnonymize = strMaxToAnonymize.remove(strMaxToAnonymize.indexOf("."), BitcoinUnits::decimals(nDisplayUnit) + 1);
         strAmountAndRounds = "<span style='color:red;'>" +
                 QString(BitcoinUnits::factor(nDisplayUnit) == 1 ? "" : "~") + strMaxToAnonymize +
-                " / " + tr("%n Rounds", "", m_privsendstatus.rounds) + "</span>";
+                " / " + tr("%n Rounds", nullptr, m_privsendstatus.rounds) + "</span>";
     }
     ui->labelAmountRounds->setText(strAmountAndRounds);
 
@@ -395,7 +394,6 @@ void OverviewPage::updateAdvancedPSUI(bool _fShowAdvancedPSUI) {
     ui->privateSendProgress->setVisible(_fShowAdvancedPSUI);
     ui->labelSubmittedDenomText->setVisible(_fShowAdvancedPSUI);
     ui->labelSubmittedDenom->setVisible(_fShowAdvancedPSUI);
-    ui->privateSendAuto->setVisible(_fShowAdvancedPSUI);
     ui->privateSendReset->setVisible(_fShowAdvancedPSUI);
     ui->privateSendInfo->setVisible(true);
     ui->labelPrivateSendLastMessage->setVisible(_fShowAdvancedPSUI);
@@ -425,8 +423,8 @@ void OverviewPage::privateSendStatus(const interfaces::PrivateSendStatus& status
     if (!m_privsendstatus.enabled) {
         if (nBestHeight != m_privsendstatus.cachednumblocks) {
             walletModel->setNumBlocks(nBestHeight);
-            updatePrivateSendProgress();
         }
+        updatePrivateSendProgress();
 
         ui->labelPrivateSendLastMessage->setText("");
         ui->togglePrivateSend->setText(tr("Start Mixing"));
@@ -437,6 +435,8 @@ void OverviewPage::privateSendStatus(const interfaces::PrivateSendStatus& status
         ui->labelPrivateSendEnabled->setText(strEnabled);
 
         return;
+    } else {
+        ui->togglePrivateSend->setText(tr("Stop Mixing"));
     }
 
     // Warn user that wallet is running out of keys
@@ -510,10 +510,10 @@ void OverviewPage::privateSendStatus(const interfaces::PrivateSendStatus& status
 
     QString strStatus = QString::fromStdString(m_privsendstatus.status);
 
-    QString s = tr("Last PrivateSend message:\n") + strStatus;
+    QString s = tr("PrivateSend status:\n") + strStatus;
 
     if(s != ui->labelPrivateSendLastMessage->text())
-        LogPrintf("OverviewPage::privateSendStatus -- Last PrivateSend message: %s\n", strStatus.toStdString());
+        LogPrintf("OverviewPage::privateSendStatus -- PrivateSend status: %s\n", strStatus.toStdString());
 
     ui->labelPrivateSendLastMessage->setText(s);
 
@@ -521,12 +521,10 @@ void OverviewPage::privateSendStatus(const interfaces::PrivateSendStatus& status
 
 }
 
-void OverviewPage::privateSendAuto(){
-    walletModel->oneShotDenominate();
-}
-
 void OverviewPage::privateSendReset(){
+    walletModel->toggleMixing(true);
     walletModel->resetPool();
+    walletModel->updateTransaction();
 
     QMessageBox::warning(this, tr("PrivateSend"),
         tr("PrivateSend was successfully reset."),
@@ -550,6 +548,7 @@ void OverviewPage::togglePrivateSend(){
         settings.setValue("hasMixed", "hasMixed");
     }
     if(!m_privsendstatus.enabled){
+        walletModel->resetPool();
         const CAmount nMinAmount = walletModel->m_privsendconfig.minamount;
         if(m_balances.balance < nMinAmount){
             QString strMinAmount(BitcoinUnits::formatWithUnit(nDisplayUnit, nMinAmount));
@@ -574,18 +573,11 @@ void OverviewPage::togglePrivateSend(){
                 return;
             }
         }
-
     }
 
     walletModel->toggleMixing();
+    walletModel->updateTransaction();
     walletModel->setNumBlocks(std::numeric_limits<int>::max());
-
-    if(!m_privsendstatus.enabled){
-        ui->togglePrivateSend->setText(tr("Start Mixing"));
-        walletModel->resetPool();
-    } else {
-        ui->togglePrivateSend->setText(tr("Stop Mixing"));
-    }
 }
 
 void OverviewPage::SetupTransactionList(int nNumItems) {
@@ -608,11 +600,11 @@ void OverviewPage::SetupTransactionList(int nNumItems) {
 
 void OverviewPage::DisablePrivateSendCompletely() {
     ui->togglePrivateSend->setText("(" + tr("Disabled") + ")");
-    ui->privateSendAuto->setText("(" + tr("Disabled") + ")");
     ui->privateSendReset->setText("(" + tr("Disabled") + ")");
     ui->framePrivateSend->setEnabled(false);
     if (nWalletBackups <= 0) {
         ui->labelPrivateSendEnabled->setText("<span style='color:red;'>(" + tr("Disabled") + ")</span>");
     }
     walletModel->toggleMixing(true);
+    walletModel->updateTransaction();
 }

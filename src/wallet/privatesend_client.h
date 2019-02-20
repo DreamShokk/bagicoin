@@ -174,12 +174,12 @@ public:
     bool GetMixingMasternodeInfo(masternode_info_t& mnInfoRet) const;
 
     /// Passively run mixing in the background according to the configuration in settings
-    bool DoAutomaticDenominating(interfaces::Chain::Lock& locked_chain);
+    void DoAutomaticDenominating(interfaces::Chain::Lock& locked_chain);
 
     /// As a client, submit part of a future mixing transaction to a Masternode to start the process
     bool SubmitDenominate();
 
-    bool ProcessPendingDsaRequest();
+    bool ProcessPendingDsaRequest(CConnman *connman);
 
     bool CheckTimeout();
 };
@@ -259,11 +259,8 @@ public:
 
     bool IsMixingMasternode(const CNode* pnode);
 
-    /// one-shot mixing attempt
-    bool DoOnceDenominating();
-
     /// Passively run mixing in the background according to the configuration in settings
-    bool DoAutomaticDenominating(interfaces::Chain::Lock &locked_chain);
+    void DoAutomaticDenominating(interfaces::Chain::Lock &locked_chain);
 
     void CheckTimeout();
 

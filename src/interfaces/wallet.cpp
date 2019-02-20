@@ -536,11 +536,6 @@ public:
             m_wallet.privateSendClient->fEnablePrivateSend = !m_wallet.privateSendClient->fEnablePrivateSend;
     }
 
-    void oneShotDenominate() override
-    {
-        m_wallet.privateSendClient->DoOnceDenominating();
-    }
-
     bool DoAutoBackup(std::string walletIn, std::string& strBackupWarning, std::string& strBackupError) override
     {
         std::shared_ptr<CWallet> const pwallet = GetWallet(walletIn);

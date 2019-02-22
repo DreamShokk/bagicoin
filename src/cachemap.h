@@ -5,9 +5,6 @@
 #ifndef CACHEMAP_H_
 #define CACHEMAP_H_
 
-#include <map>
-#include <list>
-#include <cstddef>
 
 #include <serialize.h>
 

@@ -5,12 +5,6 @@
 #ifndef CACHEMULTIMAP_H_
 #define CACHEMULTIMAP_H_
 
-#include <cstddef>
-#include <map>
-#include <list>
-#include <set>
-
-#include <serialize.h>
 
 #include <cachemap.h>
 

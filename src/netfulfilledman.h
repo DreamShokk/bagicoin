@@ -2,8 +2,8 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef NETFULFILLEDMAN_H
-#define NETFULFILLEDMAN_H
+#ifndef BITCOIN_NETFULFILLEDMAN_H
+#define BITCOIN_NETFULFILLEDMAN_H
 
 #include <netaddress.h>
 #include <scheduler.h>

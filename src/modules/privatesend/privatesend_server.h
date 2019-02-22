@@ -2,8 +2,8 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef BITCOIN_PRIVATESENDSERVER_H
-#define BITCOIN_PRIVATESENDSERVER_H
+#ifndef BITCOIN_MODULES_PRIVATESEND_PRIVATESENDSERVER_H
+#define BITCOIN_MODULES_PRIVATESEND_PRIVATESENDSERVER_H
 
 #include <net.h>
 #include <modules/privatesend/privatesend.h>

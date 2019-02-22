@@ -625,6 +625,7 @@ chaincoin_wallet_LDADD = \
   $(LIBBITCOIN_WALLET) \
   $(LIBBITCOIN_SERVER) \
   $(LIBBITCOIN_COMMON) \
+  $(LIBUNIVALUE) \
   $(LIBBITCOIN_CONSENSUS) \
   $(LIBBITCOIN_UTIL) \
   $(LIBBITCOIN_CRYPTO) \
@@ -633,7 +634,7 @@ chaincoin_wallet_LDADD = \
   $(LIBMEMENV) \
   $(LIBSECP256K1)
 
-chaincoin_wallet_LDADD += $(BOOST_LIBS) $(BDB_LIBS) $(CRYPTO_LIBS) $(MINIUPNPC_LIBS)
+chaincoin_wallet_LDADD += $(BOOST_LIBS) $(BDB_LIBS) $(CRYPTO_LIBS) $(EVENT_PTHREADS_LIBS) $(MINIUPNPC_LIBS)
 #
 
 # chaincoinconsensus library #

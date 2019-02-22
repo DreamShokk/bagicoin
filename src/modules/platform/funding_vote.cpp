@@ -110,12 +110,11 @@ CGovernanceVote::CGovernanceVote(const COutPoint& outpointMasternodeIn, const ui
 
 std::string CGovernanceVote::ToString() const
 {
-    std::ostringstream ostr;
-    ostr << masternodeOutpoint.ToStringShort() << ":"
-         << nTime << ":"
-         << CGovernanceVoting::ConvertOutcomeToString(GetOutcome()) << ":"
-         << CGovernanceVoting::ConvertSignalToString(GetSignal());
-    return ostr.str();
+    std::string strResult;
+    strResult = strprintf(masternodeOutpoint.ToStringShort() + ":%u:"
+         + CGovernanceVoting::ConvertOutcomeToString(GetOutcome()) + ":"
+         + CGovernanceVoting::ConvertSignalToString(GetSignal()), nTime);
+    return strResult;
 }
 
 void CGovernanceVote::Relay(CConnman* connman) const

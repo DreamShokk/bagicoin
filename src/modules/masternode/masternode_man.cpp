@@ -818,8 +818,6 @@ void CMasternodeMan::ProcessModuleMessage(CNode* pfrom, const std::string& strCo
         CMasternodeBroadcast mnb;
         vRecv >> mnb;
 
-        pfrom->setAskFor.erase(mnb.GetHash());
-
         if(!masternodeSync.IsBlockchainSynced()) return;
 
         LogPrint(BCLog::MNODE, "MNANNOUNCE -- Masternode announce, masternode=%s\n", mnb.outpoint.ToStringShort());
@@ -845,8 +843,6 @@ void CMasternodeMan::ProcessModuleMessage(CNode* pfrom, const std::string& strCo
         vRecv >> mnp;
 
         uint256 nHash = mnp.GetHash();
-
-        pfrom->setAskFor.erase(nHash);
 
         if(!masternodeSync.IsBlockchainSynced()) return;
 
@@ -909,8 +905,6 @@ void CMasternodeMan::ProcessModuleMessage(CNode* pfrom, const std::string& strCo
 
         CMasternodeVerification mnv;
         vRecv >> mnv;
-
-        pfrom->setAskFor.erase(mnv.GetHash());
 
         if(!masternodeSync.IsMasternodeListSynced()) return;
 

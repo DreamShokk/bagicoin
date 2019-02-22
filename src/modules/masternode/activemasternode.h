@@ -2,8 +2,8 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef ACTIVEMASTERNODE_H
-#define ACTIVEMASTERNODE_H
+#ifndef BITCOIN_MODULES_MASTERNODE_ACTIVEMASTERNODE_H
+#define BITCOIN_MODULES_MASTERNODE_ACTIVEMASTERNODE_H
 
 #include <chainparams.h>
 #include <net.h>

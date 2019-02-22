@@ -2,15 +2,8 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef CACHEMULTIMAP_H_
-#define CACHEMULTIMAP_H_
-
-#include <cstddef>
-#include <map>
-#include <list>
-#include <set>
-
-#include <serialize.h>
+#ifndef BITCOIN_CACHEMULTIMAP_H
+#define BITCOIN_CACHEMULTIMAP_H
 
 #include <cachemap.h>
 

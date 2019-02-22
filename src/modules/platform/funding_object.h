@@ -2,27 +2,27 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef GOVERNANCE_OBJECT_H
-#define GOVERNANCE_OBJECT_H
+#ifndef BITCOIN_MODULES_PLATFORM_FUNDING_OBJECT_H
+#define BITCOIN_MODULES_PLATFORM_FUNDING_OBJECT_H
 
 //#define ENABLE_CHAINCOIN_DEBUG
 
 #include <cachemultimap.h>
+#include <logging.h>
 #include <modules/platform/funding_exceptions.h>
 #include <modules/platform/funding_vote.h>
 #include <modules/platform/funding_votedb.h>
-#include <key.h>
-#include <net.h>
 #include <sync.h>
-#include <util/system.h>
-#include <util/strencodings.h>
 
 #include <univalue.h>
+
+#include <string>
 
 class CGovernanceManager;
 class CGovernanceTriggerManager;
 class CGovernanceObject;
 class CGovernanceVote;
+class CNode;
 
 static const int MAX_GOVERNANCE_OBJECT_DATA_SIZE = 16 * 1024;
 static const int MIN_GOVERNANCE_PEER_PROTO_VERSION = 70015;
@@ -120,11 +120,9 @@ public: // Types
 
     typedef vote_m_t::const_iterator vote_m_cit;
 
-    typedef CacheMultiMap<COutPoint, vote_time_pair_t> vote_cmm_t;
-
 private:
     /// critical section to protect the inner data structures
-    mutable CCriticalSection cs;
+    mutable CCriticalSection cs_fobject;
 
     /// Object typecode
     int nObjectType;
@@ -183,7 +181,7 @@ private:
     vote_m_t mapCurrentMNVotes;
 
     /// Limited map of votes orphaned by MN
-    vote_cmm_t cmmapOrphanVotes;
+    CacheMultiMap<COutPoint, vote_time_pair_t> cmmapOrphanVotes;
 
     CGovernanceObjectVoteFile fileVotes;
 
@@ -340,4 +338,4 @@ private:
 };
 
 
-#endif
+#endif // BITCOIN_MODULES_PLATFORM_FUNDING_OBJECT_H

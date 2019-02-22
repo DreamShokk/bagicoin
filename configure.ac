@@ -444,9 +444,9 @@ AC_ARG_ENABLE([util-tx],
 
 AC_ARG_ENABLE([util-wallet],
   [AS_HELP_STRING([--enable-util-wallet],
-  [build bitcoin-wallet])],
-  [build_bitcoin_wallet=$enableval],
-  [build_bitcoin_wallet=$build_bitcoin_utils])
+  [build chaincoin-wallet])],
+  [build_chaincoin_wallet=$enableval],
+  [build_chaincoin_wallet=$build_chaincoin_utils])
 
 AC_ARG_WITH([libs],
   [AS_HELP_STRING([--with-libs],
@@ -1261,9 +1261,9 @@ AC_MSG_CHECKING([whether to build chaincoin-tx])
 AM_CONDITIONAL([BUILD_BITCOIN_TX], [test x$build_chaincoin_tx = xyes])
 AC_MSG_RESULT($build_chaincoin_tx)
 
-AC_MSG_CHECKING([whether to build bitcoin-wallet])
-AM_CONDITIONAL([BUILD_BITCOIN_WALLET], [test x$build_bitcoin_wallet = xyes])
-AC_MSG_RESULT($build_bitcoin_wallet)
+AC_MSG_CHECKING([whether to build chaincoin-wallet])
+AM_CONDITIONAL([BUILD_BITCOIN_WALLET], [test x$build_chaincoin_wallet = xyes])
+AC_MSG_RESULT($build_chaincoin_wallet)
 
 AC_MSG_CHECKING([whether to build libraries])
 AM_CONDITIONAL([BUILD_BITCOIN_LIBS], [test x$build_chaincoin_libs = xyes])

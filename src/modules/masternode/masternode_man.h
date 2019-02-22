@@ -3,8 +3,8 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef MASTERNODEMAN_H
-#define MASTERNODEMAN_H
+#ifndef BITCOIN_MODULES_MASTERNODE_MASTERNODEMAN_H
+#define BITCOIN_MODULES_MASTERNODE_MASTERNODEMAN_H
 
 #include <modules/masternode/masternode.h>
 #include <sync.h>

@@ -2,8 +2,8 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef MESSAGESIGNER_H
-#define MESSAGESIGNER_H
+#ifndef BITCOIN_MESSAGESIGNER_H
+#define BITCOIN_MESSAGESIGNER_H
 
 #include <key.h>
 

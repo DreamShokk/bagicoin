@@ -5,7 +5,7 @@
 //#define ENABLE_DASH_DEBUG
 
 #include <modules/platform/funding_classes.h>
-
+#include <util/strencodings.h>
 #include <validation.h>
 
 #include <boost/algorithm/string.hpp>

@@ -63,20 +63,20 @@ private:
 
 public:
     CGovernanceException(const std::string& strMessageIn = "",
-                         governance_exception_type_enum_t eTypeIn = GOVERNANCE_EXCEPTION_NONE,
-                         int nNodePenaltyIn = 0)
-        : strMessage(),
-          eType(eTypeIn),
-          nNodePenalty(nNodePenaltyIn)
+        governance_exception_type_enum_t eTypeIn = GOVERNANCE_EXCEPTION_NONE,
+        int nNodePenaltyIn = 0) :
+        strMessage(),
+        eType(eTypeIn),
+        nNodePenalty(nNodePenaltyIn)
     {
         std::ostringstream ostr;
         ostr << eType << ":" << strMessageIn;
         strMessage = ostr.str();
     }
 
-    virtual ~CGovernanceException() throw() {}
+    virtual ~CGovernanceException() noexcept {}
 
-    virtual const char* what() const throw() override
+    virtual const char* what() const noexcept override
     {
         return strMessage.c_str();
     }
@@ -91,7 +91,8 @@ public:
         return eType;
     }
 
-    int GetNodePenalty() const {
+    int GetNodePenalty() const
+    {
         return nNodePenalty;
     }
 };

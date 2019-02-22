@@ -11,13 +11,12 @@
 #include <modules/masternode/masternode_sync.h>
 #include <modules/masternode/masternode_man.h>
 #include <modules/platform/funding_classes.h>
-#include <modules/platform/funding_object.h>
 #include <modules/platform/funding_validators.h>
-#include <modules/platform/funding_vote.h>
 #include <net_processing.h>
 #include <netmessagemaker.h>
 #include <netfulfilledman.h>
 #include <ui_interface.h>
+#include <util/strencodings.h>
 #include <util/system.h>
 
 CGovernanceManager governance;
@@ -836,6 +835,7 @@ bool CGovernanceManager::ProcessVote(CNode* pfrom, const CGovernanceVote& vote, 
     ENTER_CRITICAL_SECTION(cs);
     uint256 nHashVote = vote.GetHash();
     uint256 nHashGovobj = vote.GetParentHash();
+    std::string strResult;
 
     if(cmapVoteToObject.HasKey(nHashVote)) {
         LogPrint(BCLog::GOV, "CGovernanceObject::ProcessVote -- skipping known valid vote %s for object %s\n", nHashVote.ToString(), nHashGovobj.ToString());
@@ -844,30 +844,29 @@ bool CGovernanceManager::ProcessVote(CNode* pfrom, const CGovernanceVote& vote, 
     }
 
     if(cmapInvalidVotes.HasKey(nHashVote)) {
-        std::ostringstream ostr;
-        ostr << "CGovernanceManager::ProcessVote -- Old invalid vote "
-                << ", MN outpoint = " << vote.GetMasternodeOutpoint().ToStringShort()
-                << ", governance object hash = " << nHashGovobj.ToString();
-        LogPrintf("%s\n", ostr.str());
-        exception = CGovernanceException(ostr.str(), GOVERNANCE_EXCEPTION_PERMANENT_ERROR, 20);
+        strResult = strprintf("CGovernanceManager::ProcessVote -- Old invalid vote, MN outpoint = "
+                + vote.GetMasternodeOutpoint().ToStringShort()
+                + ", governance object hash = " + nHashGovobj.ToString());
+        LogPrintf("%s\n", strResult);
+        exception = CGovernanceException(strResult, GOVERNANCE_EXCEPTION_PERMANENT_ERROR, 20);
         LEAVE_CRITICAL_SECTION(cs);
         return false;
     }
 
     const auto& it = mapObjects.find(nHashGovobj);
     if(it == mapObjects.end()) {
-        std::ostringstream ostr;
-        ostr << "CGovernanceManager::ProcessVote -- Unknown parent object " << nHashGovobj.ToString()
-             << ", MN outpoint = " << vote.GetMasternodeOutpoint().ToStringShort();
-        exception = CGovernanceException(ostr.str(), GOVERNANCE_EXCEPTION_WARNING);
+        strResult = strprintf("CGovernanceManager::ProcessVote -- Unknown parent object " + nHashGovobj.ToString()
+             + ", MN outpoint = "
+             + vote.GetMasternodeOutpoint().ToStringShort());
+        exception = CGovernanceException(strResult, GOVERNANCE_EXCEPTION_WARNING);
         if(cmmapOrphanVotes.Insert(nHashGovobj, vote_time_pair_t(vote, GetAdjustedTime() + GOVERNANCE_ORPHAN_EXPIRATION_TIME))) {
             LEAVE_CRITICAL_SECTION(cs);
             RequestGovernanceObject(pfrom, nHashGovobj, connman);
-            LogPrintf("%s\n", ostr.str());
+            LogPrintf("%s\n", strResult);
             return false;
         }
 
-        LogPrint(BCLog::GOV, "%s\n", ostr.str());
+        LogPrint(BCLog::GOV, "%s\n", strResult);
         LEAVE_CRITICAL_SECTION(cs);
         return false;
     }

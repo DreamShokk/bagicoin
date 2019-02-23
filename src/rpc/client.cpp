@@ -119,6 +119,7 @@ static const CRPCConvertParam vRPCConvertParams[] =
     { "createpsct", 2, "locktime" },
     { "createpsct", 3, "replaceable" },
     { "combinepsct", 0, "txs"},
+    { "joinpscts", 0, "txs"},
     { "finalizepsct", 1, "extract"},
     { "converttopsct", 1, "permitsigdata"},
     { "converttopsct", 2, "iswitness"},
@@ -171,6 +172,7 @@ static const CRPCConvertParam vRPCConvertParams[] =
     { "rescanblockchain", 0, "start_height"},
     { "rescanblockchain", 1, "stop_height"},
     { "createwallet", 1, "disable_private_keys"},
+    { "createwallet", 2, "blank"},
     { "getnodeaddresses", 0, "count"},
     { "stop", 0, "wait" },
 };

@@ -123,6 +123,7 @@ BITCOIN_CORE_H = \
   clientversion.h \
   coins.h \
   compat.h \
+  compat/assumptions.h \
   compat/byteswap.h \
   compat/endian.h \
   compat/sanity.h \
@@ -174,6 +175,7 @@ BITCOIN_CORE_H = \
   netbase.h \
   netfulfilledman.h \
   netmessagemaker.h \
+  node/transaction.h \
   noui.h \
   optional.h \
   outputtype.h \
@@ -183,6 +185,7 @@ BITCOIN_CORE_H = \
   policy/rbf.h \
   pow.h \
   protocol.h \
+  psct.h \
   random.h \
   reverse_iterator.h \
   reverselock.h \
@@ -216,6 +219,7 @@ BITCOIN_CORE_H = \
   txmempool.h \
   ui_interface.h \
   undo.h \
+  util/bip32.h \
   util/bytevectorhash.h \
   util/system.h \
   util/memory.h \
@@ -232,6 +236,7 @@ BITCOIN_CORE_H = \
   wallet/feebumper.h \
   wallet/fees.h \
   wallet/privatesend_client.h \
+  wallet/psctwallet.h \
   wallet/rpcwallet.h \
   wallet/wallet.h \
   wallet/walletdb.h \
@@ -295,6 +300,7 @@ libchaincoin_server_a_SOURCES = \
   net.cpp \
   netfulfilledman.cpp \
   net_processing.cpp \
+  node/transaction.cpp \
   noui.cpp \
   outputtype.cpp \
   policy/fees.cpp \
@@ -351,6 +357,7 @@ libchaincoin_wallet_a_SOURCES = \
   wallet/fees.cpp \
   wallet/init.cpp \
   wallet/privatesend_client.cpp \
+  wallet/psctwallet.cpp \
   wallet/rpcdump.cpp \
   wallet/rpcwallet.cpp \
   wallet/wallet.cpp \
@@ -492,6 +499,7 @@ libchaincoin_common_a_SOURCES = \
   netaddress.cpp \
   netbase.cpp \
   policy/feerate.cpp \
+  psct.cpp \
   protocol.cpp \
   scheduler.cpp \
   script/descriptor.cpp \
@@ -521,6 +529,7 @@ libchaincoin_util_a_SOURCES = \
   support/cleanse.cpp \
   sync.cpp \
   threadinterrupt.cpp \
+  util/bip32.cpp \
   util/bytevectorhash.cpp \
   util/system.cpp \
   util/moneystr.cpp \

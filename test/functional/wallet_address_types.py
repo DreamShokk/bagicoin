@@ -54,6 +54,10 @@ from decimal import Decimal
 import itertools
 
 from test_framework.test_framework import BitcoinTestFramework
+from test_framework.descriptors import (
+    descsum_create,
+    descsum_check,
+)
 from test_framework.util import (
     assert_equal,
     assert_greater_than,
@@ -156,35 +160,42 @@ class AddressTypeTest(BitcoinTestFramework):
         assert(self.nodes[node].validateaddress(address)['isvalid'])
 
         # Use a ridiculously roundabout way to find the key origin info through
-        # the PSBT logic. However, this does test consistency between the PSBT reported
+        # the PSCT logic. However, this does test consistency between the PSCT reported
         # fingerprints/paths and the descriptor logic.
-        psbt = self.nodes[node].createpsbt([{'txid':utxo['txid'], 'vout':utxo['vout']}],[{address:0.00010000}])
-        psbt = self.nodes[node].walletprocesspsbt(psbt, False, "ALL", True)
-        decode = self.nodes[node].decodepsbt(psbt['psbt'])
+        psct = self.nodes[node].createpsct([{'txid':utxo['txid'], 'vout':utxo['vout']}],[{address:0.00010000}])
+        psct = self.nodes[node].walletprocesspsct(psct, False, "ALL", True)
+        decode = self.nodes[node].decodepsct(psct['psct'])
         key_descs = {}
         for deriv in decode['inputs'][0]['bip32_derivs']:
             assert_equal(len(deriv['master_fingerprint']), 8)
             assert_equal(deriv['path'][0], 'm')
             key_descs[deriv['pubkey']] = '[' + deriv['master_fingerprint'] + deriv['path'][1:] + ']' + deriv['pubkey']
 
+        # Verify the descriptor checksum against the Python implementation
+        assert(descsum_check(info['desc']))
+        # Verify that stripping the checksum and recreating it using Python roundtrips
+        assert(info['desc'] == descsum_create(info['desc'][:-9]))
+        # Verify that stripping the checksum and feeding it to getdescriptorinfo roundtrips
+        assert(info['desc'] == self.nodes[0].getdescriptorinfo(info['desc'][:-9])['descriptor'])
+
         if not multisig and typ == 'legacy':
             # P2PKH
-            assert_equal(info['desc'], "pkh(%s)" % key_descs[info['pubkey']])
+            assert_equal(info['desc'], descsum_create("pkh(%s)" % key_descs[info['pubkey']]))
         elif not multisig and typ == 'p2sh-segwit':
             # P2SH-P2WPKH
-            assert_equal(info['desc'], "sh(wpkh(%s))" % key_descs[info['pubkey']])
+            assert_equal(info['desc'], descsum_create("sh(wpkh(%s))" % key_descs[info['pubkey']]))
         elif not multisig and typ == 'bech32':
             # P2WPKH
-            assert_equal(info['desc'], "wpkh(%s)" % key_descs[info['pubkey']])
+            assert_equal(info['desc'], descsum_create("wpkh(%s)" % key_descs[info['pubkey']]))
         elif typ == 'legacy':
             # P2SH-multisig
-            assert_equal(info['desc'], "sh(multi(2,%s,%s))" % (key_descs[info['pubkeys'][0]], key_descs[info['pubkeys'][1]]))
+            assert_equal(info['desc'], descsum_create("sh(multi(2,%s,%s))" % (key_descs[info['pubkeys'][0]], key_descs[info['pubkeys'][1]])))
         elif typ == 'p2sh-segwit':
             # P2SH-P2WSH-multisig
-            assert_equal(info['desc'], "sh(wsh(multi(2,%s,%s)))" % (key_descs[info['embedded']['pubkeys'][0]], key_descs[info['embedded']['pubkeys'][1]]))
+            assert_equal(info['desc'], descsum_create("sh(wsh(multi(2,%s,%s)))" % (key_descs[info['embedded']['pubkeys'][0]], key_descs[info['embedded']['pubkeys'][1]])))
         elif typ == 'bech32':
             # P2WSH-multisig
-            assert_equal(info['desc'], "wsh(multi(2,%s,%s))" % (key_descs[info['pubkeys'][0]], key_descs[info['pubkeys'][1]]))
+            assert_equal(info['desc'], descsum_create("wsh(multi(2,%s,%s))" % (key_descs[info['pubkeys'][0]], key_descs[info['pubkeys'][1]])))
         else:
             # Unknown type
             assert(False)

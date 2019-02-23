@@ -4,6 +4,7 @@
 
 #include <core_io.h>
 
+#include <psct.h>
 #include <primitives/block.h>
 #include <primitives/transaction.h>
 #include <script/script.h>
@@ -176,10 +177,20 @@ bool DecodeHexBlk(CBlock& block, const std::string& strHexBlk)
     return true;
 }
 
-bool DecodePSCT(PartiallySignedTransaction& psct, const std::string& base64_tx, std::string& error)
+bool DecodeBase64PSCT(PartiallySignedTransaction& psct, const std::string& base64_tx, std::string& error)
 {
-    std::vector<unsigned char> tx_data = DecodeBase64(base64_tx.c_str());
-    CDataStream ss_data(tx_data, SER_NETWORK, PROTOCOL_VERSION);
+    bool invalid;
+    std::string tx_data = DecodeBase64(base64_tx, &invalid);
+    if (invalid) {
+        error = "invalid base64";
+        return false;
+    }
+    return DecodeRawPSCT(psct, tx_data, error);
+}
+
+bool DecodeRawPSCT(PartiallySignedTransaction& psct, const std::string& tx_data, std::string& error)
+{
+    CDataStream ss_data(tx_data.data(), tx_data.data() + tx_data.size(), SER_NETWORK, PROTOCOL_VERSION);
     try {
         ss_data >> psct;
         if (!ss_data.empty()) {

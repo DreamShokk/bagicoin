@@ -70,7 +70,7 @@ static constexpr int STALE_RELAY_AGE_LIMIT = 30 * 24 * 60 * 60;
 /// limiting block relay. Set to one week, denominated in seconds.
 static constexpr int HISTORICAL_BLOCK_AGE = 7 * 24 * 60 * 60;
 /** Maximum number of in-flight inventory items from a peer */
-static constexpr int32_t MAX_PEER_INV_IN_FLIGHT = 100;
+static constexpr int32_t MAX_PEER_INV_IN_FLIGHT = 3000;
 /** Maximum number of announced inventory items from a peer */
 static constexpr int32_t MAX_PEER_INV_ANNOUNCEMENTS = 2 * MAX_INV_SZ;
 /** How many microseconds to delay requesting inventory items from inbound peers */
@@ -3279,7 +3279,7 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
         {
             //probably for one of the modules
             GetMainSignals().ProcessModuleMessage(pfrom, strCommand, vRecv, connman);
-            LogPrint(BCLog::NET, "Forwarded message \"%s\" from peer=%d\n", SanitizeString(strCommand), pfrom->GetId());
+            LogPrint(BCLog::NET, "Forwarded message \"%s\" from peer=%d to Chaincoin modules\n", SanitizeString(strCommand), pfrom->GetId());
         } else {
             // Ignore unknown commands for extensibility
             LogPrint(BCLog::NET, "Unknown command \"%s\" from peer=%d\n", SanitizeString(strCommand), pfrom->GetId());

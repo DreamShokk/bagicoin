@@ -967,10 +967,13 @@ void CMasternodeMan::SyncAll(CNode* pnode, CConnman* connman)
 
     for (const auto& mnpair : mapMasternodes) {
         if (mnpair.second.addr.IsRFC1918() || mnpair.second.addr.IsLocal()) continue; // do not send local network masternode
-        // NOTE: send masternode regardless of its current state, the other node will need it to verify old votes.
-        LogPrint(BCLog::MNODE, "CMasternodeMan::%s -- Sending Masternode entry: masternode=%s  addr=%s\n", __func__, mnpair.first.ToStringShort(), mnpair.second.addr.ToString());
-        PushDsegInvs(pnode, mnpair.second);
-        nInvCount++;
+        // NOTE: send only ENABLED nodes as they are needed for payment verification. others can be processed
+        // as pings and votes are distributed. This saves bandwidth and prevents the list from uncontrolled growth.
+        if (mnpair.second.IsEnabled()) {
+            LogPrint(BCLog::MNODE, "CMasternodeMan::%s -- Sending Masternode entry: masternode=%s  addr=%s\n", __func__, mnpair.first.ToStringShort(), mnpair.second.addr.ToString());
+            PushDsegInvs(pnode, mnpair.second);
+            nInvCount++;
+        }
     }
 
     connman->PushMessage(pnode, CNetMsgMaker(pnode->GetSendVersion()).Make(NetMsgType::SYNCSTATUSCOUNT, MASTERNODE_SYNC_LIST, nInvCount));

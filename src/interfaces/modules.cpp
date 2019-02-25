@@ -17,13 +17,26 @@ void ModuleInterface::InitializeCurrentBlockTip()
     UpdatedBlockTip(chainActive.Tip(), nullptr, IsInitialBlockDownload());
 }
 
-void ModuleInterface::ProcessModuleMessage(CNode* pfrom, const std::string& strCommand, CDataStream& vRecv, CConnman* connman)
+void ModuleInterface::ProcessModuleMessage(CNode* pfrom, const NetMsgDest &dest, const std::string& strCommand, CDataStream& vRecv, CConnman* connman)
 {
-    governance.ProcessModuleMessage(pfrom, strCommand, vRecv, connman);
-    mnodeman.ProcessModuleMessage(pfrom, strCommand, vRecv, connman);
-    masternodeSync.ProcessModuleMessage(pfrom, strCommand, vRecv);
-    mnpayments.ProcessModuleMessage(pfrom, strCommand, vRecv, connman);
-    privateSendServer.ProcessModuleMessage(pfrom, strCommand, vRecv, connman);
+    switch (dest) {
+    case NetMsgDest::MSG_FUND:
+        governance.ProcessModuleMessage(pfrom, strCommand, vRecv, connman);
+    case NetMsgDest::MSG_MN_MAN:
+        mnodeman.ProcessModuleMessage(pfrom, strCommand, vRecv, connman);
+    case NetMsgDest::MSG_MN_SYNC:
+        masternodeSync.ProcessModuleMessage(pfrom, strCommand, vRecv);
+    case NetMsgDest::MSG_MN_PAY:
+        mnpayments.ProcessModuleMessage(pfrom, strCommand, vRecv, connman);
+    case NetMsgDest::MSG_PSEND:
+        privateSendServer.ProcessModuleMessage(pfrom, strCommand, vRecv, connman);
+    case NetMsgDest::MSG_ALL:
+        governance.ProcessModuleMessage(pfrom, strCommand, vRecv, connman);
+        mnodeman.ProcessModuleMessage(pfrom, strCommand, vRecv, connman);
+        masternodeSync.ProcessModuleMessage(pfrom, strCommand, vRecv);
+        mnpayments.ProcessModuleMessage(pfrom, strCommand, vRecv, connman);
+        privateSendServer.ProcessModuleMessage(pfrom, strCommand, vRecv, connman);
+    }
 }
 
 void ModuleInterface::UpdatedBlockTip(const CBlockIndex *pindexNew, const CBlockIndex *pindexFork, bool fInitialDownload)

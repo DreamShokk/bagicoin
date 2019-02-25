@@ -6,9 +6,9 @@
 #ifndef BITCOIN_NET_PROCESSING_H
 #define BITCOIN_NET_PROCESSING_H
 
+#include <interfaces/modules.h>
 #include <net.h>
 #include <validation.h>
-#include <validationinterface.h>
 #include <consensus/params.h>
 #include <sync.h>
 

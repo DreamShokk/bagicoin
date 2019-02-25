@@ -3278,7 +3278,7 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
         if (found)
         {
             //probably for one of the modules
-            GetMainSignals().ProcessModuleMessage(pfrom, strCommand, vRecv, connman);
+            GetMainSignals().ProcessModuleMessage(pfrom, NetMsgDest::MSG_ALL, strCommand, vRecv, connman);
             LogPrint(BCLog::NET, "Forwarded message \"%s\" from peer=%d to Chaincoin modules\n", SanitizeString(strCommand), pfrom->GetId());
         } else {
             // Ignore unknown commands for extensibility

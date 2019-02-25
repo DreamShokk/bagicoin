@@ -2518,7 +2518,7 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
             }
 
             LogPrintf("DSTX -- Got Masternode transaction %s\n", hashTx.ToString());
-            mempool.PrioritiseTransaction(hashTx, 0.1*COIN);
+            mempool.PrioritiseTransaction(hashTx, COIN/100);
             mnodeman.DisallowMixing(dstx.masternodeOutpoint);
         }
 

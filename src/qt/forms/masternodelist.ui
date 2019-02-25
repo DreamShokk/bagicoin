@@ -77,12 +77,12 @@
        </property>
        <widget class="QWidget" name="MyNodeList">
         <attribute name="title">
-         <string>My Masterodes</string>
+         <string>My Masternodes</string>
         </attribute>
        </widget>
        <widget class="QWidget" name="AllNodeList">
         <attribute name="title">
-         <string>All Masterodes</string>
+         <string>All Masternodes</string>
         </attribute>
        </widget>
       </widget>

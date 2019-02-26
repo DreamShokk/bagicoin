@@ -3449,9 +3449,10 @@ bool CWallet::CreateCollateralTransaction(CMutableTransaction& txCollateral, std
         // make our change address
         CScript scriptChange;
         CPubKey vchPubKey;
+        LearnRelatedScripts(vchPubKey, m_default_change_type);
+        scriptChange = GetScriptForDestination(GetDestinationForKey(vchPubKey, m_default_change_type));
         bool success = reservekey.GetReservedKey(vchPubKey, true);
         assert(success); // should never fail, as we just unlocked
-        scriptChange = GetScriptForDestination(vchPubKey.GetID());
         reservekey.KeepKey();
         // return change
         txCollateral.vout.push_back(CTxOut(nValue - CPrivateSend::GetCollateralAmount(), scriptChange));

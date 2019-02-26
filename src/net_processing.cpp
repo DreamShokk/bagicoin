@@ -70,7 +70,7 @@ static constexpr int STALE_RELAY_AGE_LIMIT = 30 * 24 * 60 * 60;
 /// limiting block relay. Set to one week, denominated in seconds.
 static constexpr int HISTORICAL_BLOCK_AGE = 7 * 24 * 60 * 60;
 /** Maximum number of in-flight inventory items from a peer */
-static constexpr int32_t MAX_PEER_INV_IN_FLIGHT = 3000;
+static constexpr int32_t MAX_PEER_INV_IN_FLIGHT = 100;
 /** Maximum number of announced inventory items from a peer */
 static constexpr int32_t MAX_PEER_INV_ANNOUNCEMENTS = 2 * MAX_INV_SZ;
 /** How many microseconds to delay requesting inventory items from inbound peers */
@@ -1217,8 +1217,8 @@ bool static AlreadyHave(const CInv& inv) EXCLUSIVE_LOCKS_REQUIRED(cs_main)
 
     case MSG_MASTERNODE_PAYMENT_BLOCK:
         {
-            BlockMap::iterator mi = mapBlockIndex.find(inv.hash);
-            return mi != mapBlockIndex.end() && mnpayments.mapMasternodeBlocks.find(mi->second->nHeight) != mnpayments.mapMasternodeBlocks.end();
+            CBlockIndex* pindex = LookupBlockIndex(inv.hash);
+            return pindex && mnpayments.mapMasternodeBlocks.find(pindex->nHeight) != mnpayments.mapMasternodeBlocks.end();
         }
 
     case MSG_MASTERNODE_ANNOUNCE:
@@ -1489,10 +1489,10 @@ void static ProcessGetData(CNode* pfrom, const CChainParams& chainparams, CConnm
                     }
                 }
                 else if (inv.type == MSG_MASTERNODE_PAYMENT_BLOCK) {
-                    BlockMap::iterator mi2 = mapBlockIndex.find(inv.hash);
+                    CBlockIndex* pindex = LookupBlockIndex(inv.hash);
                     LOCK(cs_mapMasternodeBlocks);
-                    if (mi2 != mapBlockIndex.end() && mnpayments.mapMasternodeBlocks.count(mi2->second->nHeight)) {
-                        for (CMasternodePayee& payee : mnpayments.mapMasternodeBlocks[mi2->second->nHeight].vecPayees) {
+                    if (pindex && mnpayments.mapMasternodeBlocks.count(pindex->nHeight)) {
+                        for (CMasternodePayee& payee : mnpayments.mapMasternodeBlocks[pindex->nHeight].vecPayees) {
                             std::vector<uint256> vecVoteHashes = payee.GetVoteHashes();
                             for (uint256& hash : vecVoteHashes) {
                                 if(mnpayments.HasVerifiedPaymentVote(hash)) {

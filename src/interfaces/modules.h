@@ -9,7 +9,8 @@
 
 enum class NetMsgDest
 {
-    MSG_ALL = 0,
+    MSG_NONE = 0,
+    MSG_ALL,
     MSG_MN_MAN,
     MSG_MN_PAY,
     MSG_MN_SYNC,

@@ -913,16 +913,16 @@ void CPrivateSendClientSession::DoAutomaticDenominating(interfaces::Chain::Lock&
 
         //check our collateral and create new if needed
         std::string strReason;
-        bool fOK = false;
+        bool fOK = true;
         if (txMyCollateral == CMutableTransaction()) {
             if (!m_wallet_session->CreateCollateralTransaction(txMyCollateral, strReason)) {
-                fOK = true;
+                fOK = false;
             }
         } else {
             if (!CPrivateSend::IsCollateralValid(CTransaction(txMyCollateral))) {
                 LogPrintf("CPrivateSendClientSession::DoAutomaticDenominating -- invalid collateral, recreating...\n");
                 if (!m_wallet_session->CreateCollateralTransaction(txMyCollateral, strReason)) {
-                    fOK = true;
+                    fOK = false;
                 }
             }
         }

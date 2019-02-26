@@ -227,7 +227,7 @@ std::string CInv::GetCommand() const
     case MSG_FILTERED_BLOCK:            return cmd.append(NetMsgType::MERKLEBLOCK);
     case MSG_CMPCT_BLOCK:               return cmd.append(NetMsgType::CMPCTBLOCK);
     case MSG_MASTERNODE_PAYMENT_VOTE:   return NetMsgType::MASTERNODEPAYMENTVOTE;
-    case MSG_MASTERNODE_PAYMENT_BLOCK:  return NetMsgType::MNGOVERNANCEOBJECT;
+    case MSG_MASTERNODE_PAYMENT_BLOCK:  return NetMsgType::MASTERNODEPAYMENTBLOCK;
     case MSG_MASTERNODE_ANNOUNCE:       return NetMsgType::MNANNOUNCE;
     case MSG_MASTERNODE_PING:           return NetMsgType::MNPING;
     case MSG_DSTX:                      return NetMsgType::DSTX;

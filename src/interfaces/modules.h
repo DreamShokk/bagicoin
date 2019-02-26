@@ -7,6 +7,18 @@
 
 #include <validationinterface.h>
 
+enum class NetMsgDest
+{
+    MSG_NONE = 0,
+    MSG_ALL,
+    MSG_MN_MAN,
+    MSG_MN_PAY,
+    MSG_MN_SYNC,
+    MSG_PSEND,
+    MSG_FUND
+};
+
+
 class ModuleInterface : public CValidationInterface {
 public:
     ModuleInterface(CConnman* _connman): connman(_connman) {}
@@ -18,7 +30,7 @@ public:
 
 protected:
     // CValidationInterface
-    void ProcessModuleMessage(CNode* pfrom, const std::string& strCommand, CDataStream& vRecv, CConnman* connman) override;
+    void ProcessModuleMessage(CNode* pfrom, const NetMsgDest& dest, const std::string& strCommand, CDataStream& vRecv, CConnman* connman) override;
     void UpdatedBlockTip(const CBlockIndex *pindexNew, const CBlockIndex *pindexFork, bool fInitialDownload) override;
     void TransactionAddedToMempool(const CTransactionRef& tx) override;
     void BlockDisconnected(const std::shared_ptr<const CBlock>& pblock) override;

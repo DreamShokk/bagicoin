@@ -70,7 +70,7 @@ static constexpr int STALE_RELAY_AGE_LIMIT = 30 * 24 * 60 * 60;
 /// limiting block relay. Set to one week, denominated in seconds.
 static constexpr int HISTORICAL_BLOCK_AGE = 7 * 24 * 60 * 60;
 /** Maximum number of in-flight inventory items from a peer */
-static constexpr int32_t MAX_PEER_INV_IN_FLIGHT = 3000;
+static constexpr int32_t MAX_PEER_INV_IN_FLIGHT = 100;
 /** Maximum number of announced inventory items from a peer */
 static constexpr int32_t MAX_PEER_INV_ANNOUNCEMENTS = 2 * MAX_INV_SZ;
 /** How many microseconds to delay requesting inventory items from inbound peers */
@@ -1204,7 +1204,7 @@ bool static AlreadyHave(const CInv& inv) EXCLUSIVE_LOCKS_REQUIRED(cs_main)
         return LookupBlockIndex(inv.hash) != nullptr;
 
     /* 
-        Dash Related Inventory Messages
+        Chaincoin Related Inventory Messages
 
         --
 
@@ -1217,8 +1217,8 @@ bool static AlreadyHave(const CInv& inv) EXCLUSIVE_LOCKS_REQUIRED(cs_main)
 
     case MSG_MASTERNODE_PAYMENT_BLOCK:
         {
-            BlockMap::iterator mi = mapBlockIndex.find(inv.hash);
-            return mi != mapBlockIndex.end() && mnpayments.mapMasternodeBlocks.find(mi->second->nHeight) != mnpayments.mapMasternodeBlocks.end();
+            CBlockIndex* pindex = LookupBlockIndex(inv.hash);
+            return pindex && mnpayments.mapMasternodeBlocks.find(pindex->nHeight) != mnpayments.mapMasternodeBlocks.end();
         }
 
     case MSG_MASTERNODE_ANNOUNCE:
@@ -1489,10 +1489,10 @@ void static ProcessGetData(CNode* pfrom, const CChainParams& chainparams, CConnm
                     }
                 }
                 else if (inv.type == MSG_MASTERNODE_PAYMENT_BLOCK) {
-                    BlockMap::iterator mi2 = mapBlockIndex.find(inv.hash);
+                    CBlockIndex* pindex = LookupBlockIndex(inv.hash);
                     LOCK(cs_mapMasternodeBlocks);
-                    if (mi2 != mapBlockIndex.end() && mnpayments.mapMasternodeBlocks.count(mi2->second->nHeight)) {
-                        for (CMasternodePayee& payee : mnpayments.mapMasternodeBlocks[mi2->second->nHeight].vecPayees) {
+                    if (pindex && mnpayments.mapMasternodeBlocks.count(pindex->nHeight)) {
+                        for (CMasternodePayee& payee : mnpayments.mapMasternodeBlocks[pindex->nHeight].vecPayees) {
                             std::vector<uint256> vecVoteHashes = payee.GetVoteHashes();
                             for (uint256& hash : vecVoteHashes) {
                                 if(mnpayments.HasVerifiedPaymentVote(hash)) {
@@ -2518,7 +2518,7 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
             }
 
             LogPrintf("DSTX -- Got Masternode transaction %s\n", hashTx.ToString());
-            mempool.PrioritiseTransaction(hashTx, 0.1*COIN);
+            mempool.PrioritiseTransaction(hashTx, COIN/100);
             mnodeman.DisallowMixing(dstx.masternodeOutpoint);
         }
 
@@ -2720,6 +2720,150 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
             }
         }
         return true;
+    }
+
+    if (strCommand == NetMsgType::MNANNOUNCE)
+    {
+        if (fReindex || fImporting || IsInitialBlockDownload()) return true;
+        {
+            LOCK(cs_main);
+
+            CDataStream ss(vRecv);
+            CMasternodeBroadcast mnb;
+            ss >> mnb;
+            CInv inv(MSG_MASTERNODE_ANNOUNCE, mnb.GetHash());
+            pfrom->AddInventoryKnown(inv);
+
+            GetMainSignals().ProcessModuleMessage(pfrom, NetMsgDest::MSG_MN_MAN, strCommand, vRecv, connman);
+            LogPrint(BCLog::NET, "Forwarded message \"%s\" from peer=%d to Chaincoin modules\n", SanitizeString(strCommand), pfrom->GetId());
+
+            CNodeState* nodestate = State(pfrom->GetId());
+
+            nodestate->m_inv_download.m_inv_announced.erase(inv.hash);
+            nodestate->m_inv_download.m_inv_in_flight.erase(inv.hash);
+            EraseInvRequest(inv.hash);
+            return true;
+        }
+    }
+
+    if (strCommand == NetMsgType::MNPING)
+    {
+        if (fReindex || fImporting || IsInitialBlockDownload()) return true;
+        {
+            LOCK(cs_main);
+
+            CDataStream ss(vRecv);
+            CMasternodePing mnp;
+            ss >> mnp;
+            CInv inv(MSG_MASTERNODE_PING, mnp.GetHash());
+            pfrom->AddInventoryKnown(inv);
+
+            GetMainSignals().ProcessModuleMessage(pfrom, NetMsgDest::MSG_MN_MAN, strCommand, vRecv, connman);
+            LogPrint(BCLog::NET, "Forwarded message \"%s\" from peer=%d to Chaincoin modules\n", SanitizeString(strCommand), pfrom->GetId());
+
+            CNodeState* nodestate = State(pfrom->GetId());
+
+            nodestate->m_inv_download.m_inv_announced.erase(inv.hash);
+            nodestate->m_inv_download.m_inv_in_flight.erase(inv.hash);
+            EraseInvRequest(inv.hash);
+            return true;
+        }
+    }
+
+    if (strCommand == NetMsgType::MNVERIFY)
+    {
+        if (fReindex || fImporting || IsInitialBlockDownload()) return true;
+        {
+            LOCK(cs_main);
+
+            CDataStream ss(vRecv);
+            CMasternodeVerification mnv;
+            ss >> mnv;
+            CInv inv(MSG_MASTERNODE_VERIFY, mnv.GetHash());
+            pfrom->AddInventoryKnown(inv);
+
+            GetMainSignals().ProcessModuleMessage(pfrom, NetMsgDest::MSG_MN_MAN, strCommand, vRecv, connman);
+            LogPrint(BCLog::NET, "Forwarded message \"%s\" from peer=%d to Chaincoin modules\n", SanitizeString(strCommand), pfrom->GetId());
+
+            CNodeState* nodestate = State(pfrom->GetId());
+
+            nodestate->m_inv_download.m_inv_announced.erase(inv.hash);
+            nodestate->m_inv_download.m_inv_in_flight.erase(inv.hash);
+            EraseInvRequest(inv.hash);
+            return true;
+        }
+    }
+
+    if (strCommand == NetMsgType::MASTERNODEPAYMENTVOTE)
+    {
+        if (fReindex || fImporting || IsInitialBlockDownload()) return true;
+        {
+            LOCK(cs_main);
+
+            CDataStream ss(vRecv);
+            CMasternodePaymentVote mnv;
+            ss >> mnv;
+            CInv inv(MSG_MASTERNODE_PAYMENT_VOTE, mnv.GetHash());
+            pfrom->AddInventoryKnown(inv);
+
+            GetMainSignals().ProcessModuleMessage(pfrom, NetMsgDest::MSG_MN_PAY, strCommand, vRecv, connman);
+            LogPrint(BCLog::NET, "Forwarded message \"%s\" from peer=%d to Chaincoin modules\n", SanitizeString(strCommand), pfrom->GetId());
+
+            CNodeState* nodestate = State(pfrom->GetId());
+
+            nodestate->m_inv_download.m_inv_announced.erase(inv.hash);
+            nodestate->m_inv_download.m_inv_in_flight.erase(inv.hash);
+            EraseInvRequest(inv.hash);
+            return true;
+        }
+    }
+
+    if (strCommand == NetMsgType::MNGOVERNANCEOBJECT)
+    {
+        if (fReindex || fImporting || IsInitialBlockDownload()) return true;
+        {
+            LOCK(cs_main);
+
+            CDataStream ss(vRecv);
+            CGovernanceObject govobj;
+            ss >> govobj;
+            CInv inv(MSG_GOVERNANCE_OBJECT, govobj.GetHash());
+            pfrom->AddInventoryKnown(inv);
+
+            GetMainSignals().ProcessModuleMessage(pfrom, NetMsgDest::MSG_FUND, strCommand, vRecv, connman);
+            LogPrint(BCLog::NET, "Forwarded message \"%s\" from peer=%d to Chaincoin modules\n", SanitizeString(strCommand), pfrom->GetId());
+
+            CNodeState* nodestate = State(pfrom->GetId());
+
+            nodestate->m_inv_download.m_inv_announced.erase(inv.hash);
+            nodestate->m_inv_download.m_inv_in_flight.erase(inv.hash);
+            EraseInvRequest(inv.hash);
+            return true;
+        }
+    }
+
+    if (strCommand == NetMsgType::MNGOVERNANCEOBJECTVOTE)
+    {
+        if (fReindex || fImporting || IsInitialBlockDownload()) return true;
+        {
+            LOCK(cs_main);
+
+            CDataStream ss(vRecv);
+            CGovernanceVote vote;
+            ss >> vote;
+            CInv inv(MSG_GOVERNANCE_OBJECT_VOTE, vote.GetHash());
+            pfrom->AddInventoryKnown(inv);
+
+            GetMainSignals().ProcessModuleMessage(pfrom, NetMsgDest::MSG_FUND, strCommand, vRecv, connman);
+            LogPrint(BCLog::NET, "Forwarded message \"%s\" from peer=%d to Chaincoin modules\n", SanitizeString(strCommand), pfrom->GetId());
+
+            CNodeState* nodestate = State(pfrom->GetId());
+
+            nodestate->m_inv_download.m_inv_announced.erase(inv.hash);
+            nodestate->m_inv_download.m_inv_in_flight.erase(inv.hash);
+            EraseInvRequest(inv.hash);
+            return true;
+        }
     }
 
     if (strCommand == NetMsgType::CMPCTBLOCK && !fImporting && !fReindex) // Ignore blocks received while importing
@@ -3278,7 +3422,7 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
         if (found)
         {
             //probably for one of the modules
-            GetMainSignals().ProcessModuleMessage(pfrom, strCommand, vRecv, connman);
+            GetMainSignals().ProcessModuleMessage(pfrom, NetMsgDest::MSG_ALL, strCommand, vRecv, connman);
             LogPrint(BCLog::NET, "Forwarded message \"%s\" from peer=%d to Chaincoin modules\n", SanitizeString(strCommand), pfrom->GetId());
         } else {
             // Ignore unknown commands for extensibility

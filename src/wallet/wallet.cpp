@@ -34,7 +34,6 @@
 #include <util/moneystr.h>
 #include <validation.h>
 #include <wallet/fees.h>
-#include <wallet/privatesend_client.h>
 
 #include <algorithm>
 #include <assert.h>
@@ -3432,7 +3431,6 @@ bool CWallet::CreateCollateralTransaction(CMutableTransaction& txCollateral, std
     txCollateral.vin.clear();
     txCollateral.vout.clear();
 
-    CReserveKey reservekey(this);
     CAmount nValue = 0;
     CTxDSIn txdsinCollateral;
 
@@ -3448,13 +3446,14 @@ bool CWallet::CreateCollateralTransaction(CMutableTransaction& txCollateral, std
     // CPrivateSend::IsCollateralAmount in GetCollateralTxDSIn should already take care of this
     if (nValue >= CPrivateSend::GetCollateralAmount() * 2) {
         // make our change address
-        CScript scriptChange;
+        CReserveKey reservekey(this);
         CPubKey vchPubKey;
-        LearnRelatedScripts(vchPubKey, m_default_change_type);
-        scriptChange = GetScriptForDestination(GetDestinationForKey(vchPubKey, m_default_change_type));
-        bool success = reservekey.GetReservedKey(vchPubKey, true);
+        bool success = CanGetAddresses(true) && reservekey.GetReservedKey(vchPubKey, true);
         assert(success); // should never fail, as we just unlocked
         reservekey.KeepKey();
+
+        LearnRelatedScripts(vchPubKey, m_default_change_type);
+        CScript scriptChange = GetScriptForDestination(GetDestinationForKey(vchPubKey, m_default_change_type));
         // return change
         txCollateral.vout.push_back(CTxOut(nValue - CPrivateSend::GetCollateralAmount(), scriptChange));
     } else { // nValue < CPrivateSend::GetCollateralAmount() * 2
@@ -3468,6 +3467,7 @@ bool CWallet::CreateCollateralTransaction(CMutableTransaction& txCollateral, std
     }
 
     LogPrint(BCLog::PRIVSEND, "Created PS collateral: %s\n", txCollateral.GetHash().ToString());
+    LogPrint(BCLog::PRIVSEND, "Created PS collateral: %s\n", CTransaction(txCollateral).ToString());
     return true;
 }
 

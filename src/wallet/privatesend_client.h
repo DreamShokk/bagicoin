@@ -116,11 +116,11 @@ private:
 
     /// Create denominations
     bool CreateDenominated();
-    bool CreateDenominated(interfaces::Chain::Lock& locked_chain, const CompactTallyItem& tallyItem, bool fCreateMixingCollaterals);
+    bool CreateDenominated(const CompactTallyItem& tallyItem, bool fCreateMixingCollaterals);
 
     /// Split up large inputs or make fee sized inputs
-    bool MakeCollateralAmounts(interfaces::Chain::Lock& locked_chain);
-    bool MakeCollateralAmounts(interfaces::Chain::Lock& locked_chain, const CompactTallyItem& tallyItem, bool fTryDenominated);
+    bool MakeCollateralAmounts();
+    bool MakeCollateralAmounts(const CompactTallyItem& tallyItem, bool fTryDenominated);
 
     bool JoinExistingQueue(CAmount nBalanceNeedsAnonymized);
     bool StartNewQueue(CAmount nValueMin, CAmount nBalanceNeedsAnonymized);
@@ -174,7 +174,7 @@ public:
     bool GetMixingMasternodeInfo(masternode_info_t& mnInfoRet) const;
 
     /// Passively run mixing in the background according to the configuration in settings
-    void DoAutomaticDenominating(interfaces::Chain::Lock& locked_chain);
+    void DoAutomaticDenominating();
 
     /// As a client, submit part of a future mixing transaction to a Masternode to start the process
     bool SubmitDenominate();
@@ -260,7 +260,7 @@ public:
     bool IsMixingMasternode(const CNode* pnode);
 
     /// Passively run mixing in the background according to the configuration in settings
-    void DoAutomaticDenominating(interfaces::Chain::Lock &locked_chain);
+    void DoAutomaticDenominating();
 
     void CheckTimeout();
 

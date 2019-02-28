@@ -817,7 +817,7 @@ bool CPrivateSendClientManager::CheckAutomaticBackup()
 //
 // Passively run mixing in the background to anonymize funds based on the given configuration.
 //
-void CPrivateSendClientSession::DoAutomaticDenominating(interfaces::Chain::Lock& locked_chain)
+void CPrivateSendClientSession::DoAutomaticDenominating()
 {
     if(nState != POOL_STATE_IDLE) return;
 
@@ -835,6 +835,7 @@ void CPrivateSendClientSession::DoAutomaticDenominating(interfaces::Chain::Lock&
     CAmount nValueMin = CPrivateSend::GetSmallestDenomination();
 
     {
+        auto locked_chain = m_wallet_session->chain().lock();
         LOCK(m_wallet_session->cs_wallet);
 
         if (m_wallet_session->IsLocked(true)) {
@@ -861,7 +862,7 @@ void CPrivateSendClientSession::DoAutomaticDenominating(interfaces::Chain::Lock&
         }
 
         // if there are no confirmed DS collateral inputs yet
-        if (!m_wallet_session->HasCollateralInputs(locked_chain)) {
+        if (!m_wallet_session->HasCollateralInputs()) {
             // should have some additional amount for them
             nValueMin += CPrivateSend::GetMaxCollateralAmount();
         }
@@ -897,8 +898,8 @@ void CPrivateSendClientSession::DoAutomaticDenominating(interfaces::Chain::Lock&
         }
 
         //check if we have the collateral sized inputs
-        if (!m_wallet_session->HasCollateralInputs(locked_chain))
-            if (!MakeCollateralAmounts(locked_chain)) return;
+        if (!m_wallet_session->HasCollateralInputs())
+            if (!MakeCollateralAmounts()) return;
 
         if (nSessionID) {
             strAutoDenomResult = _("Mixing in progress...");
@@ -948,7 +949,7 @@ void CPrivateSendClientSession::DoAutomaticDenominating(interfaces::Chain::Lock&
     return;
 }
 
-void CPrivateSendClientManager::DoAutomaticDenominating(interfaces::Chain::Lock& locked_chain)
+void CPrivateSendClientManager::DoAutomaticDenominating()
 {
     if (WaitForAnotherBlock()) {
         LogPrint(BCLog::PRIVSEND, "CPrivateSendClientManager::DoAutomaticDenominating -- Last successful PrivateSend action was too recent\n");
@@ -993,7 +994,7 @@ void CPrivateSendClientManager::DoAutomaticDenominating(interfaces::Chain::Lock&
             fEnablePrivateSend = false;
             return;
         }
-        session.DoAutomaticDenominating(locked_chain);
+        session.DoAutomaticDenominating();
     }
 }
 
@@ -1348,7 +1349,7 @@ bool CPrivateSendClientSession::PrepareDenominate(int nMinRounds, int nMaxRounds
 }
 
 // Create collaterals by looping through inputs grouped by addresses
-bool CPrivateSendClientSession::MakeCollateralAmounts(interfaces::Chain::Lock& locked_chain)
+bool CPrivateSendClientSession::MakeCollateralAmounts()
 {
     if (!m_wallet_session) return false;
 
@@ -1366,14 +1367,14 @@ bool CPrivateSendClientSession::MakeCollateralAmounts(interfaces::Chain::Lock& l
 
     // First try to use only non-denominated funds
     for (const auto& item : vecTally) {
-        if(!MakeCollateralAmounts(locked_chain, item, false)) continue;
+        if(!MakeCollateralAmounts(item, false)) continue;
         strAutoDenomResult = _("Prepared collateral...");
         return true;
     }
 
     // There should be at least some denominated funds we should be able to break in pieces to continue mixing
     for (const auto& item : vecTally) {
-        if(!MakeCollateralAmounts(locked_chain, item, true)) continue;
+        if(!MakeCollateralAmounts(item, true)) continue;
         strAutoDenomResult = _("Prepared collateral...");
         return true;
     }
@@ -1385,7 +1386,7 @@ bool CPrivateSendClientSession::MakeCollateralAmounts(interfaces::Chain::Lock& l
 }
 
 // Split up large inputs or create fee sized inputs
-bool CPrivateSendClientSession::MakeCollateralAmounts(interfaces::Chain::Lock& locked_chain, const CompactTallyItem& tallyItem, bool fTryDenominated)
+bool CPrivateSendClientSession::MakeCollateralAmounts(const CompactTallyItem& tallyItem, bool fTryDenominated)
 {
     if (!m_wallet_session) return false;
 
@@ -1424,14 +1425,16 @@ bool CPrivateSendClientSession::MakeCollateralAmounts(interfaces::Chain::Lock& l
     for (const auto& outpoint : tallyItem.vecOutPoints)
         coinControl.Select(outpoint);
 
-    bool fSuccess = m_wallet_session->CreateTransaction(locked_chain, vecSend, tx, reservekeyChange,
+    auto locked_chain = m_wallet_session->chain().lock();
+
+    bool fSuccess = m_wallet_session->CreateTransaction(*locked_chain, vecSend, tx, reservekeyChange,
             nFeeRet, nChangePosRet, strFail, coinControl, true, ONLY_NONDENOMINATED);
     if(!fSuccess) {
         LogPrintf("CPrivateSendClientSession::MakeCollateralAmounts -- ONLY_NONDENOMINATED: %s\n", strFail);
         // If we failed then most likely there are not enough funds on this address.
         if(fTryDenominated) {
             // Try to also use denominated coins (we can't mix denominated without collaterals anyway).
-            if(!m_wallet_session->CreateTransaction(locked_chain, vecSend, tx, reservekeyChange,
+            if(!m_wallet_session->CreateTransaction(*locked_chain, vecSend, tx, reservekeyChange,
                                 nFeeRet, nChangePosRet, strFail, coinControl, true, ALL_COINS)) {
                 LogPrintf("CPrivateSendClientSession::MakeCollateralAmounts -- ALL_COINS Error: %s\n", strFail);
                 reservekeyCollateral.ReturnKey();
@@ -1465,7 +1468,6 @@ bool CPrivateSendClientSession::CreateDenominated()
 {
     if (!m_wallet_session) return false;
 
-    auto locked_chain = m_wallet_session->chain().lock();
     LOCK(m_wallet_session->cs_wallet);
 
     // NOTE: We do not allow txes larger than 100kB, so we have to limit number of inputs here.
@@ -1484,10 +1486,10 @@ bool CPrivateSendClientSession::CreateDenominated()
         return a.nAmount > b.nAmount;
     });
 
-    bool fCreateMixingCollaterals = !m_wallet_session->HasCollateralInputs(*locked_chain);
+    bool fCreateMixingCollaterals = !m_wallet_session->HasCollateralInputs();
 
     for (const auto& item : vecTally) {
-        if(!CreateDenominated(*locked_chain, item, fCreateMixingCollaterals)) continue;
+        if(!CreateDenominated(item, fCreateMixingCollaterals)) continue;
         return true;
     }
 
@@ -1497,7 +1499,7 @@ bool CPrivateSendClientSession::CreateDenominated()
 }
 
 // Create denominations
-bool CPrivateSendClientSession::CreateDenominated(interfaces::Chain::Lock& locked_chain, const CompactTallyItem& tallyItem, bool fCreateMixingCollaterals)
+bool CPrivateSendClientSession::CreateDenominated(const CompactTallyItem& tallyItem, bool fCreateMixingCollaterals)
 {
     if (!m_wallet_session) return false;
 
@@ -1603,7 +1605,8 @@ bool CPrivateSendClientSession::CreateDenominated(interfaces::Chain::Lock& locke
     // make our change address
     CReserveKey reservekeyChange(m_wallet_session);
 
-    bool fSuccess = m_wallet_session->CreateTransaction(locked_chain, vecSend, tx, reservekeyChange,
+    auto locked_chain = m_wallet_session->chain().lock();
+    bool fSuccess = m_wallet_session->CreateTransaction(*locked_chain, vecSend, tx, reservekeyChange,
             nFeeRet, nChangePosRet, strFail, coinControl, true, ONLY_NONDENOMINATED);
     if(!fSuccess) {
         LogPrintf("CPrivateSendClientSession::CreateDenominated -- Error: %s\n", strFail);
@@ -1663,8 +1666,7 @@ void CPrivateSendClientManager::ClientTask()
         nTick++;
         if(nDoAutoNextRun == nTick) {
             nDoAutoNextRun = nTick + PRIVATESEND_AUTO_TIMEOUT_MIN + GetRandInt(PRIVATESEND_AUTO_TIMEOUT_MAX - PRIVATESEND_AUTO_TIMEOUT_MIN);
-            auto locked_chain = m_wallet->chain().lock();
-            DoAutomaticDenominating(*locked_chain);
+            DoAutomaticDenominating();
         }
     }
 }

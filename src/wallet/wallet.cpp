@@ -3413,11 +3413,12 @@ int CWallet::CountInputsWithAmount(CAmount nInputAmount)
     return nTotal;
 }
 
-bool CWallet::HasCollateralInputs(interfaces::Chain::Lock& locked_chain, bool fOnlyConfirmed) const
+bool CWallet::HasCollateralInputs(bool fOnlyConfirmed) const
 {
     LOCK(cs_wallet);
     std::vector<COutput> vCoins;
-    AvailableCoins(locked_chain, vCoins, fOnlyConfirmed, nullptr, ONLY_PRIVATESEND_COLLATERAL);
+    auto locked_chain = chain().lock();
+    AvailableCoins(*locked_chain, vCoins, fOnlyConfirmed, nullptr, ONLY_PRIVATESEND_COLLATERAL);
 
     return !vCoins.empty();
 }

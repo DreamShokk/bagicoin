@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Copyright (c) 2014-2017 The Bitcoin Core developers
+# Copyright (c) 2014-2018 The Bitcoin Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 """Test RPCs related to blockchainstate.
@@ -35,22 +35,25 @@ from test_framework.util import (
 from test_framework.blocktools import (
     create_block,
     create_coinbase,
+    TIME_GENESIS_BLOCK,
 )
 from test_framework.messages import (
     msg_block,
 )
 from test_framework.mininode import (
     P2PInterface,
-    network_thread_start,
 )
 
 
 class BlockchainTest(BitcoinTestFramework):
     def set_test_params(self):
+        self.setup_clean_chain = True
         self.num_nodes = 1
-        self.extra_args = [['-stopatheight=207', '-prune=1']]
 
     def run_test(self):
+        self.mine_chain()
+        self.restart_node(0, extra_args=['-stopatheight=207', '-prune=1'])  # Set extra args with pruning after rescan is complete
+
         self._test_getblockchaininfo()
         self._test_getchaintxstats()
         self._test_gettxoutsetinfo()
@@ -60,6 +63,15 @@ class BlockchainTest(BitcoinTestFramework):
         self._test_stopatheight()
         self._test_waitforblockheight()
         assert self.nodes[0].verifychain(4, 0)
+
+    def mine_chain(self):
+        self.log.info('Create some old blocks')
+        address = self.nodes[0].get_deterministic_priv_key().address
+        for t in range(TIME_GENESIS_BLOCK, TIME_GENESIS_BLOCK + 200 * 600, 600):
+            # ten-minute steps from genesis block time
+            self.nodes[0].setmocktime(t)
+            self.nodes[0].generatetoaddress(1, address)
+        assert_equal(self.nodes[0].getblockchaininfo()['blocks'], 200)
 
     def _test_getblockchaininfo(self):
         self.log.info("Test getblockchaininfo")
@@ -172,7 +184,7 @@ class BlockchainTest(BitcoinTestFramework):
         assert_equal(res['transactions'], 200)
         assert_equal(res['height'], 200)
         assert_equal(res['txouts'], 200)
-        assert_equal(res['bogosize'], 17000),
+        assert_equal(res['bogosize'], 15000),
         assert_equal(res['bestblock'], node.getblockhash(200))
         size = res['disk_size']
         assert size > 6400
@@ -197,13 +209,10 @@ class BlockchainTest(BitcoinTestFramework):
         node.reconsiderblock(b1hash)
 
         res3 = node.gettxoutsetinfo()
-        assert_equal(res['total_amount'], res3['total_amount'])
-        assert_equal(res['transactions'], res3['transactions'])
-        assert_equal(res['height'], res3['height'])
-        assert_equal(res['txouts'], res3['txouts'])
-        assert_equal(res['bogosize'], res3['bogosize'])
-        assert_equal(res['bestblock'], res3['bestblock'])
-        assert_equal(res['hash_serialized_2'], res3['hash_serialized_2'])
+        # The field 'disk_size' is non-deterministic and can thus not be
+        # compared between res and res3.  Everything else should be the same.
+        del res['disk_size'], res3['disk_size']
+        assert_equal(res, res3)
 
     def _test_getblockheader(self):
         node = self.nodes[0]
@@ -221,6 +230,7 @@ class BlockchainTest(BitcoinTestFramework):
         assert_equal(header['confirmations'], 1)
         assert_equal(header['previousblockhash'], secondbesthash)
         assert_is_hex_string(header['chainwork'])
+        assert_equal(header['nTx'], 1)
         assert_is_hash_string(header['hash'])
         assert_is_hash_string(header['previousblockhash'])
         assert_is_hash_string(header['merkleroot'])
@@ -245,12 +255,12 @@ class BlockchainTest(BitcoinTestFramework):
 
     def _test_stopatheight(self):
         assert_equal(self.nodes[0].getblockcount(), 200)
-        self.nodes[0].generate(6)
+        self.nodes[0].generatetoaddress(6, self.nodes[0].get_deterministic_priv_key().address)
         assert_equal(self.nodes[0].getblockcount(), 206)
         self.log.debug('Node should not stop at this height')
         assert_raises(subprocess.TimeoutExpired, lambda: self.nodes[0].process.wait(timeout=3))
         try:
-            self.nodes[0].generate(1)
+            self.nodes[0].generatetoaddress(1, self.nodes[0].get_deterministic_priv_key().address)
         except (ConnectionError, http.client.BadStatusLine):
             pass  # The node already shut down before response
         self.log.debug('Node should stop at this height...')
@@ -260,13 +270,8 @@ class BlockchainTest(BitcoinTestFramework):
 
     def _test_waitforblockheight(self):
         self.log.info("Test waitforblockheight")
-
         node = self.nodes[0]
-
-        # Start a P2P connection since we'll need to create some blocks.
         node.add_p2p_connection(P2PInterface())
-        network_thread_start()
-        node.p2p.wait_for_verack()
 
         current_height = node.getblock(node.getbestblockhash())['height']
 

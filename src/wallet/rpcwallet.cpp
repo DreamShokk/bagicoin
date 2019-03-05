@@ -37,7 +37,6 @@
 #include <validation.h>
 #include <wallet/coincontrol.h>
 #include <wallet/feebumper.h>
-#include <wallet/privatesend_client.h>
 #include <wallet/psctwallet.h>
 #include <wallet/rpcwallet.h>
 #include <wallet/wallet.h>
@@ -4172,7 +4171,7 @@ UniValue walletcreatefundedpsct(const JSONRPCRequest& request)
     return result;
 }
 
-UniValue prepareproposal(const JSONRPCRequest& request)
+static UniValue prepareproposal(const JSONRPCRequest& request)
 {
     std::shared_ptr<CWallet> const wallet = GetWalletForJSONRPCRequest(request);
     CWallet* const pwallet = wallet.get();
@@ -4181,7 +4180,7 @@ UniValue prepareproposal(const JSONRPCRequest& request)
         return NullUniValue;
     }
 
-    if (request.fHelp || request.params.size() != 5)
+    if (request.fHelp || request.params.size() != 4)
         throw std::runtime_error(
             RPCHelpMan{"prepareproposal",
                 "\nCreates and submits the collateral transaction for a pre-defined proposal\n" +
@@ -4195,42 +4194,41 @@ UniValue prepareproposal(const JSONRPCRequest& request)
                 },
                 RPCResult{
                             "{\n"
-                            "  \"txid\": \"value\"        (string)  The resulting collateral transaction (base64-encoded string)\n"
+                            "  \"txid\"        (string)  The resulting collateral transaction (base64-encoded string)\n"
                             "}\n"
-                                },
-                                RPCExamples{
-                            "\nCreate a transaction with no inputs\n"
-                            + HelpExampleCli("prepareproposal", "\"[{\\\"txid\\\":\\\"00010203\\\"}]\"")
-                            + HelpExampleRpc("prepareproposal", "\"[{\\\"txid\\\":\\\"00010203\\\"}]\"")
+                         },
+                RPCExamples{
+                            "\nPrepare proposal by signing and creating tx\n"
+                            + HelpExampleCli("prepareproposal", "\"mytxid\" \"myrevision\" \"mytime\" myhex")
+                            + HelpExampleRpc("prepareproposal", "\"mytxid\", \"myrevision\", \"mytime\", myhex")
                                 },
                             }.ToString());
-
-    RPCTypeCheck(request.params, {
-                     UniValue::VSTR,
-                     UniValue::VNUM,
-                     UniValue::VNUM,
-                     UniValue::VSTR
-                 }, true
-                 );
 
     uint256 hashParent;
 
     // -- attach to root node (root node doesn't really exist, but has a hash of zero)
-    if(request.params[1].get_str() == "0") {
+    if(request.params[0].get_str() == "0") {
         hashParent = uint256();
     } else {
-        hashParent = ParseHashV(request.params[1], "fee-txid, parameter 1");
+        hashParent = ParseHashV(request.params[0], "fee-txid, parameter 1");
     }
 
-    std::string strRevision = request.params[2].get_str();
-    std::string strTime = request.params[3].get_str();
-    int nRevision = atoi(strRevision);
-    int64_t nTime = atoi64(strTime);
-    std::string strDataHex = request.params[4].get_str();
+    int nRevision = request.params[1].get_int();
+    int64_t nTime = request.params[2].get_int64();
+    std::string strDataHex = request.params[3].get_str();
 
     // CREATE A NEW COLLATERAL TRANSACTION FOR THIS SPECIFIC OBJECT
 
     CGovernanceObject govobj(hashParent, nRevision, nTime, uint256(), strDataHex);
+
+    // This command is dangerous because it consumes 5 CHC irreversibly.
+    // If params are lost, it's very hard to bruteforce them and yet
+    // users ignore all instructions and do not save them...
+    // Let's log them here and hope users do not mess with debug.log
+    LogPrintf("prepareproposal -- params: %s %i %i %s, data: %s, hash: %s\n",
+                request.params[0].get_str(), request.params[1].get_int(),
+                request.params[2].get_int64(), request.params[3].get_str(),
+                govobj.GetDataAsPlainString(), govobj.GetHash().ToString());
 
     if(govobj.GetObjectType() == GOVERNANCE_OBJECT_PROPOSAL) {
         CProposalValidator validator(strDataHex);
@@ -4248,6 +4246,10 @@ UniValue prepareproposal(const JSONRPCRequest& request)
     std::string strError = "";
     if(!govobj.IsValidLocally(strError, false))
         throw JSONRPCError(RPC_INTERNAL_ERROR, "Governance object is not valid - " + govobj.GetHash().ToString() + " - " + strError);
+
+    if (!pwallet->CanGetAddresses(true)) {
+        throw JSONRPCError(RPC_WALLET_ERROR, "Error: This wallet has no available keys");
+    }
 
     EnsureWalletIsUnlocked(pwallet);
 
@@ -4352,7 +4354,7 @@ UniValue getmnoutputs(const JSONRPCRequest& request)
     if (request.fHelp || request.params.size() != 0)
         throw std::runtime_error(
             "getmnoutputs\n"
-            "Returns alist of compatible Masternode outputs.\n");
+            "Returns a list of compatible Masternode outputs.\n");
 
     std::shared_ptr<CWallet> const wallet = GetWalletForJSONRPCRequest(request);
     CWallet* const pwallet = wallet.get();

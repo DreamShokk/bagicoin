@@ -36,5 +36,6 @@ std::string DurationToDHMS(int64_t nDurationTime);
 
 std::string FormatISO8601DateTime(int64_t nTime);
 std::string FormatISO8601Date(int64_t nTime);
+std::string DateTimeStrFormat(const char* pszFormat, int64_t nTime);
 
 #endif // BITCOIN_UTIL_TIME_H

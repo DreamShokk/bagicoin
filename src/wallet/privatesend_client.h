@@ -46,7 +46,7 @@ private:
     mutable CCriticalSection cs_storage;
 
 public:
-    void AddKey(std::shared_ptr<CReserveScript> &script, CWallet *pwalletIn);
+    void AddKey(std::shared_ptr<CReserveScript>& script, CWallet* pwalletIn);
     void KeepAll();
     void ReturnAll();
 
@@ -257,7 +257,7 @@ public:
 
     bool GetMixingMasternodesInfo(std::vector<masternode_info_t>& vecMnInfoRet) const;
 
-    bool IsMixingMasternode(const CNode* pnode);
+    bool IsMixingMasternode(const CNode* pnode) const;
 
     /// Passively run mixing in the background according to the configuration in settings
     void DoAutomaticDenominating();

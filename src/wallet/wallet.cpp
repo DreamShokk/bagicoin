@@ -3447,14 +3447,15 @@ bool CWallet::CreateCollateralTransaction(CMutableTransaction& txCollateral, std
     // CPrivateSend::IsCollateralAmount in GetCollateralTxDSIn should already take care of this
     if (nValue >= CPrivateSend::GetCollateralAmount() * 2) {
         // make our change address
+        OutputType output_type = m_default_change_type != OutputType::CHANGE_AUTO ? m_default_change_type : m_default_address_type;
         CReserveKey reservekey(this);
         CPubKey vchPubKey;
         bool success = CanGetAddresses(true) && reservekey.GetReservedKey(vchPubKey, true);
         assert(success); // should never fail, as we just unlocked
         reservekey.KeepKey();
 
-        LearnRelatedScripts(vchPubKey, m_default_change_type);
-        CScript scriptChange = GetScriptForDestination(GetDestinationForKey(vchPubKey, m_default_change_type));
+        LearnRelatedScripts(vchPubKey, output_type);
+        CScript scriptChange = GetScriptForDestination(GetDestinationForKey(vchPubKey, output_type));
         // return change
         txCollateral.vout.push_back(CTxOut(nValue - CPrivateSend::GetCollateralAmount(), scriptChange));
     } else { // nValue < CPrivateSend::GetCollateralAmount() * 2

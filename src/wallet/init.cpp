@@ -262,12 +262,11 @@ void UnloadWallets()
 
 bool CheckMNCollateral(COutPoint& outpointRet, CTxDestination &destRet, CPubKey& pubKeyRet, CKey& keyRet, const std::string& strTxHash, const std::string& strOutputIndex)
 {
-    bool foundmnout = false;
     for (const std::shared_ptr<CWallet>& pwallet : GetWallets()) {
         if (pwallet->GetMasternodeOutpointAndKeys(outpointRet, destRet, pubKeyRet, keyRet, strTxHash, strOutputIndex))
-            foundmnout = true;
+            return true;
     }
-    return foundmnout;
+    return false;
 }
 
 bool IsMixingMasternode(const CNode* pnode)

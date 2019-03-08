@@ -105,7 +105,7 @@ public:
     inline void SerializationOp(Stream& s, Operation ser_action) {
         LOCK(cs);
         std::string strVersion;
-        if(ser_action.ForRead()) {
+        if (ser_action.ForRead()) {
             READWRITE(strVersion);
         }
         else {
@@ -124,7 +124,7 @@ public:
 
         READWRITE(mapSeenMasternodeBroadcast);
         READWRITE(mapSeenMasternodePing);
-        if(ser_action.ForRead() && (strVersion != SERIALIZATION_VERSION_STRING)) {
+        if (ser_action.ForRead() && (strVersion != SERIALIZATION_VERSION_STRING)) {
             Clear();
         }
     }

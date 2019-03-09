@@ -773,7 +773,7 @@ void CMasternodeMan::ProcessPendingMnbRequests(CConnman* connman)
 {
     std::pair<CService, std::set<uint256> > p = PopScheduledMnbRequestConnection();
     if (!(p.first == CService() || p.second.empty())) {
-        if (connman->IsMasternodeOrDisconnectRequested(p.first)) return;
+        if (connman->IsDisconnectRequested(p.first) || connman->IsMasternode(p.first)) return;
         mapPendingMNB.insert(std::make_pair(p.first, std::make_pair(GetTime(), p.second)));
         connman->AddPendingMasternode(p.first);
     }
@@ -1134,7 +1134,7 @@ bool CMasternodeMan::SendVerifyRequest(const CAddress& addr, const std::vector<c
         return false;
     }
 
-    if (connman->IsMasternodeOrDisconnectRequested(addr)) return false;
+    if (connman->IsMasternode(addr) || connman->IsDisconnectRequested(addr)) return false;
 
     connman->AddPendingMasternode(addr);
     // use random nonce, store it and require node to reply with correct one later

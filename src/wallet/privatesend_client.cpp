@@ -1022,12 +1022,6 @@ bool CPrivateSendClientSession::JoinExistingQueue(CAmount nBalanceNeedsAnonymize
 
         if (infoMn.nProtocolVersion < MIN_PRIVATESEND_PEER_PROTO_VERSION) continue;
 
-        // skip next mn payments winners
-        if (mnpayments.IsScheduled(infoMn, 0)) {
-            LogPrintf("CPrivateSendClientSession::JoinExistingQueue -- skipping winner, masternode=%s\n", infoMn.outpoint.ToStringShort());
-            continue;
-        }
-
         std::vector<int> vecBits;
         if (!CPrivateSend::GetDenominationsBits(dsq.nDenom, vecBits)) {
             // incompatible denom
@@ -1052,8 +1046,8 @@ bool CPrivateSendClientSession::JoinExistingQueue(CAmount nBalanceNeedsAnonymize
 
         m_wallet_session->privateSendClient->AddUsedMasternode(dsq.masternodeOutpoint);
 
-        if (g_connman.get()->IsMasternodeOrDisconnectRequested(infoMn.addr)) {
-            LogPrintf("CPrivateSendClientSession::JoinExistingQueue -- skipping masternode connection, addr=%s\n", infoMn.addr.ToString());
+        if (g_connman.get()->IsDisconnectRequested(infoMn.addr)) {
+            LogPrintf("CPrivateSendClientSession::JoinExistingQueue -- skipping connection, addr=%s\n", infoMn.addr.ToString());
             continue;
         }
 
@@ -1118,9 +1112,9 @@ bool CPrivateSendClientSession::StartNewQueue(CAmount nValueMin, CAmount nBalanc
             continue;
         }
 
-        if (g_connman.get()->IsMasternodeOrDisconnectRequested(infoMn.addr)) {
-            LogPrintf("CPrivateSendClientSession::StartNewQueue -- skipping masternode connection, addr=%s\n", infoMn.addr.ToString());
-            nTries++;
+        // this should never happen
+        if (g_connman.get()->IsDisconnectRequested(infoMn.addr)) {
+            LogPrintf("CPrivateSendClientSession::StartNewQueue -- skipping connection, addr=%s\n", infoMn.addr.ToString());
             continue;
         }
 

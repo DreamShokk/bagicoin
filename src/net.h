@@ -200,7 +200,8 @@ public:
     bool ForNode(const CService& addr, std::function<bool(CNode* pnode)> func);
     bool ForNode(const CService& addr, std::function<bool(const CNode* pnode)> cond, std::function<bool(CNode* pnode)> func);
 
-    bool IsMasternodeOrDisconnectRequested(const CService& addr);
+    bool IsMasternode(const CService& addr);
+    bool IsDisconnectRequested(const CService& addr);
 
     void PushMessage(CNode* pnode, CSerializedNetMsg&& msg);
 

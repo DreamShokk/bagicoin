@@ -1925,7 +1925,7 @@ void CConnman::ThreadOpenMasternodeConnections()
 
         const CService addr = vPendingMasternodes.front();
         vPendingMasternodes.erase(vPendingMasternodes.begin());
-        if (IsMasternodeOrDisconnectRequested(addr)) {
+        if (IsMasternode(addr) || IsDisconnectRequested(addr)) {
             // nothing to do, try the next one
             continue;
         }
@@ -2846,9 +2846,15 @@ void CConnman::ReleaseNodeVector(const std::vector<CNode*>& vecNodes)
     }
 }
 
-bool CConnman::IsMasternodeOrDisconnectRequested(const CService& addr) {
+bool CConnman::IsMasternode(const CService& addr) {
     return ForNode(addr,[](CNode* pnode){
-        return pnode->fMasternode || pnode->fDisconnect;
+        return pnode && pnode->fMasternode;
+    });
+}
+
+bool CConnman::IsDisconnectRequested(const CService& addr) {
+    return ForNode(addr,[](CNode* pnode){
+        return pnode && pnode->fDisconnect;
     });
 }
 

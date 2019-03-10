@@ -163,7 +163,7 @@ public:
     {
     }
 
-    void ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStream& vRecv);
+    void ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStream& vRecv, CConnman* connman);
 
     void UnlockCoins();
 
@@ -242,7 +242,7 @@ public:
     {
     }
 
-    void ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStream& vRecv);
+    void ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStream& vRecv, CConnman* connman);
 
     bool IsDenomSkipped(const CAmount& nDenomValue);
     void AddSkippedDenom(const CAmount& nDenomValue);

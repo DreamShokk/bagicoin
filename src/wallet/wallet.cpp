@@ -13,6 +13,7 @@
 #include <consensus/validation.h>
 #include <fs.h>
 #include <interfaces/chain.h>
+#include <interfaces/modules.h>
 #include <key.h>
 #include <key_io.h>
 #include <keystore.h>
@@ -2354,6 +2355,13 @@ void CWallet::ResendWalletTransactions(int64_t nBestBlockTime, CConnman* connman
     std::vector<uint256> relayed = ResendWalletTransactionsBefore(*locked_chain, nBestBlockTime-5*60, connman);
     if (!relayed.empty())
         WalletLogPrintf("%s: rebroadcast %u unconfirmed transactions\n", __func__, relayed.size());
+}
+
+void CWallet::ProcessModuleMessage(CNode* pfrom, const NetMsgDest& dest, const std::string& strCommand, CDataStream& vRecv, CConnman* connman)
+{
+    if (dest == NetMsgDest::MSG_PSEND || dest == NetMsgDest::MSG_ALL) {
+        privateSendClient->ProcessMessage(pfrom, strCommand, vRecv, connman);
+    }
 }
 
 /** @} */ // end of mapWallet

@@ -68,7 +68,7 @@ void CKeyHolderStorage::ReturnAll()
     }
 }
 
-void CPrivateSendClientManager::ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStream& vRecv)
+void CPrivateSendClientManager::ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStream& vRecv, CConnman* connman)
 {
     if (fLiteMode) return; // ignore all Chaincoin related functionality
     if (!masternodeSync.IsBlockchainSynced()) return;
@@ -84,7 +84,7 @@ void CPrivateSendClientManager::ProcessMessage(CNode* pfrom, const std::string& 
     if (strCommand == NetMsgType::DSQUEUE) {
         if (pfrom->GetSendVersion() < MIN_PRIVATESEND_PEER_PROTO_VERSION) {
             LogPrint(BCLog::PRIVSEND, "DSQUEUE -- peer=%d using obsolete version %i\n", pfrom->GetId(), pfrom->GetSendVersion());
-            g_connman.get()->PushMessage(pfrom, CNetMsgMaker(pfrom->GetSendVersion()).Make(NetMsgType::REJECT, strCommand, REJECT_OBSOLETE,
+            connman->PushMessage(pfrom, CNetMsgMaker(pfrom->GetSendVersion()).Make(NetMsgType::REJECT, strCommand, REJECT_OBSOLETE,
                                strprintf("Version must be %d or greater", MIN_PRIVATESEND_PEER_PROTO_VERSION)));
             return;
         }
@@ -114,7 +114,7 @@ void CPrivateSendClientManager::ProcessMessage(CNode* pfrom, const std::string& 
 
         if (!dsq.CheckSignature(infoMn.pubKeyMasternode)) {
             // we probably have outdated info
-            mnodeman.AskForMN(pfrom, dsq.masternodeOutpoint, g_connman.get());
+            mnodeman.AskForMN(pfrom, dsq.masternodeOutpoint, connman);
             return;
         }
 
@@ -160,7 +160,7 @@ void CPrivateSendClientManager::ProcessMessage(CNode* pfrom, const std::string& 
                 }
             }
             vecPrivateSendQueue.push_back(dsq);
-            dsq.Relay(g_connman.get());
+            dsq.Relay(connman);
         }
 
     } else if (
@@ -169,12 +169,12 @@ void CPrivateSendClientManager::ProcessMessage(CNode* pfrom, const std::string& 
         strCommand == NetMsgType::DSCOMPLETE) {
         LOCK(cs_deqsessions);
         for (auto& session : deqSessions) {
-            session.ProcessMessage(pfrom, strCommand, vRecv);
+            session.ProcessMessage(pfrom, strCommand, vRecv, connman);
         }
     }
 }
 
-void CPrivateSendClientSession::ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStream& vRecv)
+void CPrivateSendClientSession::ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStream& vRecv, CConnman* connman)
 {
     if (fLiteMode) return; // ignore all Dash related functionality
     if (!masternodeSync.IsBlockchainSynced()) return;
@@ -183,7 +183,7 @@ void CPrivateSendClientSession::ProcessMessage(CNode* pfrom, const std::string& 
 
         if (pfrom->GetSendVersion() < MIN_PRIVATESEND_PEER_PROTO_VERSION) {
             LogPrint(BCLog::PRIVSEND, "DSSTATUSUPDATE -- peer=%d using obsolete version %i\n", pfrom->GetId(), pfrom->GetSendVersion());
-            g_connman.get()->PushMessage(pfrom, CNetMsgMaker(pfrom->GetSendVersion()).Make(NetMsgType::REJECT, strCommand, REJECT_OBSOLETE,
+            connman->PushMessage(pfrom, CNetMsgMaker(pfrom->GetSendVersion()).Make(NetMsgType::REJECT, strCommand, REJECT_OBSOLETE,
                                strprintf("Version must be %d or greater", MIN_PRIVATESEND_PEER_PROTO_VERSION)));
             return;
         }
@@ -226,7 +226,7 @@ void CPrivateSendClientSession::ProcessMessage(CNode* pfrom, const std::string& 
     } else if (strCommand == NetMsgType::DSFINALTX) {
         if (pfrom->GetSendVersion() < MIN_PRIVATESEND_PEER_PROTO_VERSION) {
             LogPrint(BCLog::PRIVSEND, "DSFINALTX -- peer=%d using obsolete version %i\n", pfrom->GetId(), pfrom->GetSendVersion());
-            g_connman.get()->PushMessage(pfrom, CNetMsgMaker(pfrom->GetSendVersion()).Make(NetMsgType::REJECT, strCommand, REJECT_OBSOLETE,
+            connman->PushMessage(pfrom, CNetMsgMaker(pfrom->GetSendVersion()).Make(NetMsgType::REJECT, strCommand, REJECT_OBSOLETE,
                                strprintf("Version must be %d or greater", MIN_PRIVATESEND_PEER_PROTO_VERSION)));
             return;
         }
@@ -254,7 +254,7 @@ void CPrivateSendClientSession::ProcessMessage(CNode* pfrom, const std::string& 
     } else if (strCommand == NetMsgType::DSCOMPLETE) {
         if (pfrom->GetSendVersion() < MIN_PRIVATESEND_PEER_PROTO_VERSION) {
             LogPrint(BCLog::PRIVSEND, "DSCOMPLETE -- peer=%d using obsolete version %i\n", pfrom->GetId(), pfrom->GetSendVersion());
-            g_connman.get()->PushMessage(pfrom, CNetMsgMaker(pfrom->GetSendVersion()).Make(NetMsgType::REJECT, strCommand, REJECT_OBSOLETE,
+            connman->PushMessage(pfrom, CNetMsgMaker(pfrom->GetSendVersion()).Make(NetMsgType::REJECT, strCommand, REJECT_OBSOLETE,
                                strprintf("Version must be %d or greater", MIN_PRIVATESEND_PEER_PROTO_VERSION)));
             return;
         }

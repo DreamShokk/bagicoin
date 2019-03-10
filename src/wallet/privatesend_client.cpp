@@ -1085,7 +1085,7 @@ bool CPrivateSendClientSession::StartNewQueue(CAmount nValueMin, CAmount nBalanc
     }
 
     // otherwise, try one randomly
-    while(nTries < 10) {
+    while(nTries < 30) {
         masternode_info_t infoMn = m_wallet_session->privateSendClient->GetNotUsedMasternode();
 
         if (!infoMn.fInfoValid) {

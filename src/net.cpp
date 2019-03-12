@@ -1956,7 +1956,8 @@ void CConnman::OpenNetworkConnection(const CAddress& addrConnect, bool fCountFai
     }
     if (!pszDest) {
         if (IsLocal(addrConnect) ||
-            FindNode(static_cast<CNetAddr>(addrConnect)) || (m_banman && m_banman->IsBanned(addrConnect)) ||
+            /* needed for multi-port support on testnet */
+            (fConnectToMasternode ? FindNode(static_cast<CService>(addrConnect)) : FindNode(static_cast<CNetAddr>(addrConnect))) || (m_banman && m_banman->IsBanned(addrConnect)) ||
             FindNode(addrConnect.ToStringIPPort()))
             return;
     } else if (FindNode(std::string(pszDest)))

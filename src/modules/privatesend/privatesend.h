@@ -236,8 +236,8 @@ public:
 
     std::string ToString() const
     {
-        return strprintf("nDenom=%d, nInputCount=%d, nTime=%lld, fReady=%s, fTried=%s, masternode=%s",
-                        nDenom, nTime, fReady ? "true" : "false", fTried ? "true" : "false", masternodeOutpoint.ToStringShort());
+        return strprintf("nDenom=%d, nTime=%lld, fReady=%s, fTried=%s, masternode=%s",
+            nDenom, nTime, fReady ? "true" : "false", fTried ? "true" : "false", masternodeOutpoint.ToStringShort());
     }
 
     friend bool operator==(const CPrivateSendQueue& a, const CPrivateSendQueue& b)

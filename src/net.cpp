@@ -1912,39 +1912,32 @@ void CConnman::ThreadOpenMasternodeConnections()
     if (gArgs.IsArgSet("-connect") && gArgs.GetArgs("-connect").size() > 0)
         return;
 
-    while (!interruptNet)
+    while (true)
     {
-        if (!interruptNet.sleep_for(std::chrono::milliseconds(1000)))
-            return;
-
         CSemaphoreGrant grant(*semMasternodeOutbound);
-        if (interruptNet)
-            return;
 
-        // NOTE: Process only one pending masternode at a time
-
+        {
         LOCK(cs_vPendingMasternodes);
-        if (vPendingMasternodes.empty()) {
-            // nothing to do, keep waiting
-            continue;
-        }
 
-        const CService addr = vPendingMasternodes.front();
-        vPendingMasternodes.erase(vPendingMasternodes.begin());
-        if (IsMasternode(addr) || IsDisconnectRequested(addr)) {
-            // nothing to do, try the next one
-            continue;
-        }
-
-        OpenNetworkConnection(CAddress(addr, NODE_NETWORK), false, nullptr, nullptr, false, false, false, true);
-        // should be in the list now if connection was opened
-        ForNode(addr, [&](CNode* pnode) {
-            if (pnode->fDisconnect) {
-                return false;
+        for (const CService& addr : vPendingMasternodes) {
+            if (IsMasternode(addr) || IsDisconnectRequested(addr)) {
+                continue;
             }
-            grant.MoveTo(pnode->grantMasternodeOutbound);
-            return true;
-        });
+            if (!grant.TryAcquire()) {
+                // If we've used up our semaphore and need a new one, let's not wait here since while we are waiting
+                // the vPendingMasternodes might change.
+                break;
+            }
+            OpenNetworkConnection(CAddress(addr, NODE_NONE), false, &grant, nullptr, false, false, false, true);
+            if (!interruptNet.sleep_for(std::chrono::milliseconds(500)))
+                return;
+        }
+        // All pending MN connections established, clean up
+        vPendingMasternodes.clear();
+        }
+        // Run every two seconds
+        if (!interruptNet.sleep_for(std::chrono::milliseconds(2000)))
+            return;
     }
 }
 
@@ -2499,6 +2492,18 @@ bool CConnman::AddPendingMasternode(const CService& service)
     return true;
 }
 
+bool CConnman::RemovePendingMasternode(const CService& service)
+{
+    LOCK(cs_vPendingMasternodes);
+    for(std::vector<CService>::const_iterator it = vPendingMasternodes.begin(); it != vPendingMasternodes.end(); ++it) {
+        if (service == *it) {
+            vPendingMasternodes.erase(it);
+            return true;
+        }
+    }
+    return false;
+}
+
 size_t CConnman::GetNodeCount(NumConnections flags)
 {
     LOCK(cs_vNodes);
@@ -2800,7 +2805,7 @@ bool CConnman::ForNode(const CService& addr, std::function<bool(const CNode* pno
             break;
         }
     }
-    return found != nullptr&& NodeFullyConnected(found) && cond(found) && func(found);
+    return found != nullptr && NodeFullyConnected(found) && cond(found) && func(found);
 }
 
 bool CConnman::ForNode(const CService& addr, std::function<bool(CNode* pnode)> func)
@@ -2826,7 +2831,7 @@ bool CConnman::ForNode(NodeId id, std::function<bool(const CNode* pnode)> cond, 
             break;
         }
     }
-    return found != nullptr&& NodeFullyConnected(found) && cond(found) && func(found);
+    return found != nullptr && NodeFullyConnected(found) && cond(found) && func(found);
 }
 
 std::vector<CNode*> CConnman::CopyNodeVector()

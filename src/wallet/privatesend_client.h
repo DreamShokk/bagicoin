@@ -55,7 +55,7 @@ public:
 class CPendingDsaRequest
 {
 private:
-    static const int TIMEOUT = 15;
+    static const int TIMEOUT = 75;
 
     CService addr;
     CPrivateSendAccept dsa;
@@ -179,7 +179,7 @@ public:
     /// As a client, submit part of a future mixing transaction to a Masternode to start the process
     bool SubmitDenominate();
 
-    bool ProcessPendingDsaRequest(CConnman *connman);
+    bool ProcessPendingDsaRequest(CConnman* connman);
 
     bool CheckTimeout();
 };
@@ -256,8 +256,6 @@ public:
     std::string GetSessionDenoms();
 
     bool GetMixingMasternodesInfo(std::vector<masternode_info_t>& vecMnInfoRet) const;
-
-    bool IsMixingMasternode(const CNode* pnode) const;
 
     /// Passively run mixing in the background according to the configuration in settings
     void DoAutomaticDenominating();

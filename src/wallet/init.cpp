@@ -269,11 +269,14 @@ bool CheckMNCollateral(COutPoint& outpointRet, CTxDestination &destRet, CPubKey&
     return false;
 }
 
-bool IsMixingMasternode(const CNode* pnode)
+void GetMixingMasternodesInfo(std::vector<masternode_info_t>& vecMnInfoRet)
 {
     for (const std::shared_ptr<CWallet>& pwallet : GetWallets()) {
-        if (pwallet->privateSendClient->IsMixingMasternode(pnode))
-            return true;
+        std::vector<masternode_info_t> vecMnInfoSession;
+        if (pwallet->privateSendClient->GetMixingMasternodesInfo(vecMnInfoSession)) {
+            vecMnInfoRet.reserve(vecMnInfoRet.size() + vecMnInfoSession.size());
+            vecMnInfoRet.insert(vecMnInfoRet.end(), vecMnInfoSession.begin(), vecMnInfoSession.end());
+        }
     }
-    return false;
+    return;
 }

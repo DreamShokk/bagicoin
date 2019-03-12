@@ -58,7 +58,7 @@ void StopWallets();
 bool CheckMNCollateral(COutPoint& outpointRet, CTxDestination &destRet, CPubKey& pubKeyRet, CKey& keyRet, const std::string& strTxHash, const std::string& strOutputIndex);
 
 //! Return MN mixing state
-bool IsMixingMasternode(const CNode* pnode);
+void GetMixingMasternodesInfo(std::vector<masternode_info_t>& vecMnInfoRet);
 
 //! Close all wallets.
 void UnloadWallets();

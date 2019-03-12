@@ -420,17 +420,6 @@ bool CPrivateSendClientManager::GetMixingMasternodesInfo(std::vector<masternode_
     return !vecMnInfoRet.empty();
 }
 
-bool CPrivateSendClientManager::IsMixingMasternode(const CNode* pnode) const
-{
-    for (const auto& session : deqSessions) {
-        masternode_info_t mnInfo;
-        if (session.GetMixingMasternodeInfo(mnInfo)) {
-            return mnInfo.fInfoValid && pnode->GetAddrLocal() == mnInfo.addr;
-        }
-    }
-    return false;
-}
-
 //
 // Check the mixing progress and send client updates if a Masternode
 //
@@ -468,7 +457,7 @@ bool CPrivateSendClientSession::CheckTimeout()
             break;
     }
 
-    int nLagTime = PRIVATESEND_QUEUE_TIMEOUT / 10; // give the server a few extra seconds before resetting.
+    int nLagTime = 10; // give the server a few extra seconds before resetting.
     int nTimeout = (nState == POOL_STATE_SIGNING) ? PRIVATESEND_SIGNING_TIMEOUT : PRIVATESEND_QUEUE_TIMEOUT;
     bool fTimeout = GetTime() - nTimeLastSuccessfulStep >= nTimeout + nLagTime;
 
@@ -1145,16 +1134,17 @@ bool CPrivateSendClientSession::StartNewQueue(CAmount nValueMin, CAmount nBalanc
 bool CPrivateSendClientSession::ProcessPendingDsaRequest(CConnman* connman)
 {
     if (!pendingDsaRequest) return false;
+    CService addr = pendingDsaRequest.GetAddr();
+    if (addr == CService()) return false;
 
-    bool fDone = connman->ForNode(pendingDsaRequest.GetAddr(), [&](CNode* pnode) {
-        LogPrint(BCLog::PRIVSEND, "CPrivateSendClientSession::%s -- processing dsa queue for addr=%s\n", __func__, pnode->GetAddrLocal().ToString());
-        nTimeLastSuccessfulStep = GetTime();
-        SetState(POOL_STATE_QUEUE);
-        m_wallet_session->NotifyTransactionChanged(m_wallet_session, txMyCollateral.GetHash(), CT_UPDATED);
-        CNetMsgMaker msgMaker(pnode->GetSendVersion());
-        connman->PushMessage(pnode, msgMaker.Make(NetMsgType::DSACCEPT, pendingDsaRequest.GetDSA()));
-        return true;
-    });
+    bool fDone = connman->ForNode(addr, [&](CNode *pnode) {
+            LogPrint(BCLog::PRIVSEND, "CPrivateSendClientSession::%s -- processing dsa queue for addr=%s\n", __func__, pnode->addr.ToString());
+            nTimeLastSuccessfulStep = GetTime();
+            SetState(POOL_STATE_QUEUE);
+            m_wallet_session->NotifyTransactionChanged(m_wallet_session, txMyCollateral.GetHash(), CT_UPDATED);
+            connman->PushMessage(pnode, CNetMsgMaker(pnode->GetSendVersion()).Make(NetMsgType::DSACCEPT, pendingDsaRequest.GetDSA()));
+            return true;
+        });
 
     if (fDone) {
         pendingDsaRequest = CPendingDsaRequest();

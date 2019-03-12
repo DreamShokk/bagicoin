@@ -190,7 +190,7 @@ void CPrivateSendClientSession::ProcessMessage(CNode* pfrom, const std::string& 
 
         if (!infoMixingMasternode.fInfoValid) return;
         if (infoMixingMasternode.addr != pfrom->addr) {
-            //LogPrintf("DSSTATUSUPDATE -- message doesn't match current Masternode: infoMixingMasternode %s addr %s\n", infoMixingMasternode.addr.ToString(), pfrom->addr.ToString());
+            LogPrintf("DSSTATUSUPDATE -- message doesn't match current Masternode: infoMixingMasternode %s addr %s\n", infoMixingMasternode.addr.ToString(), pfrom->addr.ToString());
             return;
         }
 
@@ -1137,7 +1137,7 @@ bool CPrivateSendClientSession::ProcessPendingDsaRequest(CConnman* connman)
     CService addr = pendingDsaRequest.GetAddr();
     if (addr == CService()) return false;
 
-    bool fDone = connman->ForNode(addr, [&](CNode *pnode) {
+    bool fDone = connman->ForNode(addr, [&](CNode* pnode) {
             LogPrint(BCLog::PRIVSEND, "CPrivateSendClientSession::%s -- processing dsa queue for addr=%s\n", __func__, pnode->addr.ToString());
             nTimeLastSuccessfulStep = GetTime();
             SetState(POOL_STATE_QUEUE);

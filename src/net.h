@@ -589,6 +589,7 @@ public:
     int nVersion;
     std::string cleanSubVer;
     bool fInbound;
+    bool fMasternode;
     bool m_manual_connection;
     int nStartingHeight;
     uint64_t nSendBytes;

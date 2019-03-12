@@ -514,6 +514,7 @@ void CNode::copyStats(CNodeStats &stats)
         X(cleanSubVer);
     }
     X(fInbound);
+    X(fMasternode);
     X(m_manual_connection);
     X(nStartingHeight);
     {

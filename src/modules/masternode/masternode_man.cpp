@@ -729,17 +729,34 @@ void CMasternodeMan::ProcessMasternodeConnections(CConnman* connman)
     //we don't care about this for regtest
     if (Params().NetworkIDString() == CBaseChainParams::REGTEST) return;
 
+    std::vector<CAddress> disconnect;
+    std::vector<masternode_info_t> vecMnInfo;
+
+    for (const auto& client : g_mn_interfaces->chain_clients) {
+        std::vector<masternode_info_t> vecMnInfoClient;
+        client->getMixingMasternodesInfo(vecMnInfoClient);
+        vecMnInfo.reserve(vecMnInfo.size() + vecMnInfoClient.size());
+        vecMnInfo.insert(vecMnInfo.end(), vecMnInfoClient.begin(), vecMnInfoClient.end());
+    }
+
     connman->ForEachNode([&](CNode* pnode) {
-        bool ismixing = false;
-        for (const auto& client : g_mn_interfaces->chain_clients) {
-            if (client->mixingMasternode(pnode))
-                ismixing = true;
-        }
-        if (pnode->fMasternode && !ismixing) {
-            LogPrintf("Closing Masternode connection: peer=%d, addr=%s\n", pnode->GetId(), pnode->addr.ToString());
-            pnode->fDisconnect = true;
+        if (pnode->fMasternode) {
+            bool ismixing = false;
+            for (const auto& mnode : vecMnInfo) {
+                if (mnode.addr == pnode->addr) ismixing = true;
+            }
+            if (!ismixing) {
+                LogPrintf("CMasternodeMan::ProcessMasternodeConnections -- Closing Masternode connection: peer=%d, addr=%s\n", pnode->GetId(), pnode->addr.ToString());
+                disconnect.push_back(pnode->addr);
+                pnode->fDisconnect = true;
+            } else {
+                LogPrintf("CMasternodeMan::ProcessMasternodeConnections -- Keep mixing Masternode connection: peer=%d, addr=%s\n", pnode->GetId(), pnode->addr.ToString());
+            }
         }
     });
+    for (const auto& addr : disconnect){
+        connman->RemovePendingMasternode(addr);
+    }
 }
 
 std::pair<CService, std::set<uint256> > CMasternodeMan::PopScheduledMnbRequestConnection()

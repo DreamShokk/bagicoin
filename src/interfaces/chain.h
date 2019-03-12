@@ -19,6 +19,7 @@ class CBlock;
 class CScheduler;
 class uint256;
 struct CBlockLocator;
+struct masternode_info_t;
 
 namespace interfaces {
 
@@ -161,7 +162,7 @@ public:
     virtual bool checkCollateral(COutPoint& outpointRet, CTxDestination &destRet, CPubKey& pubKeyRet, CKey& keyRet, const std::string& strTxHash, const std::string& strOutputIndex) = 0;
 
     //! Return MN mixing state */
-    virtual bool mixingMasternode(const CNode* pnode) = 0;
+    virtual void getMixingMasternodesInfo(std::vector<masternode_info_t>& vecMnInfoRet) = 0;
 
 };
 

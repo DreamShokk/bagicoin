@@ -600,7 +600,7 @@ public:
     {
         return CheckMNCollateral(outpointRet, destRet, pubKeyRet, keyRet, strTxHash, strOutputIndex);
     }
-    bool mixingMasternode(const CNode* pnode) override { return IsMixingMasternode(pnode); }
+    void getMixingMasternodesInfo(std::vector<masternode_info_t>& vecMnInfoRet) override { return GetMixingMasternodesInfo(vecMnInfoRet); }
     ~WalletClientImpl() override { UnloadWallets(); }
 
     Chain& m_chain;

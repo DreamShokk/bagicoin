@@ -190,7 +190,7 @@ void CPrivateSendClientSession::ProcessMessage(CNode* pfrom, const std::string& 
 
         if (!infoMixingMasternode.fInfoValid) return;
         if (infoMixingMasternode.addr != pfrom->addr) {
-            LogPrintf("DSSTATUSUPDATE -- message doesn't match current Masternode: infoMixingMasternode %s addr %s\n", infoMixingMasternode.addr.ToString(), pfrom->addr.ToString());
+            LogPrint(BCLog::PRIVSEND, "DSSTATUSUPDATE -- message received from different Masternode: infoMixingMasternode %s addr %s\n", infoMixingMasternode.addr.ToString(), pfrom->addr.ToString());
             return;
         }
 
@@ -233,7 +233,7 @@ void CPrivateSendClientSession::ProcessMessage(CNode* pfrom, const std::string& 
 
         if (!infoMixingMasternode.fInfoValid) return;
         if (infoMixingMasternode.addr != pfrom->addr) {
-            LogPrintf("DSFINALTX -- message doesn't match current Masternode: infoMixingMasternode %s addr %s\n", infoMixingMasternode.addr.ToString(), pfrom->addr.ToString());
+            LogPrint(BCLog::PRIVSEND, "DSFINALTX -- message received from different Masternode: infoMixingMasternode %s addr %s\n", infoMixingMasternode.addr.ToString(), pfrom->addr.ToString());
             return;
         }
 
@@ -261,7 +261,7 @@ void CPrivateSendClientSession::ProcessMessage(CNode* pfrom, const std::string& 
 
         if (!infoMixingMasternode.fInfoValid) return;
         if (infoMixingMasternode.addr != pfrom->addr) {
-            LogPrint(BCLog::PRIVSEND, "DSCOMPLETE -- message doesn't match current Masternode: infoMixingMasternode=%s  addr=%s\n", infoMixingMasternode.addr.ToString(), pfrom->addr.ToString());
+            LogPrint(BCLog::PRIVSEND, "DSCOMPLETE -- message received from different Masternode: infoMixingMasternode=%s  addr=%s\n", infoMixingMasternode.addr.ToString(), pfrom->addr.ToString());
             return;
         }
 

@@ -3111,7 +3111,7 @@ bool CWallet::FundTransaction(CMutableTransaction& tx, CAmount& nFeeRet, int& nC
     return true;
 }
 
-bool CWallet::SelectPSInOutPairsByDenominations(int nDenom, CAmount nValueMin, CAmount nValueMax, std::vector< std::pair<CTxDSIn, CTxOut> >& vecPSInOutPairsRet)
+bool CWallet::SelectPSInOutPairsByDenominations(interfaces::Chain::Lock& locked_chain, int nDenom, CAmount nValueMin, CAmount nValueMax, std::vector< std::pair<CTxDSIn, CTxOut> >& vecPSInOutPairsRet)
 {
     CAmount nValueTotal{0};
     int nDenomResult{0};
@@ -3127,9 +3127,8 @@ bool CWallet::SelectPSInOutPairsByDenominations(int nDenom, CAmount nValueMin, C
     }
 
     {
-        auto locked_chain = chain().lock();
         LOCK(cs_wallet);
-        AvailableCoins(*locked_chain, vCoins, true, nullptr, ONLY_DENOMINATED);
+        AvailableCoins(locked_chain, vCoins, true, nullptr, ONLY_DENOMINATED);
     }
 
     WalletLogPrintf("CWallet::%s -- vCoins.size(): %d\n", __func__, vCoins.size());
@@ -3421,12 +3420,11 @@ int CWallet::CountInputsWithAmount(CAmount nInputAmount)
     return nTotal;
 }
 
-bool CWallet::HasCollateralInputs(bool fOnlyConfirmed) const
+bool CWallet::HasCollateralInputs(interfaces::Chain::Lock& locked_chain, bool fOnlyConfirmed) const
 {
-    LOCK(cs_wallet);
     std::vector<COutput> vCoins;
-    auto locked_chain = chain().lock();
-    AvailableCoins(*locked_chain, vCoins, fOnlyConfirmed, nullptr, ONLY_PRIVATESEND_COLLATERAL);
+    LOCK(cs_wallet);
+    AvailableCoins(locked_chain, vCoins, fOnlyConfirmed, nullptr, ONLY_PRIVATESEND_COLLATERAL);
 
     return !vCoins.empty();
 }

@@ -46,7 +46,7 @@ private:
     mutable CCriticalSection cs_storage;
 
 public:
-    void AddKey(std::shared_ptr<CReserveScript>& script, CWallet* pwalletIn);
+    void AddKey(std::shared_ptr<CReserveScript> &script, CWallet* pwalletIn);
     void KeepAll();
     void ReturnAll();
 
@@ -126,7 +126,7 @@ private:
     bool StartNewQueue(CAmount nValueMin, CAmount nBalanceNeedsAnonymized);
 
     /// step 0: select denominated inputs and txouts
-    bool SelectDenominate(std::string& strErrorRet, std::vector<std::pair<CTxDSIn, CTxOut> >& vecPSInOutPairsRet);
+    bool SelectDenominate(interfaces::Chain::Lock &locked_chain, std::string& strErrorRet, std::vector<std::pair<CTxDSIn, CTxOut> >& vecPSInOutPairsRet);
     /// step 1: prepare denominated inputs and outputs
     bool PrepareDenominate(int nMinRounds, int nMaxRounds, std::string& strErrorRet, const std::vector<std::pair<CTxDSIn, CTxOut> >& vecPSInOutPairsIn, std::vector<std::pair<CTxDSIn, CTxOut> >& vecPSInOutPairsRet);
     /// step 2: send denominated inputs and outputs prepared in step 1

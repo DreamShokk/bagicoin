@@ -263,7 +263,7 @@ void CMasternode::Check(bool fForce)
         LogPrint(BCLog::MNODE, "CMasternode::Check -- outpoint=%s, GetAdjustedTime()=%d, lastPing.fSentinelIsCurrent=%d\n",
                 outpoint.ToStringShort(), GetAdjustedTime(), lastPing.fSentinelIsCurrent);
 
-        if (!mnodeman.IsSentinelPingActive() || !lastPing.fSentinelIsCurrent) {
+        if (masternodeSync.IsSynced() && (!mnodeman.IsSentinelPingActive() || !lastPing.fSentinelIsCurrent)) {
             nActiveState = MASTERNODE_SENTINEL_PING_EXPIRED;
             if (nActiveStatePrev != nActiveState) {
                 uiInterface.NotifyMasternodeChanged(outpoint, CT_UPDATED);

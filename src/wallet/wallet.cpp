@@ -5109,6 +5109,9 @@ void CWallet::postInitProcess()
     // Do this here as mempool requires genesis block to be loaded
     ReacceptWalletTransactions(*locked_chain);
 
+    // Update wallet transactions with current mempool transactions.
+    chain().requestMempoolTransactions([this](const CTransactionRef& tx) { TransactionAddedToMempool(tx); });
+
     if((gArgs.GetBoolArg("-mnconflock", true)) && (masternodeConfig.getCount() > 0)) {
         LOCK(cs_wallet);
         WalletLogPrintf("Locking Masternodes:\n");

@@ -12,7 +12,7 @@
  * for both chaincoind and chaincoin-qt, to make it harder for attackers to
  * target servers or GUI users specifically.
  */
-const std::string CLIENT_NAME("Chaincoin Core");
+const std::string CLIENT_NAME("CoinJoin");
 
 /**
  * Client version number

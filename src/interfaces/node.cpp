@@ -17,7 +17,7 @@
 #include <modules/masternode/masternode_config.h>
 #include <modules/masternode/masternode_man.h>
 #include <modules/platform/funding.h>
-#include <modules/privatesend/privatesend.h>
+#include <modules/coinjoin/coinjoin.h>
 #include <net.h>
 #include <net_processing.h>
 #include <netaddress.h>
@@ -366,8 +366,8 @@ public:
     {
         MasterNodeCount result;
         result.size = ::mnodeman.size();
-        result.compatible = ::mnodeman.CountMasternodes(MIN_PRIVATESEND_PEER_PROTO_VERSION);
-        result.enabled = ::mnodeman.CountEnabled(MIN_PRIVATESEND_PEER_PROTO_VERSION);
+        result.compatible = ::mnodeman.CountMasternodes(MIN_COINJOIN_PEER_PROTO_VERSION);
+        result.enabled = ::mnodeman.CountEnabled(-1);
         result.countIPv4 = ::mnodeman.CountByIP(NET_IPV4);
         result.countIPv6 = ::mnodeman.CountByIP(NET_IPV6);
         result.countTOR = ::mnodeman.CountByIP(NET_ONION);

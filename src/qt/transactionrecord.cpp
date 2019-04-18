@@ -12,7 +12,7 @@
 #include <timedata.h>
 #include <validation.h>
 
-#include <modules/privatesend/privatesend.h>
+#include <modules/coinjoin/coinjoin.h>
 
 #include <QDateTime>
 
@@ -96,7 +96,7 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const interface
         if (nNet == 0 && fAllFromMe && fAllToMe)
         {
             // Private Send Denominate is currently the only zero-fee case allowed
-            parts.append(TransactionRecord(hash, nTime, TransactionRecord::PrivateSendDenominate, "",
+            parts.append(TransactionRecord(hash, nTime, TransactionRecord::CoinJoinDenominate, "",
                              -nDebit, nCredit));
             parts.last().involvesWatchAddress = involvesWatchAddress;   // maybe pass to TransactionRecord as constructor argument
         }
@@ -117,9 +117,7 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const interface
                 sub.idx = nOut;
                 sub.involvesWatchAddress = involvesWatchAddress;
 
-                if(txout.nValue == CPrivateSend::GetMaxCollateralAmount()) sub.type = TransactionRecord::PrivateSendMakeCollaterals;
-                if(CPrivateSend::IsDenominatedAmount(txout.nValue)) sub.type = TransactionRecord::PrivateSendCreateDenominations;
-                if(nDebit - wtx.tx->GetValueOut() == CPrivateSend::GetCollateralAmount()) sub.type = TransactionRecord::PrivateSendCollateralPayment;
+                if(CCoinJoin::IsDenominatedAmount(txout.nValue)) sub.type = TransactionRecord::CoinJoinCreateDenominations;
             }
 
             CAmount nChange = wtx.change;
@@ -164,9 +162,9 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const interface
                     sub.address = mapValue["to"];
                 }
 
-                if(mapValue["DS"] == "1")
+                if(mapValue["CJ"] == "1")
                 {
-                    sub.type = TransactionRecord::PrivateSend;
+                    sub.type = TransactionRecord::CoinJoin;
                 }
 
                 CAmount nValue = txout.nValue;

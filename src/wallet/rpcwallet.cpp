@@ -313,7 +313,7 @@ static UniValue setlabel(const JSONRPCRequest& request)
 }
 
 
-static CTransactionRef SendMoney(interfaces::Chain::Lock& locked_chain, CWallet * const pwallet, const CTxDestination &address, CAmount nValue, bool fSubtractFeeFromAmount, const CCoinControl& coin_control, mapValue_t mapValue, bool fUsePrivateSend = false)
+static CTransactionRef SendMoney(interfaces::Chain::Lock& locked_chain, CWallet * const pwallet, const CTxDestination &address, CAmount nValue, bool fSubtractFeeFromAmount, const CCoinControl& coin_control, mapValue_t mapValue, bool fUseCoinJoin = false)
 {
     CAmount curBalance = pwallet->GetBalance();
 
@@ -340,13 +340,13 @@ static CTransactionRef SendMoney(interfaces::Chain::Lock& locked_chain, CWallet 
     CRecipient recipient = {scriptPubKey, nValue, fSubtractFeeFromAmount};
     vecSend.push_back(recipient);
     CTransactionRef tx;
-    if (!pwallet->CreateTransaction(locked_chain, vecSend, tx, reservekey, nFeeRequired, nChangePosRet, strError, coin_control, true, fUsePrivateSend ? ONLY_DENOMINATED : ALL_COINS)) {
+    if (!pwallet->CreateTransaction(locked_chain, vecSend, tx, reservekey, nFeeRequired, nChangePosRet, strError, coin_control, true, fUseCoinJoin ? ONLY_DENOMINATED : ALL_COINS)) {
         if (!fSubtractFeeFromAmount && nValue + nFeeRequired > curBalance)
             strError = strprintf("Error: This transaction requires a transaction fee of at least %s because of its amount, complexity, or use of recently received funds!", FormatMoney(nFeeRequired));
         throw JSONRPCError(RPC_WALLET_ERROR, strError);
     }
     CValidationState state;
-    if (!pwallet->CommitTransaction(tx, std::move(mapValue), {} /* orderForm */, reservekey, g_connman.get(), state, fUsePrivateSend)) {
+    if (!pwallet->CommitTransaction(tx, std::move(mapValue), {} /* orderForm */, reservekey, g_connman.get(), state, fUseCoinJoin)) {
         strError = strprintf("Error: The transaction was rejected! Reason given: %s", FormatStateMessage(state));
         throw JSONRPCError(RPC_WALLET_ERROR, strError);
     }
@@ -438,13 +438,13 @@ static UniValue sendtoaddress(const JSONRPCRequest& request)
         }
     }
 
-    bool fUsePrivateSend = false;
+    bool fUseCoinJoin = false;
     if (request.params.size() > 8)
-        fUsePrivateSend = request.params[8].get_bool();
+        fUseCoinJoin = request.params[8].get_bool();
 
     EnsureWalletIsUnlocked(pwallet);
 
-    CTransactionRef tx = SendMoney(*locked_chain, pwallet, dest, nAmount, fSubtractFeeFromAmount, coin_control, std::move(mapValue), fUsePrivateSend);
+    CTransactionRef tx = SendMoney(*locked_chain, pwallet, dest, nAmount, fSubtractFeeFromAmount, coin_control, std::move(mapValue), fUseCoinJoin);
     return tx->GetHash().GetHex();
 }
 
@@ -952,17 +952,17 @@ static UniValue sendmany(const JSONRPCRequest& request)
     CAmount nFeeRequired = 0;
     int nChangePosRet = -1;
     std::string strFailReason;
-    bool fUsePrivateSend = false;
+    bool fUseCoinJoin = false;
     if (request.params.size() > 8)
-        fUsePrivateSend = request.params[8].get_bool();
+        fUseCoinJoin = request.params[8].get_bool();
 
     CTransactionRef tx;
     bool fCreated = pwallet->CreateTransaction(*locked_chain, vecSend, tx, keyChange, nFeeRequired, nChangePosRet, strFailReason,
-                                               coin_control, true, fUsePrivateSend ? ONLY_DENOMINATED : ALL_COINS);
+                                               coin_control, true, fUseCoinJoin ? ONLY_DENOMINATED : ALL_COINS);
     if (!fCreated)
         throw JSONRPCError(RPC_WALLET_INSUFFICIENT_FUNDS, strFailReason);
     CValidationState state;
-    if (!pwallet->CommitTransaction(tx, std::move(mapValue), {} /* orderForm */, keyChange, g_connman.get(), state, fUsePrivateSend)) {
+    if (!pwallet->CommitTransaction(tx, std::move(mapValue), {} /* orderForm */, keyChange, g_connman.get(), state, fUseCoinJoin)) {
         strFailReason = strprintf("Transaction commit failed:: %s", FormatStateMessage(state));
         throw JSONRPCError(RPC_WALLET_ERROR, strFailReason);
     }
@@ -1345,8 +1345,8 @@ static void ListTransactions(interfaces::Chain::Lock& locked_chain, CWallet* con
                 entry.pushKV("involvesWatchonly", true);
             }
             MaybePushAddress(entry, s.destination);
-            std::map<std::string, std::string>::const_iterator it = wtx.mapValue.find("DS");
-            entry.pushKV("category", (it != wtx.mapValue.end() && it->second == "1") ? "privatesend" : "send");
+            std::map<std::string, std::string>::const_iterator it = wtx.mapValue.find("CJ");
+            entry.pushKV("category", (it != wtx.mapValue.end() && it->second == "1") ? "coinjoin" : "send");
             entry.pushKV("amount", ValueFromAmount(-s.amount));
             if (pwallet->mapAddressBook.count(s.destination)) {
                 entry.pushKV("label", pwallet->mapAddressBook[s.destination].name);
@@ -1945,7 +1945,7 @@ static UniValue walletpassphrase(const JSONRPCRequest& request)
                 RPCExamples{
             "\nUnlock the wallet for 60 seconds\n"
             + HelpExampleCli("walletpassphrase", "\"my pass phrase\" 60") +
-            "\nUnlock the wallet for 60 seconds but allow PrivateSend mixing only\n"
+            "\nUnlock the wallet for 60 seconds but allow CoinJoin mixing only\n"
             + HelpExampleCli("walletpassphrase", "\"my pass phrase\" 60 true") +
             "\nLock the wallet again (before 60 seconds)\n"
             + HelpExampleCli("walletlock", "") +
@@ -2939,7 +2939,7 @@ static UniValue listunspent(const JSONRPCRequest& request)
             entry.pushKV("desc", descriptor->ToString());
         }
         entry.pushKV("safe", out.fSafe);
-        entry.pushKV("ps_rounds", pwallet->GetCappedOutpointPrivateSendRounds(COutPoint(out.tx->GetHash(), out.i)));
+        entry.pushKV("ps_rounds", pwallet->GetCappedOutpointCoinJoinRounds(COutPoint(out.tx->GetHash(), out.i)));
         results.push_back(entry);
     }
 
@@ -4270,7 +4270,7 @@ static UniValue prepareproposal(const JSONRPCRequest& request)
     return tx->GetHash().ToString();
 }
 
-UniValue privatesend(const JSONRPCRequest& request)
+UniValue coinjoin(const JSONRPCRequest& request)
 {
     std::shared_ptr<CWallet> const wallet = GetWalletForJSONRPCRequest(request);
     CWallet* const pwallet = wallet.get();
@@ -4280,7 +4280,7 @@ UniValue privatesend(const JSONRPCRequest& request)
 
     if (request.fHelp || request.params.size() != 1)
         throw std::runtime_error(
-            "privatesend \"command\"\n"
+            "coinjoin \"command\"\n"
             "\nArguments:\n"
             "1. \"command\"        (string or set of strings, required) The command to execute\n"
             "\nAvailable commands:\n"
@@ -4295,21 +4295,21 @@ UniValue privatesend(const JSONRPCRequest& request)
             if (pwallet->IsLocked(true))
                 throw JSONRPCError(RPC_WALLET_UNLOCK_NEEDED, "Error: Please unlock wallet for mixing with walletpassphrase first.");
         }
-        pwallet->privateSendClient->fEnablePrivateSend = true;
+        pwallet->coinjoinClient->fEnableCoinJoin = true;
         return "Mixing was started";
     }
 
     if(request.params[0].get_str() == "stop") {
-        pwallet->privateSendClient->fEnablePrivateSend = false;
+        pwallet->coinjoinClient->fEnableCoinJoin = false;
         return "Mixing was stopped";
     }
 
     if(request.params[0].get_str() == "reset") {
-        pwallet->privateSendClient->ResetPool();
+        pwallet->coinjoinClient->ResetPool();
         return "Mixing was reset";
     }
 
-    return "Unknown command, please see \"help privatesend\"";
+    return "Unknown command, please see \"help coinjoin\"";
 }
 
 UniValue getpoolinfo(const JSONRPCRequest& request)
@@ -4326,11 +4326,10 @@ UniValue getpoolinfo(const JSONRPCRequest& request)
     }
 
     UniValue obj(UniValue::VOBJ);
-    obj.pushKV("mixing_mode",       (!fMasternodeMode && pwallet->privateSendClient->fPrivateSendMultiSession) ? "multi-session" : "normal");
-    obj.pushKV("status",            pwallet->privateSendClient->GetStatuses());
+    obj.pushKV("status",            pwallet->coinjoinClient->GetStatuses());
 
     std::vector<masternode_info_t> vecMnInfo;
-    if (pwallet->privateSendClient->GetMixingMasternodesInfo(vecMnInfo)) {
+    if (pwallet->coinjoinClient->GetMixingMasternodesInfo(vecMnInfo)) {
         UniValue pools(UniValue::VARR);
         for (const auto& mnInfo : vecMnInfo) {
             UniValue pool(UniValue::VOBJ);
@@ -4343,7 +4342,7 @@ UniValue getpoolinfo(const JSONRPCRequest& request)
 
     if (pwallet) {
         obj.pushKV("keys_left",     pwallet->nKeysLeftSinceAutoBackup);
-        obj.pushKV("warnings",      pwallet->nKeysLeftSinceAutoBackup < PRIVATESEND_KEYS_THRESHOLD_WARNING
+        obj.pushKV("warnings",      pwallet->nKeysLeftSinceAutoBackup < COINJOIN_KEYS_THRESHOLD_WARNING
                                                 ? "WARNING: keypool is almost depleted!" : "");
     }
     return obj;
@@ -4400,6 +4399,7 @@ static const CRPCCommand commands[] =
     { "wallet",             "addmultisigaddress",               &addmultisigaddress,            {"nrequired","keys","label","address_type"} },
     { "wallet",             "backupwallet",                     &backupwallet,                  {"destination"} },
     { "wallet",             "bumpfee",                          &bumpfee,                       {"txid", "options"} },
+    { "wallet",             "coinjoin",                         &coinjoin,                      {"start","stop","reset"} },
     { "wallet",             "createwallet",                     &createwallet,                  {"wallet_name", "disable_private_keys", "blank"} },
     { "wallet",             "dumpprivkey",                      &dumpprivkey,                   {"address"}  },
     { "wallet",             "dumpwallet",                       &dumpwallet,                    {"filename"} },
@@ -4435,7 +4435,6 @@ static const CRPCCommand commands[] =
     { "wallet",             "listwallets",                      &listwallets,                   {} },
     { "wallet",             "loadwallet",                       &loadwallet,                    {"filename"} },
     { "wallet",             "lockunspent",                      &lockunspent,                   {"unlock","transactions"} },
-    { "wallet",             "privatesend",                      &privatesend,                   {"start","stop","reset"} },
     { "wallet",             "prepareproposal",                  &prepareproposal,               {"parent-hash","revision","time", "hex-data"} },
     { "wallet",             "removeprunedfunds",                &removeprunedfunds,             {"txid"} },
     { "wallet",             "rescanblockchain",                 &rescanblockchain,              {"start_height", "stop_height"} },

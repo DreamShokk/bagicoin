@@ -19,12 +19,12 @@
 #include <script/sign.h>
 #include <util/system.h>
 #include <wallet/crypter.h>
+#include <wallet/coinjoin_client.h>
 #include <wallet/coinselection.h>
-#include <wallet/privatesend_client.h>
 #include <wallet/walletdb.h>
 #include <wallet/walletutil.h>
 
-#include <modules/privatesend/privatesend.h>
+#include <modules/coinjoin/coinjoin.h>
 
 #include <algorithm>
 #include <atomic>
@@ -143,7 +143,6 @@ enum AvailableCoinsType
     ONLY_DENOMINATED,
     ONLY_NONDENOMINATED,
     ONLY_1000, // find masternode outputs including locked ones (use with caution)
-    ONLY_PRIVATESEND_COLLATERAL
 };
 
 struct CompactTallyItem
@@ -552,7 +551,7 @@ public:
     // having to resolve the issue of member access into incomplete type CWallet.
     CAmount GetAvailableCredit(interfaces::Chain::Lock& locked_chain, bool fUseCache=true, const isminefilter& filter=ISMINE_SPENDABLE) const NO_THREAD_SAFETY_ANALYSIS;
     CAmount GetImmatureWatchOnlyCredit(interfaces::Chain::Lock& locked_chain, const bool fUseCache=true) const;
-    CAmount GetDenominatedCredit(interfaces::Chain::Lock& locked_chain, int nPrivateSendRounds=0, bool fUseCache=true) const;
+    CAmount GetDenominatedCredit(interfaces::Chain::Lock& locked_chain, int nCoinJoinRounds=0, bool fUseCache=true) const;
     CAmount GetChange() const;
 
     // Get the marginal bytes if spending the specified output from this transaction
@@ -627,9 +626,6 @@ public:
             nInputBytes = tx->GetSpendSize(i, use_max_sig);
         }
     }
-
-    //Used with Private Send. Will return largest nondenom, then denominations, then very small inputs
-    int Priority() const;
 
     std::string ToString() const;
 
@@ -837,7 +833,7 @@ public:
     MasterKeyMap mapMasterKeys;
     unsigned int nMasterKeyMaxID = 0;
 
-    std::unique_ptr<CPrivateSendClientManager> privateSendClient = MakeUnique<CPrivateSendClientManager>(this);
+    std::unique_ptr<CCoinJoinClientManager> coinjoinClient = MakeUnique<CCoinJoinClientManager>(this);
 
     /** Construct wallet with specified name and database implementation. */
     CWallet(interfaces::Chain& chain, const WalletLocation& location, std::unique_ptr<WalletDatabase> database) : m_chain(chain), m_location(location), database(std::move(database))
@@ -899,23 +895,20 @@ public:
         std::set<CInputCoin>& setCoinsRet, CAmount& nValueRet, const CoinSelectionParams& coin_selection_params, bool& bnb_used) const;
 
     // Coin selection
-    bool SelectPSInOutPairsByDenominations(interfaces::Chain::Lock& locked_chain, int nDenom, CAmount nValueMin, CAmount nValueMax, std::vector< std::pair<CTxDSIn, CTxOut> >& vecPSInOutPairsRet);
-    bool GetCollateralTxDSIn(CTxDSIn& txdsinRet, CAmount& nValueRet) const;
-    bool SelectPrivateCoins(CAmount nValueMin, CAmount nValueMax, std::vector<CTxIn>& vecTxInRet, CAmount& nValueRet, int nPrivateSendRoundsMin, int nPrivateSendRoundsMax) const;
-    bool SelectCoinsGroupedByAddresses(std::vector<CompactTallyItem>& vecTallyRet, bool fSkipDenominated = true, bool fAnonymizable = true, int nMaxOupointsPerAddress = -1) const;
+    bool SelectJoinCoins(CAmount nValueMin, CAmount nValueMax, std::vector<std::pair<CTxIn, CTxOut> >& mtxPairRet, int nCoinJoinRoundsMin, int nCoinJoinRoundsMax) const;
+    bool SelectCoinsGroupedByAddresses(std::vector<CompactTallyItem>& vecTallyRet, bool fSkipDenominated = true) const;
 
     /// Get 1000CHC output and keys which can be used for the Masternode
     bool GetMasternodeOutpointAndKeys(COutPoint& outpointRet, CTxDestination &destRet, CPubKey& pubKeyRet, CKey& keyRet, const std::string& strTxHash = "", const std::string& strOutputIndex = "");
     /// Extract txin information and keys from output
     bool GetOutpointAndKeysFromOutput(const COutput& out, COutPoint& outpointRet, CTxDestination &destRet, CPubKey& pubKeyRet, CKey& keyRet);
 
-    bool HasCollateralInputs(interfaces::Chain::Lock& locked_chain, bool fOnlyConfirmed = true) const;
     int  CountInputsWithAmount(CAmount nInputAmount);
 
-    // get the PrivateSend chain depth for a given input
-    int GetRealOutpointPrivateSendRounds(const COutPoint& outpoint, int nRounds = 0) const;
+    // get the CoinJoin chain depth for a given input
+    int GetRealOutpointCoinJoinRounds(const COutPoint& outpoint, int nRounds = 0) const;
     // respect current settings
-    int GetCappedOutpointPrivateSendRounds(const COutPoint& outpoint) const;
+    int GetCappedOutpointCoinJoinRounds(const COutPoint& outpoint) const;
 
     bool IsDenominated(const COutPoint& outpoint) const;
 
@@ -1057,11 +1050,8 @@ public:
      * @note passing nChangePosInOut as -1 will result in setting a random position
      */
     bool CreateTransaction(interfaces::Chain::Lock& locked_chain, const std::vector<CRecipient>& vecSend, CTransactionRef& tx, CReserveKey& reservekey, CAmount& nFeeRet, int& nChangePosInOut,
-                           std::string& strFailReason, const CCoinControl& coin_control, bool sign = true, AvailableCoinsType _nCoinType = ALL_COINS, bool fPrivateSend = false);
-    bool CommitTransaction(CTransactionRef tx, mapValue_t mapValue, std::vector<std::pair<std::string, std::string>> orderForm, CReserveKey& reservekey, CConnman* connman, CValidationState& state, bool fPrivateSend = false);
-
-    bool CreateCollateralTransaction(CMutableTransaction& txCollateral, std::string& strReason);
-    bool ConvertList(std::vector<CTxIn> vecTxIn, std::vector<CAmount>& vecAmounts);
+                           std::string& strFailReason, const CCoinControl& coin_control, bool sign = true, AvailableCoinsType _nCoinType = ALL_COINS, bool fCoinJoin = false);
+    bool CommitTransaction(CTransactionRef tx, mapValue_t mapValue, std::vector<std::pair<std::string, std::string>> orderForm, CReserveKey& reservekey, CConnman* connman, CValidationState& state, bool fCoinJoin = false);
 
     bool DummySignTx(CMutableTransaction &txNew, const std::set<CTxOut> &txouts, bool use_max_sig = false) const
     {
@@ -1387,5 +1377,5 @@ public:
 int64_t CalculateMaximumSignedTxSize(const CTransaction &tx, const CWallet *wallet, bool use_max_sig = false) EXCLUSIVE_LOCKS_REQUIRED(wallet->cs_wallet);
 int64_t CalculateMaximumSignedTxSize(const CTransaction &tx, const CWallet *wallet, const std::vector<CTxOut>& txouts, bool use_max_sig = false);
 bool AutoBackupWallet(std::shared_ptr<CWallet> pwallet, const WalletLocation& location, std::string& strBackupWarning, std::string& strBackupError);
-void privateSendClientTask();
+void coinJoinClientTask();
 #endif // BITCOIN_WALLET_WALLET_H

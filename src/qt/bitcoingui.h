@@ -154,7 +154,7 @@ private:
     QAction* showBackupsAction = nullptr;
     QAction* openAction = nullptr;
     QAction* showHelpMessageAction = nullptr;
-    QAction* showPrivateSendHelpAction = nullptr;
+    QAction* showCoinJoinHelpAction = nullptr;
     QAction* proposalAction = nullptr;
     QAction* m_open_wallet_action{nullptr};
     QAction* m_close_wallet_action{nullptr};
@@ -303,8 +303,8 @@ public Q_SLOTS:
 
     /** Show help message dialog */
     void showHelpMessageClicked();
-    /** Show PrivateSend help message dialog */
-    void showPrivateSendHelpClicked();
+    /** Show CoinJoin help message dialog */
+    void showCoinJoinHelpClicked();
 #ifndef Q_OS_MAC
     /** Handle tray icon clicked */
     void trayIconActivated(QSystemTrayIcon::ActivationReason reason);

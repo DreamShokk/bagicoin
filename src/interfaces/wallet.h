@@ -35,8 +35,8 @@ class Handler;
 class PendingWalletTx;
 struct WalletAddress;
 struct WalletBalances;
-struct PrivateSendStatus;
-struct PrivateSendConstants;
+struct CoinJoinStatus;
+struct CoinJoinConstants;
 struct WalletTx;
 struct WalletTxOut;
 struct WalletTxStatus;
@@ -140,7 +140,7 @@ public:
         int& change_pos,
         CAmount& fee,
         std::string& fail_reason,
-        bool fPrivateSend) = 0;
+        bool fCoinJoin) = 0;
 
     //! Return whether transaction can be abandoned.
     virtual bool transactionCanBeAbandoned(const uint256& txid) = 0;
@@ -195,7 +195,7 @@ public:
     virtual WalletBalances getBalances() = 0;
 
     //! Get balances if possible without blocking.
-    virtual bool tryGetBalances(WalletBalances& balances, PrivateSendStatus& status, int& num_blocks) = 0;
+    virtual bool tryGetBalances(WalletBalances& balances, CoinJoinStatus& status, int& num_blocks) = 0;
 
     //! Get balance.
     virtual CAmount getBalance() = 0;
@@ -224,7 +224,7 @@ public:
     virtual std::vector<WalletTxOut> getCoins(const std::vector<COutPoint>& outputs) = 0;
 
     //! Return Private Send Rounds.
-    virtual int getCappedOutpointPrivateSendRounds(const COutPoint& outpoint) = 0;
+    virtual int getCappedOutpointCoinJoinRounds(const COutPoint& outpoint) = 0;
 
     //! Get required fee.
     virtual CAmount getRequiredFee(unsigned int tx_bytes) = 0;
@@ -253,28 +253,28 @@ public:
     //! Get default change type.
     virtual OutputType getDefaultChangeType() = 0;
 
-    //! Return PrivateSend Rounds.
+    //! Return CoinJoin Rounds.
     virtual int getPSRounds() = 0;
 
-    //! Change PrivateSend Params.
-    virtual void setPrivateSendParams(const int& rounds, const int& amount, const bool& multi) = 0;
+    //! Change CoinJoin Params.
+    virtual void setCoinJoinParams(const int& rounds, const int& amount) = 0;
 
-    //! Get PrivateSend Settings.
-    virtual PrivateSendConstants getPrivateSendConstants() = 0;
+    //! Get CoinJoin Settings.
+    virtual CoinJoinConstants getCoinJoinConstants() = 0;
 
-    //! Get PrivateSend Status.
-    virtual PrivateSendStatus getPrivateSendStatus() = 0;
+    //! Get CoinJoin Status.
+    virtual CoinJoinStatus getCoinJoinStatus() = 0;
 
     //! Disable automatic wallet backup.
     virtual void disableAutoBackup() = 0;
 
-    //! Update cached blocks in PrivateSend client.
+    //! Update cached blocks in CoinJoin client.
     virtual void setNumBlocks(const int& nCache) = 0;
 
-    //! Reset PrivateSend Client.
+    //! Reset CoinJoin Client.
     virtual void resetPool() = 0;
 
-    //! Toggle PrivateSend mixing status.
+    //! Toggle CoinJoin mixing status.
     virtual void toggleMixing(const bool& fOff = false) = 0;
 
     //! Return result of automatic wallet backup.
@@ -332,7 +332,7 @@ public:
     virtual bool commit(WalletValueMap value_map,
         WalletOrderForm order_form,
         std::string& reject_reason,
-        bool fPrivateSend) = 0;
+        bool fCoinJoin) = 0;
 };
 
 //! Information about one wallet address.
@@ -373,8 +373,8 @@ struct WalletBalances
     }
 };
 
-//! PrivateSend Status
-struct PrivateSendStatus
+//! CoinJoin Status
+struct CoinJoinStatus
 {
     bool enabled = 0;
     int cachednumblocks = 0;
@@ -385,21 +385,20 @@ struct PrivateSendStatus
     int64_t keysleft = 0;
     std::string status = "";
 
-    bool privateSendChanged(const PrivateSendStatus& prev) const
+    bool coinJoinChanged(const CoinJoinStatus& prev) const
     {
         return enabled != prev.enabled || cachednumblocks != prev.cachednumblocks || amount != prev.amount || rounds != prev.rounds
                || multisession != prev.multisession || status != prev.status || denom != prev.denom || keysleft != prev.keysleft;
     }
 };
 
-//! PrivateSend Init
-struct PrivateSendConstants
+//! CoinJoin Init
+struct CoinJoinConstants
 {
     CAmount minamount = 0;
     int defaultrounds = 0;
     int defaultamount = 0;
     int keyswarning = 0;
-    bool defaultmulti = false;
 };
 
 // Wallet transaction information.

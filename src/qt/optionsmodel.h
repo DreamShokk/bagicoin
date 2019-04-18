@@ -59,9 +59,8 @@ public:
         ShowMasternodesTab,     // bool
         ShowAdvancedPSUI,       // bool
         LowKeysWarning,         // bool
-        PrivateSendRounds,      // int
-        PrivateSendAmount,      // int
-        PrivateSendMultiSession,// bool
+        CoinJoinRounds,      // int
+        CoinJoinAmount,      // int
         Listen,                 // bool
         OptionIDRowCount,
     };
@@ -84,9 +83,8 @@ public:
     bool getProxySettings(QNetworkProxy& proxy) const;
     bool getCoinControlFeatures() const { return fCoinControlFeatures; }
     bool getShowAdvancedPSUI() const { return fShowAdvancedPSUI; }
-    int getPrivateSendRounds() const { return nPrivateSendRounds; }
-    int getPrivateSendAmount() const { return nPrivateSendAmount; }
-    bool getPrivateSendMultiSession() const { return fPrivateSendMultiSession; }
+    int getCoinJoinRounds() const { return nCoinJoinRounds; }
+    int getCoinJoinAmount() const { return nCoinJoinAmount; }
     const QString& getOverriddenByCommandLine() { return strOverriddenByCommandLine; }
 
     /* Restart flag helper */
@@ -106,9 +104,8 @@ private:
     QString strThirdPartyTxUrls;
     bool fCoinControlFeatures;
     bool fShowAdvancedPSUI;
-    int nPrivateSendRounds;
-    int nPrivateSendAmount;
-    bool fPrivateSendMultiSession;
+    int nCoinJoinRounds;
+    int nCoinJoinAmount;
     /* settings that were overriden by command-line */
     QString strOverriddenByCommandLine;
 
@@ -119,7 +116,7 @@ private:
     void checkAndMigrate();
 Q_SIGNALS:
     void displayUnitChanged(int unit);
-    void privateSendConfigChanged(const int& rounds, const int& amount, const bool& multi);
+    void coinJoinConfigChanged(const int& rounds, const int& amount);
     void advancedPSUIChanged(bool);
     void coinControlFeaturesChanged(bool);
     void hideTrayIconChanged(bool);

@@ -90,7 +90,7 @@ void OptionsModel::Init(bool resetSettings)
     if (!settings.contains("fShowMasternodesTab"))
         settings.setValue("fShowMasternodesTab", m_node.getMasternodeConfigCount());
 
-    // PrivateSend
+    // CoinJoin
     if (!settings.contains("fShowAdvancedPSUI"))
         settings.setValue("fShowAdvancedPSUI", false);
     fShowAdvancedPSUI = settings.value("fShowAdvancedPSUI", false).toBool();
@@ -137,24 +137,18 @@ void OptionsModel::Init(bool resetSettings)
     if (!m_node.softSetBoolArg("-spendzeroconfchange", settings.value("bSpendZeroConfChange").toBool()))
         addOverriddenOption("-spendzeroconfchange");
 
-    // PrivateSend
-    if (!settings.contains("nPrivateSendRounds"))
-        settings.setValue("nPrivateSendRounds", 2);
-    nPrivateSendRounds = settings.value("nPrivateSendRounds").toInt();
-    if (!m_node.softSetArg("-privatesendrounds", settings.value("nPrivateSendRounds").toString().toStdString()))
+    // CoinJoin
+    if (!settings.contains("nCoinJoinRounds"))
+        settings.setValue("nCoinJoinRounds", 2);
+    nCoinJoinRounds = settings.value("nCoinJoinRounds").toInt();
+    if (!m_node.softSetArg("-privatesendrounds", settings.value("nCoinJoinRounds").toString().toStdString()))
         addOverriddenOption("-privatesendrounds");
 
-    if (!settings.contains("nPrivateSendAmount"))
-        settings.setValue("nPrivateSendAmount", 1000);
-    nPrivateSendAmount = settings.value("nPrivateSendAmount").toInt();
-    if (!m_node.softSetArg("-privatesendamount", settings.value("nPrivateSendAmount").toString().toStdString()))
+    if (!settings.contains("nCoinJoinAmount"))
+        settings.setValue("nCoinJoinAmount", 1000);
+    nCoinJoinAmount = settings.value("nCoinJoinAmount").toInt();
+    if (!m_node.softSetArg("-privatesendamount", settings.value("nCoinJoinAmount").toString().toStdString()))
         addOverriddenOption("-privatesendamount");
-
-    if (!settings.contains("fPrivateSendMultiSession"))
-        settings.setValue("fPrivateSendMultiSession", false);
-    fPrivateSendMultiSession = settings.value("fPrivateSendMultiSession").toBool();
-    if (!m_node.softSetBoolArg("-privatesendmultisession", settings.value("fPrivateSendMultiSession").toBool()))
-        addOverriddenOption("-privatesendmultisession");
 #endif
 
     // Network
@@ -326,12 +320,10 @@ QVariant OptionsModel::data(const QModelIndex & index, int role) const
             return fShowAdvancedPSUI;
         case LowKeysWarning:
             return settings.value("fLowKeysWarning");
-        case PrivateSendRounds:
-            return settings.value("nPrivateSendRounds");
-        case PrivateSendAmount:
-            return settings.value("nPrivateSendAmount");
-        case PrivateSendMultiSession:
-            return settings.value("fPrivateSendMultiSession");
+        case CoinJoinRounds:
+            return settings.value("nCoinJoinRounds");
+        case CoinJoinAmount:
+            return settings.value("nCoinJoinAmount");
 #endif
         case DisplayUnit:
             return nDisplayUnit;
@@ -465,25 +457,18 @@ bool OptionsModel::setData(const QModelIndex & index, const QVariant & value, in
         case LowKeysWarning:
             settings.setValue("fLowKeysWarning", value);
             break;
-        case PrivateSendRounds:
-            if (settings.value("nPrivateSendRounds") != value) {
-                settings.setValue("nPrivateSendRounds", value);
-                nPrivateSendRounds = value.toInt();
-                Q_EMIT privateSendConfigChanged(nPrivateSendRounds, nPrivateSendAmount, fPrivateSendMultiSession);
+        case CoinJoinRounds:
+            if (settings.value("nCoinJoinRounds") != value) {
+                settings.setValue("nCoinJoinRounds", value);
+                nCoinJoinRounds = value.toInt();
+                Q_EMIT coinJoinConfigChanged(nCoinJoinRounds, nCoinJoinAmount);
             }
             break;
-        case PrivateSendAmount:
-            if (settings.value("nPrivateSendAmount") != value) {
-                settings.setValue("nPrivateSendAmount", value);
-                nPrivateSendAmount = value.toInt();
-                Q_EMIT privateSendConfigChanged(nPrivateSendRounds, nPrivateSendAmount, fPrivateSendMultiSession);
-            }
-            break;
-        case PrivateSendMultiSession:
-            if (settings.value("fPrivateSendMultiSession") != value) {
-                settings.setValue("fPrivateSendMultiSession", value);
-                fPrivateSendMultiSession = value.toBool();
-                Q_EMIT privateSendConfigChanged(nPrivateSendRounds, nPrivateSendAmount, fPrivateSendMultiSession);
+        case CoinJoinAmount:
+            if (settings.value("nCoinJoinAmount") != value) {
+                settings.setValue("nCoinJoinAmount", value);
+                nCoinJoinAmount = value.toInt();
+                Q_EMIT coinJoinConfigChanged(nCoinJoinRounds, nCoinJoinAmount);
             }
             break;
 #endif

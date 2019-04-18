@@ -26,7 +26,6 @@ static const int MASTERNODE_NEW_START_REQUIRED_SECONDS  = 180 * 60;
 
 static const int MASTERNODE_MAX_MNP_BLOCKS              = 60;
 static const int MASTERNODE_POSE_BAN_MAX_SCORE          =  5;
-static const int MASTERNODE_MAX_MIXING_TXES             =  5;
 
 //
 // The Masternode Ping Class : Contains a different serialize method for sending pings from masternodes throughout the network
@@ -119,7 +118,7 @@ struct masternode_info_t
     CPubKey pubKeyCollateralAddress{};
     CPubKey pubKeyMasternode{};
 
-    int64_t nLastDsq = 0; //the dsq count from the last dsq broadcast of this node
+    int64_t nLastCJq = 0; //the dsq count from the last dsq broadcast of this node
     int64_t nTimeLastChecked = 0;
     int64_t nTimeLastPaid = 0;
     int64_t nTimeLastPing = 0; //* not in CMN
@@ -127,7 +126,7 @@ struct masternode_info_t
 };
 
 //
-// The Masternode Class. For managing the Darksend process. It contains the input of the 1000 CHC, signature to prove
+// The Masternode Class. For managing the CoinJoin process. It contains the input of the 1000 CHC, signature to prove
 // it's the one who own that ip address and code for calculating the payment election.
 //
 class CMasternode : public masternode_info_t
@@ -163,7 +162,6 @@ public:
     int nBlockLastPaid{};
     int nPoSeBanScore{};
     int nPoSeBanHeight{};
-    int nMixingTxCount{};
     bool fUnitTest = false;
 
     // KEEP TRACK OF GOVERNANCE ITEMS EACH MASTERNODE HAS VOTE UPON FOR RECALCULATION
@@ -188,7 +186,7 @@ public:
         READWRITE(lastPing);
         READWRITE(vchSig);
         READWRITE(sigTime);
-        READWRITE(nLastDsq);
+        READWRITE(nLastCJq);
         READWRITE(nTimeLastChecked);
         READWRITE(nTimeLastPaid);
         READWRITE(nActiveState);
@@ -197,7 +195,6 @@ public:
         READWRITE(nProtocolVersion);
         READWRITE(nPoSeBanScore);
         READWRITE(nPoSeBanHeight);
-        READWRITE(nMixingTxCount);
         READWRITE(fUnitTest);
         READWRITE(mapGovernanceObjectsVotedOn);
         if(ser_action.ForRead()) collDest = DecodeDestination(strDest);
@@ -251,11 +248,6 @@ public:
         return false;
     }
 
-    bool IsValidForMixingTxes() const
-    {
-        return nMixingTxCount <= MASTERNODE_MAX_MIXING_TXES;
-    }
-
     void IncreasePoSeBanScore() { if(nPoSeBanScore < MASTERNODE_POSE_BAN_MAX_SCORE) nPoSeBanScore++; }
     void DecreasePoSeBanScore() { if(nPoSeBanScore > -MASTERNODE_POSE_BAN_MAX_SCORE) nPoSeBanScore--; }
     void PoSeBan() { nPoSeBanScore = MASTERNODE_POSE_BAN_MAX_SCORE; }
@@ -286,7 +278,6 @@ public:
         nBlockLastPaid = from.nBlockLastPaid;
         nPoSeBanScore = from.nPoSeBanScore;
         nPoSeBanHeight = from.nPoSeBanHeight;
-        nMixingTxCount = from.nMixingTxCount;
         fUnitTest = from.fUnitTest;
         mapGovernanceObjectsVotedOn = from.mapGovernanceObjectsVotedOn;
         return *this;

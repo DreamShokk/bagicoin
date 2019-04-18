@@ -14,7 +14,7 @@ void CCoinControl::SetNull()
     fAllowWatchOnly = false;
     m_avoid_partial_spends = gArgs.GetBoolArg("-avoidpartialspends", DEFAULT_AVOIDPARTIALSPENDS);
     setSelected.clear();
-    fUsePrivateSend = true;
+    fUseCoinJoin = true;
     m_feerate.reset();
     fOverrideFeeRate = false;
     m_confirm_target.reset();

@@ -124,7 +124,7 @@
         <string>Serves to disable the trivial sendmoney when OS account compromised. Provides no real security.</string>
        </property>
        <property name="text">
-        <string>Only for mixing via PrivateSend</string>
+        <string>Only for mixing via CoinJoin</string>
        </property>
        <property name="visible">
         <bool>false</bool>

@@ -63,7 +63,7 @@
 #include <modules/masternode/masternode_man.h>
 #include <modules/masternode/masternode_config.h>
 #include <modules/platform/funding.h>
-#include <modules/privatesend/privatesend_server.h>
+#include <modules/coinjoin/coinjoin_server.h>
 
 #include <stdint.h>
 #include <stdio.h>
@@ -554,7 +554,7 @@ void SetupServerArgs()
 
     SetupChainParamsBaseOptions();
 
-    gArgs.AddArg("-litemode=<n>", strprintf(_("Disable all Chaincoin specific functionality (Masternodes, PrivateSend, Governance) (0-1, default: %u)"), 0), false, OptionsCategory::OPTIONS);
+    gArgs.AddArg("-litemode=<n>", strprintf(_("Disable all Chaincoin specific functionality (Masternodes, CoinJoin, Governance) (0-1, default: %u)"), 0), false, OptionsCategory::OPTIONS);
 
     gArgs.AddArg("-masternode=<n>", strprintf(_("Enable the client to act as a masternode (0-1, default: %u)"), 0), false, OptionsCategory::OPTIONS);
     gArgs.AddArg("-mnconf=<file>", strprintf(_("Specify masternode configuration file (default: %s)"), "masternode.conf"), false, OptionsCategory::OPTIONS);
@@ -1788,7 +1788,7 @@ bool AppInitMain(InitInterfaces& interfaces)
         uiInterface.NotifyBlockTip_disconnect(BlockNotifyGenesisWait);
     }
 
-    // ********************************************************* Step 11a: setup PrivateSend
+    // ********************************************************* Step 11a: setup CoinJoin
 
     //lite mode disables all Chaincoin-specific functionality
     fLiteMode = gArgs.GetBoolArg("-litemode", false);
@@ -1829,8 +1829,6 @@ bool AppInitMain(InitInterfaces& interfaces)
 
     LogPrintf("fLiteMode %d\n", fLiteMode);
 
-    CPrivateSend::InitStandardDenominations();
-
     // ********************************************************* Step 11b: Load cache data
 
     // LOAD SERIALIZED DAT FILES INTO DATA CACHES FOR INTERNAL USE
@@ -1840,6 +1838,7 @@ bool AppInitMain(InitInterfaces& interfaces)
         CMNCacheDB mncachedb;
         if(!mncachedb.Read(mnodeman)) {
             LogPrintf("Invalid or missing mncache.dat; recreating\n");
+            mnodeman.Clear();
             mncachedb.Write(mnodeman);
         }
         mnodeman.CheckAndRemove();
@@ -1847,12 +1846,14 @@ bool AppInitMain(InitInterfaces& interfaces)
             CMNPayDB mnpaydb;
             if(!mnpaydb.Read(mnpayments)) {
                 LogPrintf("Invalid or missing mnpayments.dat; recreating\n");
+                mnpayments.Clear();
                 mnpaydb.Write(mnpayments);
             }
             mnpayments.CheckAndRemove();
             CGovDB govdb;
             if(!govdb.Read(governance)) {
                 LogPrintf("Invalid or missing governance.dat; recreating\n");
+                governance.Clear();
                 govdb.Write(governance);
             }
             governance.InitOnLoad();
@@ -1870,7 +1871,7 @@ bool AppInitMain(InitInterfaces& interfaces)
 
     // ********************************************************* Step 11c: update block tip in Chaincoin modules
 
-    // force UpdatedBlockTip to initialize nCachedBlockHeight for DS, MN payments and budgets
+    // force UpdatedBlockTip to initialize nCachedBlockHeight for CJ, MN payments and budgets
     // but don't call it directly to prevent triggering of other listeners like zmq etc.
     // GetMainSignals().UpdatedBlockTip(chainActive.Tip());
     pModuleNotificationInterface->InitializeCurrentBlockTip();
@@ -1878,7 +1879,7 @@ bool AppInitMain(InitInterfaces& interfaces)
     // ********************************************************* Step 11d: schedule modules
 
     activeMasternode.Controller(scheduler, g_connman.get());
-    privateSendServer.Controller(scheduler, g_connman.get());
+    coinJoinServer.Controller(scheduler, g_connman.get());
     netfulfilledman.Controller(scheduler);
     mnodeman.Controller(scheduler, g_connman.get());
     masternodeSync.Controller(scheduler, g_connman.get());

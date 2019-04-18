@@ -43,7 +43,6 @@ CMasternode::CMasternode(const CMasternode& other) :
     nBlockLastPaid(other.nBlockLastPaid),
     nPoSeBanScore(other.nPoSeBanScore),
     nPoSeBanHeight(other.nPoSeBanHeight),
-    nMixingTxCount(other.nMixingTxCount),
     fUnitTest(other.fUnitTest)
 {}
 

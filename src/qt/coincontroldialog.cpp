@@ -135,7 +135,7 @@ CoinControlDialog::CoinControlDialog(const PlatformStyle *_platformStyle, QWidge
     ui->treeWidget->setColumnWidth(COLUMN_AMOUNT, 100);
     ui->treeWidget->setColumnWidth(COLUMN_LABEL, 170);
     ui->treeWidget->setColumnWidth(COLUMN_ADDRESS, 190);
-    ui->treeWidget->setColumnWidth(COLUMN_PRIVATESEND_ROUNDS, 88);
+    ui->treeWidget->setColumnWidth(COLUMN_COINJOIN_ROUNDS, 88);
     ui->treeWidget->setColumnWidth(COLUMN_DATE, 80);
     ui->treeWidget->setColumnWidth(COLUMN_CONFIRMATIONS, 100);
 
@@ -422,12 +422,12 @@ void CoinControlDialog::viewItemChanged(QTreeWidgetItem* item, int column)
             item->setCheckState(COLUMN_CHECKBOX, Qt::Unchecked);
         else {
             coinControl()->Select(outpt);
-            int nRounds = model->wallet().getCappedOutpointPrivateSendRounds(outpt);
-            if (coinControl()->fUsePrivateSend && nRounds < model->wallet().getPSRounds()) {
+            int nRounds = model->wallet().getCappedOutpointCoinJoinRounds(outpt);
+            if (coinControl()->fUseCoinJoin && nRounds < model->wallet().getPSRounds()) {
                 QMessageBox::warning(this, windowTitle(),
-                    tr("Non-anonymized input selected. <b>PrivateSend will be disabled.</b><br><br>If you still want to use PrivateSend, please deselect all non-nonymized inputs first and then check PrivateSend checkbox again."),
+                    tr("Non-anonymized input selected. <b>CoinJoin will be disabled.</b><br><br>If you still want to use CoinJoin, please deselect all non-nonymized inputs first and then check CoinJoin checkbox again."),
                     QMessageBox::Ok, QMessageBox::Ok);
-                coinControl()->fUsePrivateSend = false;
+                coinControl()->fUseCoinJoin = false;
             }
         }
 
@@ -561,8 +561,8 @@ void CoinControlDialog::updateLabels(WalletModel *model, QDialog* dialog)
             if (!CoinControlDialog::fSubtractFeeFromAmount)
                 nChange -= nPayFee;
 
-            // PrivateSend Fee = overpay
-            if(coinControl()->fUsePrivateSend && nChange > 0)
+            // CoinJoin Fee = overpay
+            if(coinControl()->fUseCoinJoin && nChange > 0)
             {
                 nPayFee += nChange;
                 nChange = 0;
@@ -743,12 +743,12 @@ void CoinControlDialog::updateView()
             itemOutput->setText(COLUMN_DATE, GUIUtil::dateTimeStr(out.time));
             itemOutput->setData(COLUMN_DATE, Qt::UserRole, QVariant((qlonglong)out.time));
 
-            // PrivateSend rounds
-            int nRounds = model->wallet().getCappedOutpointPrivateSendRounds(output);
+            // CoinJoin rounds
+            int nRounds = model->wallet().getCappedOutpointCoinJoinRounds(output);
 
-            if (nRounds >= 0) itemOutput->setText(COLUMN_PRIVATESEND_ROUNDS, QString::number(nRounds));
-            else itemOutput->setText(COLUMN_PRIVATESEND_ROUNDS, QString::fromStdString("n/a"));
-            itemOutput->setData(COLUMN_PRIVATESEND_ROUNDS, Qt::UserRole, QVariant((qlonglong)nRounds));
+            if (nRounds >= 0) itemOutput->setText(COLUMN_COINJOIN_ROUNDS, QString::number(nRounds));
+            else itemOutput->setText(COLUMN_COINJOIN_ROUNDS, QString::fromStdString("n/a"));
+            itemOutput->setData(COLUMN_COINJOIN_ROUNDS, Qt::UserRole, QVariant((qlonglong)nRounds));
 
             // confirmations
             itemOutput->setText(COLUMN_CONFIRMATIONS, QString::number(out.depth_in_main_chain));

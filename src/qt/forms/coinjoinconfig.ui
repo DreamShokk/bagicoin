@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>DarksendConfig</class>
- <widget class="QDialog" name="DarksendConfig">
+ <class>CoinJoinConfig</class>
+ <widget class="QDialog" name="CoinJoinConfig">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Configure PrivateSend</string>
+   <string>Configure CoinJoin</string>
   </property>
   <widget class="QPushButton" name="buttonBasic">
    <property name="geometry">

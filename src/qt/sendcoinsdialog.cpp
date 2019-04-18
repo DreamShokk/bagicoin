@@ -30,7 +30,7 @@
 #include <policy/fees.h>
 #include <wallet/fees.h>
 
-#include <modules/privatesend/privatesend.h>
+#include <modules/coinjoin/coinjoin.h>
 
 #include <QFontMetrics>
 #include <QScrollBar>
@@ -95,18 +95,18 @@ SendCoinsDialog::SendCoinsDialog(const PlatformStyle *_platformStyle, QWidget *p
     if (!settings.contains("bUseDarkSend"))
         settings.setValue("bUseDarkSend", false);
 
-    bool fUsePrivateSend = settings.value("bUseDarkSend").toBool();
+    bool fUseCoinJoin = settings.value("bUseDarkSend").toBool();
     if(fLiteMode) {
-        ui->checkUsePrivateSend->setChecked(false);
-        ui->checkUsePrivateSend->setVisible(false);
-        CoinControlDialog::coinControl()->fUsePrivateSend = false;
+        ui->checkUseCoinJoin->setChecked(false);
+        ui->checkUseCoinJoin->setVisible(false);
+        CoinControlDialog::coinControl()->fUseCoinJoin = false;
     }
     else{
-        ui->checkUsePrivateSend->setChecked(fUsePrivateSend);
-        CoinControlDialog::coinControl()->fUsePrivateSend = fUsePrivateSend;
+        ui->checkUseCoinJoin->setChecked(fUseCoinJoin);
+        CoinControlDialog::coinControl()->fUseCoinJoin = fUseCoinJoin;
     }
 
-    connect(ui->checkUsePrivateSend, &QCheckBox::stateChanged, this, &SendCoinsDialog::updateDisplayUnit);
+    connect(ui->checkUseCoinJoin, &QCheckBox::stateChanged, this, &SendCoinsDialog::updateDisplayUnit);
 
     // Coin Control: clipboard actions
     QAction *clipboardQuantityAction = new QAction(tr("Copy quantity"), this);
@@ -245,7 +245,7 @@ void SendCoinsDialog::on_sendButton_clicked()
             if(entry->validate(model->node()))
             {
                 recipients.append(entry->getValue());
-                recipients[i].fPrivateSend = (ui->checkUsePrivateSend->checkState() == Qt::Checked);
+                recipients[i].fCoinJoin = (ui->checkUseCoinJoin->checkState() == Qt::Checked);
             }
             else
             {
@@ -262,13 +262,13 @@ void SendCoinsDialog::on_sendButton_clicked()
     QString strFunds = tr("using") + " <b>" + tr("anonymous funds") + "</b>";
     QString strFee = "";
 
-    if(ui->checkUsePrivateSend->checkState() == Qt::Checked) {
+    if(ui->checkUseCoinJoin->checkState() == Qt::Checked) {
         strFunds = tr("using") + " <b>" + tr("anonymous funds") + "</b>";
         QString strNearestAmount(
             BitcoinUnits::formatWithUnit(
-                model->getOptionsModel()->getDisplayUnit(), CPrivateSend::GetSmallestDenomination()));
+                model->getOptionsModel()->getDisplayUnit(), COINJOIN_LOW_DENOM));
         strFee = QString(tr(
-            "(privatesend requires this amount to be rounded up to the nearest %1)."
+            "(coinjoin requires this amount to be rounded up to the nearest %1)."
         ).arg(strNearestAmount));
     } else {
         strFunds = tr("using") + " <b>" + tr("any available funds (not anonymous)") + "</b>";
@@ -911,7 +911,7 @@ void SendCoinsDialog::coinControlUpdateLabels()
         }
     }
 
-    ui->checkUsePrivateSend->setChecked(CoinControlDialog::coinControl()->fUsePrivateSend);
+    ui->checkUseCoinJoin->setChecked(CoinControlDialog::coinControl()->fUseCoinJoin);
 
     if (CoinControlDialog::coinControl()->HasSelected())
     {

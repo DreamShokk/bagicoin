@@ -16,8 +16,8 @@ enum class TransactionError {
     P2P_DISABLED,
     MEMPOOL_REJECTED,
     MEMPOOL_ERROR,
-    INVALID_PSCT,
-    PSCT_MISMATCH,
+    INVALID_PSBT,
+    PSBT_MISMATCH,
     SIGHASH_MISMATCH,
 };
 

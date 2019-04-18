@@ -156,7 +156,7 @@ void CCoinJoinServer::ProcessModuleMessage(CNode* pfrom, const std::string& strC
         vRecv >> entry;
         entry.addr = pfrom->addr;
 
-        CMutableTransaction mtx(*entry.psctx.tx);
+        CMutableTransaction mtx(*entry.psbtx.tx);
 
         LogPrint(BCLog::CJOIN, "CJTXIN -- from addr %s, vin size: %d, vout size: %d\n", entry.addr.ToStringIPPort(), mtx.vin.size(), mtx.vout.size());
 
@@ -176,7 +176,7 @@ void CCoinJoinServer::ProcessModuleMessage(CNode* pfrom, const std::string& strC
         CAmount nMNfee = 0;
         PoolMessage nMessageID = MSG_NOERR;
 
-        if (!CheckTransaction(entry.psctx, nFee, nMessageID, true)) {
+        if (!CheckTransaction(entry.psbtx, nFee, nMessageID, true)) {
             LogPrintf("CJTXIN -- ERROR: CheckTransaction failed!\n");
             PushStatus(pfrom, STATUS_REJECTED, nMessageID, connman);
             return;
@@ -291,13 +291,13 @@ void CCoinJoinServer::CreateFinalTransaction(CConnman* connman)
 
     for (auto& entry : vecEntries) {
         LogPrint(BCLog::CJOIN, "CCoinJoinServer::CreateFinalTransaction -- processing entry:%s\n", entry.addr.ToStringIPPort());
-        for (unsigned int i = 0; i < entry.psctx.tx->vin.size(); ++i) {
-            mtx.vin.push_back(entry.psctx.tx->vin[i]);
+        for (unsigned int i = 0; i < entry.psbtx.tx->vin.size(); ++i) {
+            mtx.vin.push_back(entry.psbtx.tx->vin[i]);
             mtx.vin[i].scriptSig.clear();
             mtx.vin[i].scriptWitness.SetNull();
         }
-        for (unsigned int i = 0; i < entry.psctx.tx->vout.size(); ++i) {
-            mtx.vout.push_back(entry.psctx.tx->vout[i]);
+        for (unsigned int i = 0; i < entry.psbtx.tx->vout.size(); ++i) {
+            mtx.vout.push_back(entry.psbtx.tx->vout[i]);
         }
     }
 
@@ -307,10 +307,10 @@ void CCoinJoinServer::CreateFinalTransaction(CConnman* connman)
     finalPartiallySignedTransaction.tx = mtx;
 
     for (unsigned int i = 0; i < mtx.vin.size(); ++i) {
-        finalPartiallySignedTransaction.inputs.push_back(PSCTInput());
+        finalPartiallySignedTransaction.inputs.push_back(PSBTInput());
     }
     for (unsigned int i = 0; i < mtx.vout.size(); ++i) {
-        finalPartiallySignedTransaction.outputs.push_back(PSCTOutput());
+        finalPartiallySignedTransaction.outputs.push_back(PSBTOutput());
     }
 
     // Fetch previous transactions (inputs):
@@ -331,7 +331,7 @@ void CCoinJoinServer::CreateFinalTransaction(CConnman* connman)
 
     // Fill the inputs
     for (unsigned int i = 0; i < finalPartiallySignedTransaction.tx->vin.size(); ++i) {
-        PSCTInput& input = finalPartiallySignedTransaction.inputs.at(i);
+        PSBTInput& input = finalPartiallySignedTransaction.inputs.at(i);
 
         if (input.non_witness_utxo || !input.witness_utxo.IsNull()) {
             continue;
@@ -350,7 +350,7 @@ void CCoinJoinServer::CreateFinalTransaction(CConnman* connman)
              finalPartiallySignedTransaction.tx->GetHash().ToString());
     RelayFinalTransaction(finalPartiallySignedTransaction, connman);
 
-    // TODO: identify corrupt psct and retry with remaining
+    // TODO: identify corrupt psbt and retry with remaining
 }
 
 void CCoinJoinServer::CommitFinalTransaction(CConnman* connman)
@@ -358,8 +358,8 @@ void CCoinJoinServer::CommitFinalTransaction(CConnman* connman)
     if (!fMasternodeMode) return; // check and relay final tx only on masternode
 
     CMutableTransaction mtxFinal;
-    if (!FinalizeAndExtractPSCT(finalPartiallySignedTransaction, mtxFinal)) {
-        LogPrintf("CCoinJoinServer::CommitFinalTransaction -- FinalizeAndExtractPSCT() error: Transaction not final\n");
+    if (!FinalizeAndExtractPSBT(finalPartiallySignedTransaction, mtxFinal)) {
+        LogPrintf("CCoinJoinServer::CommitFinalTransaction -- FinalizeAndExtractPSBT() error: Transaction not final\n");
         SetNull();
         // not much we can do in this case, just notify clients
         RelayCompletedTransaction(ERR_INVALID_TX, connman);

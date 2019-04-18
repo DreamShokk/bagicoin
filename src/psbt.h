@@ -2,8 +2,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef BITCOIN_PSCT_H
-#define BITCOIN_PSCT_H
+#ifndef BITCOIN_PSBT_H
+#define BITCOIN_PSBT_H
 
 #include <attributes.h>
 #include <node/transaction.h>
@@ -12,33 +12,33 @@
 #include <script/sign.h>
 
 // Magic bytes
-static constexpr uint8_t PSCT_MAGIC_BYTES[5] = {'p', 's', 'b', 't', 0xff};
+static constexpr uint8_t PSBT_MAGIC_BYTES[5] = {'p', 's', 'b', 't', 0xff};
 
 // Global types
-static constexpr uint8_t PSCT_GLOBAL_UNSIGNED_TX = 0x00;
+static constexpr uint8_t PSBT_GLOBAL_UNSIGNED_TX = 0x00;
 
 // Input types
-static constexpr uint8_t PSCT_IN_NON_WITNESS_UTXO = 0x00;
-static constexpr uint8_t PSCT_IN_WITNESS_UTXO = 0x01;
-static constexpr uint8_t PSCT_IN_PARTIAL_SIG = 0x02;
-static constexpr uint8_t PSCT_IN_SIGHASH = 0x03;
-static constexpr uint8_t PSCT_IN_REDEEMSCRIPT = 0x04;
-static constexpr uint8_t PSCT_IN_WITNESSSCRIPT = 0x05;
-static constexpr uint8_t PSCT_IN_BIP32_DERIVATION = 0x06;
-static constexpr uint8_t PSCT_IN_SCRIPTSIG = 0x07;
-static constexpr uint8_t PSCT_IN_SCRIPTWITNESS = 0x08;
+static constexpr uint8_t PSBT_IN_NON_WITNESS_UTXO = 0x00;
+static constexpr uint8_t PSBT_IN_WITNESS_UTXO = 0x01;
+static constexpr uint8_t PSBT_IN_PARTIAL_SIG = 0x02;
+static constexpr uint8_t PSBT_IN_SIGHASH = 0x03;
+static constexpr uint8_t PSBT_IN_REDEEMSCRIPT = 0x04;
+static constexpr uint8_t PSBT_IN_WITNESSSCRIPT = 0x05;
+static constexpr uint8_t PSBT_IN_BIP32_DERIVATION = 0x06;
+static constexpr uint8_t PSBT_IN_SCRIPTSIG = 0x07;
+static constexpr uint8_t PSBT_IN_SCRIPTWITNESS = 0x08;
 
 // Output types
-static constexpr uint8_t PSCT_OUT_REDEEMSCRIPT = 0x00;
-static constexpr uint8_t PSCT_OUT_WITNESSSCRIPT = 0x01;
-static constexpr uint8_t PSCT_OUT_BIP32_DERIVATION = 0x02;
+static constexpr uint8_t PSBT_OUT_REDEEMSCRIPT = 0x00;
+static constexpr uint8_t PSBT_OUT_WITNESSSCRIPT = 0x01;
+static constexpr uint8_t PSBT_OUT_BIP32_DERIVATION = 0x02;
 
 // The separator is 0x00. Reading this in means that the unserializer can interpret it
 // as a 0 length key which indicates that this is the separator. The separator has no value.
-static constexpr uint8_t PSCT_SEPARATOR = 0x00;
+static constexpr uint8_t PSBT_SEPARATOR = 0x00;
 
-/** A structure for PSCTs which contain per-input information */
-struct PSCTInput
+/** A structure for PSBTs which contain per-input information */
+struct PSBTInput
 {
     CTransactionRef non_witness_utxo;
     CTxOut witness_utxo;
@@ -54,60 +54,60 @@ struct PSCTInput
     bool IsNull() const;
     void FillSignatureData(SignatureData& sigdata) const;
     void FromSignatureData(const SignatureData& sigdata);
-    void Merge(const PSCTInput& input);
+    void Merge(const PSBTInput& input);
     bool IsSane() const;
-    PSCTInput() {}
+    PSBTInput() {}
 
     template <typename Stream>
     inline void Serialize(Stream& s) const {
         // Write the utxo
         // If there is a non-witness utxo, then don't add the witness one.
         if (non_witness_utxo) {
-            SerializeToVector(s, PSCT_IN_NON_WITNESS_UTXO);
+            SerializeToVector(s, PSBT_IN_NON_WITNESS_UTXO);
             OverrideStream<Stream> os(&s, s.GetType(), s.GetVersion() | SERIALIZE_TRANSACTION_NO_WITNESS);
             SerializeToVector(os, non_witness_utxo);
         } else if (!witness_utxo.IsNull()) {
-            SerializeToVector(s, PSCT_IN_WITNESS_UTXO);
+            SerializeToVector(s, PSBT_IN_WITNESS_UTXO);
             SerializeToVector(s, witness_utxo);
         }
 
         if (final_script_sig.empty() && final_script_witness.IsNull()) {
             // Write any partial signatures
             for (auto sig_pair : partial_sigs) {
-                SerializeToVector(s, PSCT_IN_PARTIAL_SIG, MakeSpan(sig_pair.second.first));
+                SerializeToVector(s, PSBT_IN_PARTIAL_SIG, MakeSpan(sig_pair.second.first));
                 s << sig_pair.second.second;
             }
 
             // Write the sighash type
             if (sighash_type > 0) {
-                SerializeToVector(s, PSCT_IN_SIGHASH);
+                SerializeToVector(s, PSBT_IN_SIGHASH);
                 SerializeToVector(s, sighash_type);
             }
 
             // Write the redeem script
             if (!redeem_script.empty()) {
-                SerializeToVector(s, PSCT_IN_REDEEMSCRIPT);
+                SerializeToVector(s, PSBT_IN_REDEEMSCRIPT);
                 s << redeem_script;
             }
 
             // Write the witness script
             if (!witness_script.empty()) {
-                SerializeToVector(s, PSCT_IN_WITNESSSCRIPT);
+                SerializeToVector(s, PSBT_IN_WITNESSSCRIPT);
                 s << witness_script;
             }
 
             // Write any hd keypaths
-            SerializeHDKeypaths(s, hd_keypaths, PSCT_IN_BIP32_DERIVATION);
+            SerializeHDKeypaths(s, hd_keypaths, PSBT_IN_BIP32_DERIVATION);
         }
 
         // Write script sig
         if (!final_script_sig.empty()) {
-            SerializeToVector(s, PSCT_IN_SCRIPTSIG);
+            SerializeToVector(s, PSBT_IN_SCRIPTSIG);
             s << final_script_sig;
         }
         // write script witness
         if (!final_script_witness.IsNull()) {
-            SerializeToVector(s, PSCT_IN_SCRIPTWITNESS);
+            SerializeToVector(s, PSBT_IN_SCRIPTWITNESS);
             SerializeToVector(s, final_script_witness.stack);
         }
 
@@ -117,7 +117,7 @@ struct PSCTInput
             s << entry.second;
         }
 
-        s << PSCT_SEPARATOR;
+        s << PSBT_SEPARATOR;
     }
 
 
@@ -142,7 +142,7 @@ struct PSCTInput
 
             // Do stuff based on type
             switch(type) {
-                case PSCT_IN_NON_WITNESS_UTXO:
+                case PSBT_IN_NON_WITNESS_UTXO:
                 {
                     if (non_witness_utxo) {
                         throw std::ios_base::failure("Duplicate Key, input non-witness utxo already provided");
@@ -154,7 +154,7 @@ struct PSCTInput
                     UnserializeFromVector(os, non_witness_utxo);
                     break;
                 }
-                case PSCT_IN_WITNESS_UTXO:
+                case PSBT_IN_WITNESS_UTXO:
                     if (!witness_utxo.IsNull()) {
                         throw std::ios_base::failure("Duplicate Key, input witness utxo already provided");
                     } else if (key.size() != 1) {
@@ -162,7 +162,7 @@ struct PSCTInput
                     }
                     UnserializeFromVector(s, witness_utxo);
                     break;
-                case PSCT_IN_PARTIAL_SIG:
+                case PSBT_IN_PARTIAL_SIG:
                 {
                     // Make sure that the key is the size of pubkey + 1
                     if (key.size() != CPubKey::PUBLIC_KEY_SIZE + 1 && key.size() != CPubKey::COMPRESSED_PUBLIC_KEY_SIZE + 1) {
@@ -185,7 +185,7 @@ struct PSCTInput
                     partial_sigs.emplace(pubkey.GetID(), SigPair(pubkey, std::move(sig)));
                     break;
                 }
-                case PSCT_IN_SIGHASH:
+                case PSBT_IN_SIGHASH:
                     if (sighash_type > 0) {
                         throw std::ios_base::failure("Duplicate Key, input sighash type already provided");
                     } else if (key.size() != 1) {
@@ -193,7 +193,7 @@ struct PSCTInput
                     }
                     UnserializeFromVector(s, sighash_type);
                     break;
-                case PSCT_IN_REDEEMSCRIPT:
+                case PSBT_IN_REDEEMSCRIPT:
                 {
                     if (!redeem_script.empty()) {
                         throw std::ios_base::failure("Duplicate Key, input redeemScript already provided");
@@ -203,7 +203,7 @@ struct PSCTInput
                     s >> redeem_script;
                     break;
                 }
-                case PSCT_IN_WITNESSSCRIPT:
+                case PSBT_IN_WITNESSSCRIPT:
                 {
                     if (!witness_script.empty()) {
                         throw std::ios_base::failure("Duplicate Key, input witnessScript already provided");
@@ -213,12 +213,12 @@ struct PSCTInput
                     s >> witness_script;
                     break;
                 }
-                case PSCT_IN_BIP32_DERIVATION:
+                case PSBT_IN_BIP32_DERIVATION:
                 {
                     DeserializeHDKeypaths(s, key, hd_keypaths);
                     break;
                 }
-                case PSCT_IN_SCRIPTSIG:
+                case PSBT_IN_SCRIPTSIG:
                 {
                     if (!final_script_sig.empty()) {
                         throw std::ios_base::failure("Duplicate Key, input final scriptSig already provided");
@@ -228,7 +228,7 @@ struct PSCTInput
                     s >> final_script_sig;
                     break;
                 }
-                case PSCT_IN_SCRIPTWITNESS:
+                case PSBT_IN_SCRIPTWITNESS:
                 {
                     if (!final_script_witness.IsNull()) {
                         throw std::ios_base::failure("Duplicate Key, input final scriptWitness already provided");
@@ -257,13 +257,13 @@ struct PSCTInput
     }
 
     template <typename Stream>
-    PSCTInput(deserialize_type, Stream& s) {
+    PSBTInput(deserialize_type, Stream& s) {
         Unserialize(s);
     }
 };
 
-/** A structure for PSCTs which contains per output information */
-struct PSCTOutput
+/** A structure for PSBTs which contains per output information */
+struct PSBTOutput
 {
     CScript redeem_script;
     CScript witness_script;
@@ -273,26 +273,26 @@ struct PSCTOutput
     bool IsNull() const;
     void FillSignatureData(SignatureData& sigdata) const;
     void FromSignatureData(const SignatureData& sigdata);
-    void Merge(const PSCTOutput& output);
+    void Merge(const PSBTOutput& output);
     bool IsSane() const;
-    PSCTOutput() {}
+    PSBTOutput() {}
 
     template <typename Stream>
     inline void Serialize(Stream& s) const {
         // Write the redeem script
         if (!redeem_script.empty()) {
-            SerializeToVector(s, PSCT_OUT_REDEEMSCRIPT);
+            SerializeToVector(s, PSBT_OUT_REDEEMSCRIPT);
             s << redeem_script;
         }
 
         // Write the witness script
         if (!witness_script.empty()) {
-            SerializeToVector(s, PSCT_OUT_WITNESSSCRIPT);
+            SerializeToVector(s, PSBT_OUT_WITNESSSCRIPT);
             s << witness_script;
         }
 
         // Write any hd keypaths
-        SerializeHDKeypaths(s, hd_keypaths, PSCT_OUT_BIP32_DERIVATION);
+        SerializeHDKeypaths(s, hd_keypaths, PSBT_OUT_BIP32_DERIVATION);
 
         // Write unknown things
         for (auto& entry : unknown) {
@@ -300,7 +300,7 @@ struct PSCTOutput
             s << entry.second;
         }
 
-        s << PSCT_SEPARATOR;
+        s << PSBT_SEPARATOR;
     }
 
 
@@ -325,7 +325,7 @@ struct PSCTOutput
 
             // Do stuff based on type
             switch(type) {
-                case PSCT_OUT_REDEEMSCRIPT:
+                case PSBT_OUT_REDEEMSCRIPT:
                 {
                     if (!redeem_script.empty()) {
                         throw std::ios_base::failure("Duplicate Key, output redeemScript already provided");
@@ -335,7 +335,7 @@ struct PSCTOutput
                     s >> redeem_script;
                     break;
                 }
-                case PSCT_OUT_WITNESSSCRIPT:
+                case PSBT_OUT_WITNESSSCRIPT:
                 {
                     if (!witness_script.empty()) {
                         throw std::ios_base::failure("Duplicate Key, output witnessScript already provided");
@@ -345,7 +345,7 @@ struct PSCTOutput
                     s >> witness_script;
                     break;
                 }
-                case PSCT_OUT_BIP32_DERIVATION:
+                case PSBT_OUT_BIP32_DERIVATION:
                 {
                     DeserializeHDKeypaths(s, key, hd_keypaths);
                     break;
@@ -370,29 +370,29 @@ struct PSCTOutput
     }
 
     template <typename Stream>
-    PSCTOutput(deserialize_type, Stream& s) {
+    PSBTOutput(deserialize_type, Stream& s) {
         Unserialize(s);
     }
 };
 
-/** A version of CTransaction with the PSCT format*/
+/** A version of CTransaction with the PSBT format*/
 struct PartiallySignedTransaction
 {
     boost::optional<CMutableTransaction> tx;
-    std::vector<PSCTInput> inputs;
-    std::vector<PSCTOutput> outputs;
+    std::vector<PSBTInput> inputs;
+    std::vector<PSBTOutput> outputs;
     std::map<std::vector<unsigned char>, std::vector<unsigned char>> unknown;
 
     bool IsNull() const;
 
-    /** Merge psct into this. The two pscts must have the same underlying CTransaction (i.e. the
+    /** Merge psbt into this. The two psbts must have the same underlying CTransaction (i.e. the
       * same actual Chaincoin transaction.) Returns true if the merge succeeded, false otherwise. */
-    NODISCARD bool Merge(const PartiallySignedTransaction& psct);
+    NODISCARD bool Merge(const PartiallySignedTransaction& psbt);
     bool IsSane() const;
-    bool AddInput(const CTxIn& txin, PSCTInput& psctin);
-    bool AddOutput(const CTxOut& txout, const PSCTOutput& psctout);
+    bool AddInput(const CTxIn& txin, PSBTInput& psbtin);
+    bool AddOutput(const CTxOut& txout, const PSBTOutput& psbtout);
     PartiallySignedTransaction() {}
-    PartiallySignedTransaction(const PartiallySignedTransaction& psct_in) : tx(psct_in.tx), inputs(psct_in.inputs), outputs(psct_in.outputs), unknown(psct_in.unknown) {}
+    PartiallySignedTransaction(const PartiallySignedTransaction& psbt_in) : tx(psbt_in.tx), inputs(psbt_in.inputs), outputs(psbt_in.outputs), unknown(psbt_in.unknown) {}
     explicit PartiallySignedTransaction(const CMutableTransaction& tx);
     /**
      * Finds the UTXO for a given input index
@@ -407,10 +407,10 @@ struct PartiallySignedTransaction
     inline void Serialize(Stream& s) const {
 
         // magic bytes
-        s << PSCT_MAGIC_BYTES;
+        s << PSBT_MAGIC_BYTES;
 
         // unsigned tx flag
-        SerializeToVector(s, PSCT_GLOBAL_UNSIGNED_TX);
+        SerializeToVector(s, PSBT_GLOBAL_UNSIGNED_TX);
 
         // Write serialized tx to a stream
         OverrideStream<Stream> os(&s, s.GetType(), s.GetVersion() | SERIALIZE_TRANSACTION_NO_WITNESS);
@@ -423,14 +423,14 @@ struct PartiallySignedTransaction
         }
 
         // Separator
-        s << PSCT_SEPARATOR;
+        s << PSBT_SEPARATOR;
 
         // Write inputs
-        for (const PSCTInput& input : inputs) {
+        for (const PSBTInput& input : inputs) {
             s << input;
         }
         // Write outputs
-        for (const PSCTOutput& output : outputs) {
+        for (const PSBTOutput& output : outputs) {
             s << output;
         }
     }
@@ -441,8 +441,8 @@ struct PartiallySignedTransaction
         // Read the magic bytes
         uint8_t magic[5];
         s >> magic;
-        if (!std::equal(magic, magic + 5, PSCT_MAGIC_BYTES)) {
-            throw std::ios_base::failure("Invalid PSCT magic bytes");
+        if (!std::equal(magic, magic + 5, PSBT_MAGIC_BYTES)) {
+            throw std::ios_base::failure("Invalid PSBT magic bytes");
         }
 
         // Read global data
@@ -464,7 +464,7 @@ struct PartiallySignedTransaction
 
             // Do stuff based on type
             switch(type) {
-                case PSCT_GLOBAL_UNSIGNED_TX:
+                case PSBT_GLOBAL_UNSIGNED_TX:
                 {
                     if (tx) {
                         throw std::ios_base::failure("Duplicate Key, unsigned tx already provided");
@@ -509,7 +509,7 @@ struct PartiallySignedTransaction
         // Read input data
         unsigned int i = 0;
         while (!s.empty() && i < tx->vin.size()) {
-            PSCTInput input;
+            PSBTInput input;
             s >> input;
             inputs.push_back(input);
 
@@ -527,7 +527,7 @@ struct PartiallySignedTransaction
         // Read output data
         i = 0;
         while (!s.empty() && i < tx->vout.size()) {
-            PSCTOutput output;
+            PSBTOutput output;
             s >> output;
             outputs.push_back(output);
             ++i;
@@ -538,7 +538,7 @@ struct PartiallySignedTransaction
         }
         // Sanity check
         if (!IsSane()) {
-            throw std::ios_base::failure("PSCT is not sane.");
+            throw std::ios_base::failure("PSBT is not sane.");
         }
     }
 
@@ -548,36 +548,36 @@ struct PartiallySignedTransaction
     }
 };
 
-/** Checks whether a PSCTInput is already signed. */
-bool PSCTInputSigned(PSCTInput& input);
+/** Checks whether a PSBTInput is already signed. */
+bool PSBTInputSigned(PSBTInput& input);
 
-/** Signs a PSCTInput, verifying that all provided data matches what is being signed. */
-bool SignPSCTInput(const SigningProvider& provider, PartiallySignedTransaction& psct, int index, int sighash = SIGHASH_ALL, SignatureData* out_sigdata = nullptr, bool use_dummy = false);
+/** Signs a PSBTInput, verifying that all provided data matches what is being signed. */
+bool SignPSBTInput(const SigningProvider& provider, PartiallySignedTransaction& psbt, int index, int sighash = SIGHASH_ALL, SignatureData* out_sigdata = nullptr, bool use_dummy = false);
 
 /**
- * Finalizes a PSCT if possible, combining partial signatures.
+ * Finalizes a PSBT if possible, combining partial signatures.
  *
- * @param[in,out] &psctx reference to PartiallySignedTransaction to finalize
- * return True if the PSCT is now complete, false otherwise
+ * @param[in,out] &psbtx reference to PartiallySignedTransaction to finalize
+ * return True if the PSBT is now complete, false otherwise
  */
-bool FinalizePSCT(PartiallySignedTransaction& psctx);
+bool FinalizePSBT(PartiallySignedTransaction& psbtx);
 
 /**
- * Finalizes a PSCT if possible, and extracts it to a CMutableTransaction if it could be finalized.
+ * Finalizes a PSBT if possible, and extracts it to a CMutableTransaction if it could be finalized.
  *
- * @param[in]  &psctx reference to PartiallySignedTransaction
+ * @param[in]  &psbtx reference to PartiallySignedTransaction
  * @param[out] result CMutableTransaction representing the complete transaction, if successful
  * @return True if we successfully extracted the transaction, false otherwise
  */
-bool FinalizeAndExtractPSCT(PartiallySignedTransaction& psctx, CMutableTransaction& result);
+bool FinalizeAndExtractPSBT(PartiallySignedTransaction& psbtx, CMutableTransaction& result);
 
 /**
- * Combines PSCTs with the same underlying transaction, resulting in a single PSCT with all partial signatures from each input.
+ * Combines PSBTs with the same underlying transaction, resulting in a single PSBT with all partial signatures from each input.
  *
- * @param[out] &out   the combined PSCT, if successful
- * @param[in]  psctxs the PSCTs to combine
+ * @param[out] &out   the combined PSBT, if successful
+ * @param[in]  psbtxs the PSBTs to combine
  * @return error (OK if we successfully combined the transactions, other error if they were not compatible)
  */
-NODISCARD TransactionError CombinePSCTs(PartiallySignedTransaction& out, const std::vector<PartiallySignedTransaction>& psctxs);
+NODISCARD TransactionError CombinePSBTs(PartiallySignedTransaction& out, const std::vector<PartiallySignedTransaction>& psbtxs);
 
-#endif // BITCOIN_PSCT_H
+#endif // BITCOIN_PSBT_H

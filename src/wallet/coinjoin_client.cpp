@@ -15,7 +15,7 @@
 #include <util/moneystr.h>
 #include <wallet/coincontrol.h>
 #include <wallet/fees.h>
-#include <wallet/psctwallet.h>
+#include <wallet/psbtwallet.h>
 
 #include <memory>
 
@@ -238,22 +238,22 @@ void CCoinJoinClientSession::ProcessMessage(CNode* pfrom, const std::string& str
         }
 
 
-        CCoinJoinBroadcastTx psctxFinal;
-        vRecv >> psctxFinal;
+        CCoinJoinBroadcastTx psbtxFinal;
+        vRecv >> psbtxFinal;
 
-        if (!psctxFinal.CheckSignature(infoMixingMasternode.pubKeyMasternode)) {
+        if (!psbtxFinal.CheckSignature(infoMixingMasternode.pubKeyMasternode)) {
             // we probably have outdated info
-            mnodeman.AskForMN(pfrom, psctxFinal.masternodeOutpoint, connman);
+            mnodeman.AskForMN(pfrom, psbtxFinal.masternodeOutpoint, connman);
             return;
         }
 
-        if (nSessionID != psctxFinal.nSessionID) {
-            LogPrint(BCLog::CJOIN, "%s CJFINALTX -- message doesn't match current CoinJoin session: nSessionID: %d  nMsgSessionID: %d\n", m_wallet_session->GetDisplayName(), nSessionID, psctxFinal.nSessionID);
+        if (nSessionID != psbtxFinal.nSessionID) {
+            LogPrint(BCLog::CJOIN, "%s CJFINALTX -- message doesn't match current CoinJoin session: nSessionID: %d  nMsgSessionID: %d\n", m_wallet_session->GetDisplayName(), nSessionID, psbtxFinal.nSessionID);
             return;
         }
 
         //check to see if input is spent already? (and probably not confirmed)
-        SignFinalTransaction(psctxFinal.psctx, pfrom);
+        SignFinalTransaction(psbtxFinal.psbtx, pfrom);
 
     } else if (strCommand == NetMsgType::CJCOMPLETE) {
         if (pfrom->GetSendVersion() < MIN_COINJOIN_PEER_PROTO_VERSION) {
@@ -520,31 +520,31 @@ bool CCoinJoinClientSession::SendDenominate()
         input.scriptWitness.SetNull();
     }
 
-    // Make and fill our psct
-    PartiallySignedTransaction psctx;
-    psctx.tx = mtxSession;
+    // Make and fill our psbt
+    PartiallySignedTransaction psbtx;
+    psbtx.tx = mtxSession;
     for (unsigned int i = 0; i < mtxSession.vin.size(); ++i) {
-        psctx.inputs.push_back(PSCTInput());
+        psbtx.inputs.push_back(PSBTInput());
     }
     for (unsigned int i = 0; i < mtxSession.vout.size(); ++i) {
-        psctx.outputs.push_back(PSCTOutput());
+        psbtx.outputs.push_back(PSBTOutput());
     }
 
     bool complete = false;
-    const TransactionError err = FillPSCT(m_wallet_session, psctx, complete, 1, false, false);
-    LogPrint(BCLog::CJOIN, "%s CCoinJoinClientManager::SendDenominate -- FillPSCT completed: %b\n", m_wallet_session->GetDisplayName(), complete);
+    const TransactionError err = FillPSBT(m_wallet_session, psbtx, complete, 1, false, false);
+    LogPrint(BCLog::CJOIN, "%s CCoinJoinClientManager::SendDenominate -- FillPSBT completed: %b\n", m_wallet_session->GetDisplayName(), complete);
 
     if (err != TransactionError::OK) {
-        LogPrintf("%s CCoinJoinClientManager::SendDenominate -- ERROR: creating transaction failed, psctx=%s, error=%s\n",
+        LogPrintf("%s CCoinJoinClientManager::SendDenominate -- ERROR: creating transaction failed, psbtx=%s, error=%s\n",
                                   m_wallet_session->GetDisplayName(),
-                                  psctx.tx->GetHash().ToString(), TransactionErrorString(err));
+                                  psbtx.tx->GetHash().ToString(), TransactionErrorString(err));
         return false;
     }
 
-    LogPrintf("%s CCoinJoinClientSession::SendDenominate -- Submitting psct %s\n", m_wallet_session->GetDisplayName(), mtxSession.GetHash().ToString());
+    LogPrintf("%s CCoinJoinClientSession::SendDenominate -- Submitting psbt %s\n", m_wallet_session->GetDisplayName(), mtxSession.GetHash().ToString());
 
     // store our entry for later use
-    CCoinJoinEntry entry(nSessionID, psctx);
+    CCoinJoinEntry entry(nSessionID, psbtx);
     RelayIn(entry);
     nTimeLastSuccessfulStep = GetTime();
 
@@ -626,7 +626,7 @@ bool CCoinJoinClientSession::SignFinalTransaction(PartiallySignedTransaction& fi
         return false;
     }
 
-    const TransactionError err = FillPSCT(m_wallet_session, finalTransactionNew, complete);
+    const TransactionError err = FillPSBT(m_wallet_session, finalTransactionNew, complete);
 
     if (err != TransactionError::OK) {
         LogPrint(BCLog::CJOIN, "%s CCoinJoinClientSession::SignFinalTransaction -- ERROR: finalTransactionNew=%s, error=%s\n",
@@ -927,7 +927,7 @@ bool CCoinJoinClientSession::AddFeesAndLocktime(std::vector<CAmount>& vecAmounts
 
     for (auto i = 1; i < 200; ++i) { // allow some blocks back
         if (mnpayments.GetBlockPayee(locktime, payee)) {
-            if (payee.IsWitnessProgram(witnessversion, witnessprogram)) continue;
+            if (!payee.IsWitnessProgram(witnessversion, witnessprogram)) continue;
             CTxDestination address;
             ExtractDestination(payee, address);
             LogPrint(BCLog::CJOIN, "%s CCoinJoinClientSession::AddFeesAndLocktime --- added payee = %s\n", m_wallet_session->GetDisplayName(), EncodeDestination(address));
@@ -1479,8 +1479,8 @@ bool CCoinJoinClientManager::CreateDenominated(const CAmount& nValue, bool fOnly
 
         bool complete = true;
         bool sign = true;
-        const TransactionError err = FillPSCT(m_wallet, ptx, complete, 1, sign, false);
-        LogPrint(BCLog::CJOIN, "%s CCoinJoinClientManager::CreateDenominated -- FillPSCT completed: %b\n", m_wallet->GetDisplayName(), complete);
+        const TransactionError err = FillPSBT(m_wallet, ptx, complete, 1, sign, false);
+        LogPrint(BCLog::CJOIN, "%s CCoinJoinClientManager::CreateDenominated -- FillPSBT completed: %b\n", m_wallet->GetDisplayName(), complete);
 
         if (err != TransactionError::OK) {
             LogPrintf("%s CCoinJoinClientManager::CreateDenominated -- ERROR: signing transaction failed, ptx=%s, error=%s\n",
@@ -1489,8 +1489,8 @@ bool CCoinJoinClientManager::CreateDenominated(const CAmount& nValue, bool fOnly
             return false;
         }
 
-        if (!FinalizeAndExtractPSCT(ptx, mtx)) {
-            LogPrintf("%s CCoinJoinClientManager::CreateDenominated -- FinalizeAndExtractPSCT() error: Transaction not final\n", m_wallet->GetDisplayName());
+        if (!FinalizeAndExtractPSBT(ptx, mtx)) {
+            LogPrintf("%s CCoinJoinClientManager::CreateDenominated -- FinalizeAndExtractPSBT() error: Transaction not final\n", m_wallet->GetDisplayName());
             return false;
         }
 

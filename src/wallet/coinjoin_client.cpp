@@ -142,6 +142,7 @@ void CCoinJoinClientManager::ProcessMessage(CNode* pfrom, const std::string& str
                     return;
                 }             }
         } else {
+            if (!queue.fOpen) return; // don't re-add closed queues
             for (const auto& q : vecCoinJoinQueue) {
                 if (q.masternodeOutpoint == queue.masternodeOutpoint && queue.fOpen) {
                     // no way same mn can send another "not yet ready" queue this soon

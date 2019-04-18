@@ -85,7 +85,7 @@
                <string/>
               </property>
               <property name="icon">
-               <iconset resource="../chaincoin.qrc">
+               <iconset>
                 <normaloff>:/icons/warning</normaloff>
                 <disabledoff>:/icons/warning</disabledoff>:/icons/warning</iconset>
               </property>
@@ -413,7 +413,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QFrame" name="framePrivateSend">
+        <widget class="QFrame" name="frameCoinJoin">
          <property name="layoutDirection">
           <enum>Qt::LeftToRight</enum>
          </property>
@@ -440,7 +440,7 @@
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_5">
             <item>
-             <widget class="QLabel" name="labelPrivateSendHeader">
+             <widget class="QLabel" name="labelCoinJoinHeader">
               <property name="font">
                <font>
                 <weight>75</weight>
@@ -448,12 +448,12 @@
                </font>
               </property>
               <property name="text">
-               <string>PrivateSend</string>
+               <string>CoinJoin!</string>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="QLabel" name="labelPrivateSendSyncStatus">
+             <widget class="QLabel" name="labelCoinJoinSyncStatus">
               <property name="toolTip">
                <string>The displayed information may be out of date. Your wallet automatically synchronizes with the Chaincoin network after a connection is established, but this process has not completed yet.</string>
               </property>
@@ -484,7 +484,7 @@
            </layout>
           </item>
           <item>
-           <layout class="QFormLayout" name="privateSendFormLayout">
+           <layout class="QFormLayout" name="coinJoinFormLayout">
             <property name="fieldGrowthPolicy">
              <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
             </property>
@@ -495,14 +495,14 @@
              <number>12</number>
             </property>
             <item row="0" column="0">
-             <widget class="QLabel" name="labelPrivateSendEnabledText">
+             <widget class="QLabel" name="labelCoinJoinEnabledText">
               <property name="text">
                <string>Status:</string>
               </property>
              </widget>
             </item>
             <item row="0" column="1">
-             <widget class="QLabel" name="labelPrivateSendEnabled">
+             <widget class="QLabel" name="labelCoinJoinEnabled">
               <property name="text">
                <string>Enabled/Disabled</string>
               </property>
@@ -516,7 +516,7 @@
              </widget>
             </item>
             <item row="1" column="1">
-             <widget class="QProgressBar" name="privateSendProgress">
+             <widget class="QProgressBar" name="coinJoinProgress">
               <property name="maximumSize">
                <size>
                 <width>154</width>
@@ -531,7 +531,7 @@
             <item row="2" column="0">
              <widget class="QLabel" name="labelAnonymizedText">
               <property name="text">
-               <string>PrivateSend Balance:</string>
+               <string>CoinJoin Balance:</string>
               </property>
              </widget>
             </item>
@@ -584,7 +584,7 @@
           <item>
            <layout class="QVBoxLayout" name="VerticalLayout_PS">
             <item>
-             <widget class="QLabel" name="labelPrivateSendLastMessage">
+             <widget class="QLabel" name="labelCoinJoinLastMessage">
               <property name="text">
                <string>(Last Message)</string>
               </property>
@@ -597,7 +597,7 @@
              </widget>
             </item>
             <item>
-             <widget class="QPushButton" name="togglePrivateSend">
+             <widget class="QPushButton" name="toggleCoinJoin">
               <property name="sizePolicy">
                <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
                 <horstretch>0</horstretch>
@@ -612,7 +612,7 @@
             <item>
              <layout class="QHBoxLayout" name="horizontalLayout_debugbuttons">
               <item>
-               <widget class="QPushButton" name="privateSendReset">
+               <widget class="QPushButton" name="coinJoinReset">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
                   <horstretch>0</horstretch>
@@ -620,7 +620,7 @@
                  </sizepolicy>
                 </property>
                 <property name="toolTip">
-                 <string>Reset the current status of PrivateSend (can interrupt PrivateSend if it's in the process of Mixing, which can cost you money!)</string>
+                 <string>Reset the current status of CoinJoin (can interrupt CoinJoin if it's in the process of Mixing, which can cost you money!)</string>
                 </property>
                 <property name="autoFillBackground">
                  <bool>false</bool>
@@ -631,7 +631,7 @@
                </widget>
               </item>
               <item>
-               <widget class="QPushButton" name="privateSendInfo">
+               <widget class="QPushButton" name="coinJoinInfo">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
                   <horstretch>0</horstretch>
@@ -639,7 +639,7 @@
                  </sizepolicy>
                 </property>
                 <property name="toolTip">
-                 <string>Information about PrivateSend and Mixing</string>
+                 <string>Information about CoinJoin and Mixing</string>
                 </property>
                 <property name="text">
                  <string>Info</string>
@@ -699,7 +699,7 @@
                <string/>
               </property>
               <property name="icon">
-               <iconset resource="../chaincoin.qrc">
+               <iconset>
                 <normaloff>:/icons/warning</normaloff>
                 <disabledoff>:/icons/warning</disabledoff>:/icons/warning</iconset>
               </property>
@@ -770,8 +770,6 @@
    </item>
   </layout>
  </widget>
- <resources>
-  <include location="../chaincoin.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>

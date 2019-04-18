@@ -33,7 +33,7 @@
 #include <modules/masternode/masternode_payments.h>
 #include <modules/masternode/masternode_sync.h>
 #include <modules/masternode/masternode_man.h>
-#include <modules/privatesend/privatesend_server.h>
+#include <modules/coinjoin/coinjoin_server.h>
 
 #include <memory>
 
@@ -1198,7 +1198,6 @@ bool static AlreadyHave(const CInv& inv) EXCLUSIVE_LOCKS_REQUIRED(cs_main)
                    pcoinsTip->HaveCoinInCache(COutPoint(inv.hash, 0)) || // Best effort: only try output 0 and 1
                    pcoinsTip->HaveCoinInCache(COutPoint(inv.hash, 1));
         }
-
     case MSG_BLOCK:
     case MSG_WITNESS_BLOCK:
         return LookupBlockIndex(inv.hash) != nullptr;
@@ -1227,10 +1226,6 @@ bool static AlreadyHave(const CInv& inv) EXCLUSIVE_LOCKS_REQUIRED(cs_main)
     case MSG_MASTERNODE_PING:
         return mnodeman.mapSeenMasternodePing.count(inv.hash);
 
-    case MSG_DSTX: {
-        return static_cast<bool>(CPrivateSend::GetDSTX(inv.hash));
-    }
-
     case MSG_GOVERNANCE_OBJECT:
     case MSG_GOVERNANCE_OBJECT_VOTE:
         return !governance.ConfirmInventoryRequest(inv);
@@ -1238,14 +1233,13 @@ bool static AlreadyHave(const CInv& inv) EXCLUSIVE_LOCKS_REQUIRED(cs_main)
     case MSG_MASTERNODE_VERIFY:
         return mnodeman.mapSeenMasternodeVerification.count(inv.hash);
     }
-
     // Don't know what it is, just say we already got one
     return true;
 }
 
 static void RelayTransaction(const CTransaction& tx, CConnman* connman)
 {
-    CInv inv(static_cast<bool>(CPrivateSend::GetDSTX(tx.GetHash())) ? MSG_DSTX : MSG_TX, tx.GetHash());
+    CInv inv(MSG_TX, tx.GetHash());
     connman->ForEachNode([&inv](CNode* pnode)
     {
         pnode->PushInventory(inv);
@@ -1512,13 +1506,6 @@ void static ProcessGetData(CNode* pfrom, const CChainParams& chainparams, CConnm
                 else if (inv.type == MSG_MASTERNODE_PING) {
                     if(mnodeman.mapSeenMasternodePing.count(inv.hash)) {
                         connman->PushMessage(pfrom, msgMaker.Make(NetMsgType::MNPING, mnodeman.mapSeenMasternodePing[inv.hash]));
-                        push = true;
-                    }
-                }
-                else if (inv.type == MSG_DSTX) {
-                        CPrivateSendBroadcastTx dstx = CPrivateSend::GetDSTX(inv.hash);
-                        if(dstx) {
-                            connman->PushMessage(pfrom, msgMaker.Make(NetMsgType::DSTX, dstx));
                         push = true;
                     }
                 }
@@ -2456,7 +2443,7 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
         return true;
     }
 
-    if (strCommand == NetMsgType::TX || strCommand == NetMsgType::DSTX ) {
+    if (strCommand == NetMsgType::TX) {
         // Stop processing the transaction early if
         // We are in blocks only mode and peer is either not whitelisted or whitelistrelay is off
         if (!fRelayTxes && (!pfrom->fWhitelisted || !gArgs.GetBoolArg("-whitelistrelay", DEFAULT_WHITELISTRELAY)))
@@ -2468,59 +2455,11 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
         std::deque<COutPoint> vWorkQueue;
         std::vector<uint256> vEraseQueue;
         CTransactionRef ptx;
-        CPrivateSendBroadcastTx dstx;
-        int nInvType = MSG_TX;
-
-        // Read data and assign inv type
-        if(strCommand == NetMsgType::TX) {
-            vRecv >> ptx;
-        } else if (strCommand == NetMsgType::DSTX) {
-            vRecv >> dstx;
-            ptx = dstx.tx;
-            nInvType = MSG_DSTX;
-        }
+        vRecv >> ptx;
         const CTransaction& tx = *ptx;
 
-        uint256 hashTx = tx.GetHash();
-        CInv inv(nInvType, hashTx);
-
-        // If we are the masternode creating the final DSTX, we will have the inv but not added it to the mempool. If we want to mine it,
-        // we still need to add it
-        bool fHaveMempool = mempool.exists(hashTx);
-        bool fHaveDSTX = static_cast<bool>(CPrivateSend::GetDSTX(hashTx));
-
+        CInv inv(MSG_TX, tx.GetHash());
         pfrom->AddInventoryKnown(inv);
-
-        // Process custom logic, no matter if tx will be accepted to mempool later or not
-        if (strCommand == NetMsgType::DSTX) {
-            if(fHaveDSTX && fHaveMempool) {
-                LogPrint(BCLog::PRIVSEND, "DSTX -- Already have %s, skipping...\n", hashTx.ToString());
-                return true; // not an error
-            }
-
-            CMasternode mn;
-
-            if(!mnodeman.Get(dstx.masternodeOutpoint, mn)) {
-                LogPrint(BCLog::PRIVSEND, "DSTX -- Can't find masternode %s to verify %s\n", dstx.masternodeOutpoint.ToStringShort(), hashTx.ToString());
-                return false;
-            }
-
-            if(!mn.IsValidForMixingTxes()) {
-                LogPrint(BCLog::PRIVSEND, "DSTX -- Masternode %s is sending too many transactions %s\n", dstx.masternodeOutpoint.ToStringShort(), hashTx.ToString());
-                return true;
-                // TODO: Not an error? Could it be that someone is relaying old DSTXes
-                // we have no idea about (e.g we were offline)? How to handle them?
-            }
-
-            if(!dstx.CheckSignature(mn.pubKeyMasternode)) {
-                LogPrint(BCLog::PRIVSEND, "DSTX -- CheckSignature() failed for %s\n", hashTx.ToString());
-                return false;
-            }
-
-            LogPrintf("DSTX -- Got Masternode transaction %s\n", hashTx.ToString());
-            mempool.PrioritiseTransaction(hashTx, COIN/100);
-            mnodeman.DisallowMixing(dstx.masternodeOutpoint);
-        }
 
         LOCK2(cs_main, g_cs_orphans);
 
@@ -2534,14 +2473,8 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
 
         std::list<CTransactionRef> lRemovedTxn;
 
-        if ((!AlreadyHave(inv) || (fHaveDSTX && !fHaveMempool)) &&
-                AcceptToMemoryPool(mempool, state, ptx, &fMissingInputs, &lRemovedTxn, strCommand == NetMsgType::DSTX ? true : false /* bypass_limits */, 0 /* nAbsurdFee */)) {
-            // Process custom txes, this changes AlreadyHave to "true"
-            if (strCommand == NetMsgType::DSTX) {
-                LogPrintf("DSTX -- Masternode transaction accepted, hash=%s, peer=%d\n",
-                        tx.GetHash().ToString(), pfrom->GetId());
-                if (!fHaveDSTX) CPrivateSend::AddDSTX(dstx);
-            }
+        if (!AlreadyHave(inv) &&
+            AcceptToMemoryPool(mempool, state, ptx, &fMissingInputs, &lRemovedTxn, false /* bypass_limits */, 0 /* nAbsurdFee */)) {
 
             mempool.check(pcoinsTip.get());
             RelayTransaction(tx, connman);
@@ -2580,7 +2513,7 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
 
                     if (setMisbehaving.count(fromPeer))
                         continue;
-                    if (AcceptToMemoryPool(mempool, stateDummy, porphanTx, &fMissingInputs2, &lRemovedTxn, strCommand == NetMsgType::DSTX ? true : false /* bypass_limits */, 0 /* nAbsurdFee */)) {
+                    if (AcceptToMemoryPool(mempool, stateDummy, porphanTx, &fMissingInputs2, &lRemovedTxn, false /* bypass_limits */, 0 /* nAbsurdFee */)) {
                         LogPrint(BCLog::MEMPOOL, "   accepted orphan tx %s\n", orphanHash.ToString());
                         RelayTransaction(orphanTx, connman);
                         for (unsigned int i = 0; i < orphanTx.vout.size(); i++) {
@@ -3409,26 +3342,20 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
         // We do not care about the NOTFOUND message, but logging an Unknown Command
         // message would be undesirable as we transmit it ourselves.
         return true;
-    } else {
-        bool found = false;
-        const std::vector<std::string> &allMessages = getAllNetMessageTypes();
-        for (const auto& msg : allMessages) {
-            if(msg == strCommand) {
-                found = true;
-                break;
-            }
-        }
+    }
 
-        if (found)
-        {
+    const std::vector<std::string> &allMessages = getAllNetMessageTypes();
+    for (const auto& msg : allMessages) {
+        if(msg == strCommand) {
             //probably for one of the modules
             GetMainSignals().ProcessModuleMessage(pfrom, NetMsgDest::MSG_ALL, strCommand, vRecv, connman);
             LogPrint(BCLog::NET, "Forwarded message \"%s\" from peer=%d to Chaincoin modules\n", SanitizeString(strCommand), pfrom->GetId());
-        } else {
-            // Ignore unknown commands for extensibility
-            LogPrint(BCLog::NET, "Unknown command \"%s\" from peer=%d\n", SanitizeString(strCommand), pfrom->GetId());
+            break;
         }
     }
+
+    // Ignore unknown commands for extensibility
+    LogPrint(BCLog::NET, "Unknown command \"%s\" from peer=%d\n", SanitizeString(strCommand), pfrom->GetId());
     return true;
 }
 

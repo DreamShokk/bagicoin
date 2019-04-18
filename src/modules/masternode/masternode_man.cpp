@@ -74,8 +74,7 @@ CMasternodeMan::CMasternodeMan():
     vecDirtyGovernanceObjectHashes(),
     nLastSentinelPingTime(0),
     mapSeenMasternodeBroadcast(),
-    mapSeenMasternodePing(),
-    nDsqCount(0)
+    mapSeenMasternodePing()
 {}
 
 bool CMasternodeMan::Add(CMasternode &mn)
@@ -122,32 +121,6 @@ void CMasternodeMan::AskForMN(CNode* pnode, const COutPoint& outpoint, CConnman*
     connman->PushMessage(pnode, msgMaker.Make(NetMsgType::DSEG, outpoint));
 }
 
-bool CMasternodeMan::AllowMixing(const COutPoint &outpoint)
-{
-    LOCK(cs);
-    CMasternode* pmn = Find(outpoint);
-    if (!pmn) {
-        return false;
-    }
-    nDsqCount++;
-    pmn->nLastDsq = nDsqCount;
-    pmn->nMixingTxCount = 0;
-
-    return true;
-}
-
-bool CMasternodeMan::DisallowMixing(const COutPoint &outpoint)
-{
-    LOCK(cs);
-    CMasternode* pmn = Find(outpoint);
-    if (!pmn) {
-        return false;
-    }
-    pmn->nMixingTxCount++;
-
-    return true;
-}
-
 bool CMasternodeMan::PoSeBan(const COutPoint &outpoint)
 {
     LOCK(cs);
@@ -177,7 +150,7 @@ void CMasternodeMan::CheckAndRemove(CConnman* connman)
 {
     if (!masternodeSync.IsMasternodeListSynced()) return;
 
-    LogPrintf("CMasternodeMan::CheckAndRemove\n");
+    LogPrint(BCLog::MNODE, "CMasternodeMan::CheckAndRemove\n");
 
     {
         // Need LOCK2 here to ensure consistent locking order because code below locks cs_main
@@ -350,7 +323,7 @@ void CMasternodeMan::CheckAndRemove(CConnman* connman)
             }
         }
 
-        LogPrintf("CMasternodeMan::CheckAndRemove -- %s\n", ToString());
+        LogPrint(BCLog::MNODE, "CMasternodeMan::CheckAndRemove -- %s\n", ToString());
     }
 
     if (fMasternodesRemoved) {
@@ -367,7 +340,6 @@ void CMasternodeMan::Clear()
     mWeAskedForMasternodeListEntry.clear();
     mapSeenMasternodeBroadcast.clear();
     mapSeenMasternodePing.clear();
-    nDsqCount = 0;
     nLastSentinelPingTime = 0;
 }
 
@@ -1463,8 +1435,7 @@ std::string CMasternodeMan::ToString() const
     info << "Masternodes: " << (int)mapMasternodes.size() <<
             ", peers who asked us for Masternode list: " << (int)mAskedUsForMasternodeList.size() <<
             ", peers we asked for Masternode list: " << (int)mWeAskedForMasternodeList.size() <<
-            ", entries in Masternode list we asked for: " << (int)mWeAskedForMasternodeListEntry.size() <<
-            ", nDsqCount: " << (int)nDsqCount;
+            ", entries in Masternode list we asked for: " << (int)mWeAskedForMasternodeListEntry.size();
 
     return info.str();
 }

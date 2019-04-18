@@ -13,7 +13,7 @@
 #include <modules/masternode/masternode_sync.h>
 #include <modules/masternode/masternode_config.h>
 #include <modules/masternode/masternode_man.h>
-#include <modules/privatesend/privatesend_server.h>
+#include <modules/coinjoin/coinjoin_server.h>
 #include <rpc/server.h>
 #include <util/system.h>
 #include <util/moneystr.h>
@@ -32,9 +32,9 @@ UniValue getqueueinfo(const JSONRPCRequest& request)
             "Returns an object containing mixing queue related information.\n");
 
     UniValue obj(UniValue::VOBJ);
-    obj.pushKV("state",             privateSendServer.GetStateString());
-    obj.pushKV("queue",             privateSendServer.GetQueueSize());
-    obj.pushKV("entries",           privateSendServer.GetEntriesCount());
+    obj.pushKV("state",             coinJoinServer.GetStateString());
+    obj.pushKV("queue",             coinJoinServer.GetQueueSize());
+    obj.pushKV("entries",           coinJoinServer.GetEntriesCount());
     return obj;
 }
 
@@ -89,14 +89,14 @@ UniValue masternode(const JSONRPCRequest& request)
         mnodeman.GetNextMasternodeInQueueForPayment(true, nCount, mnInfo);
 
         int total = mnodeman.size();
-        int ps = mnodeman.CountEnabled(MIN_PRIVATESEND_PEER_PROTO_VERSION);
+        int cj = mnodeman.CountEnabled(MIN_COINJOIN_PEER_PROTO_VERSION);
         int enabled = mnodeman.CountEnabled();
 
         if (request.params.size() == 1) {
             UniValue obj(UniValue::VOBJ);
 
             obj.pushKV("total", total);
-            obj.pushKV("ps_compatible", ps);
+            obj.pushKV("ps_compatible", cj);
             obj.pushKV("enabled", enabled);
             obj.pushKV("qualify", nCount);
 
@@ -108,8 +108,8 @@ UniValue masternode(const JSONRPCRequest& request)
         if (strMode == "total")
             return total;
 
-        if (strMode == "ps")
-            return ps;
+        if (strMode == "cj")
+            return cj;
 
         if (strMode == "enabled")
             return enabled;
@@ -119,7 +119,7 @@ UniValue masternode(const JSONRPCRequest& request)
 
         if (strMode == "all")
             return strprintf("Total: %d (PS Compatible: %d / Enabled: %d / Qualify: %d)",
-                total, ps, enabled, nCount);
+                total, cj, enabled, nCount);
     }
 
     if (strCommand == "current" || strCommand == "winner")
@@ -675,7 +675,7 @@ UniValue masternodebroadcast(const JSONRPCRequest& request)
                 resultObj.pushKV("vchSig", EncodeBase64(&mnb.vchSig[0], mnb.vchSig.size()));
                 resultObj.pushKV("sigTime", mnb.sigTime);
                 resultObj.pushKV("protocolVersion", mnb.nProtocolVersion);
-                resultObj.pushKV("nLastDsq", mnb.nLastDsq);
+                resultObj.pushKV("nLastCJq", mnb.nLastCJq);
 
                 UniValue lastPingObj(UniValue::VOBJ);
                 lastPingObj.pushKV("outpoint", mnb.lastPing.masternodeOutpoint.ToStringShort());

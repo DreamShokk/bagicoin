@@ -85,12 +85,10 @@ public:
         RecvWithAddress,
         RecvFromOther,
         SendToSelf,
-        RecvWithPrivateSend,
-        PrivateSendDenominate,
-        PrivateSendCollateralPayment,
-        PrivateSendMakeCollaterals,
-        PrivateSendCreateDenominations,
-        PrivateSend
+        RecvWithCoinJoin,
+        CoinJoinDenominate,
+        CoinJoinCreateDenominations,
+        CoinJoin
     };
 
     /** Number of confirmation recommended for accepting a transaction */

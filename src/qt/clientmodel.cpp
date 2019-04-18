@@ -85,7 +85,7 @@ int ClientModel::getNumConnections(unsigned int flags) const
 
 QString ClientModel::getMasternodeCountString() const
 {
-    return tr("Total: %1 (PS compatible: %2 / Enabled: %3) (IPv4: %4, IPv6: %5, TOR: %6)").arg(QString::number((int)m_node.getMasternodeCount().size))
+    return tr("Total: %1 (CJ! compatible: %2 / Enabled: %3) (IPv4: %4, IPv6: %5, TOR: %6)").arg(QString::number((int)m_node.getMasternodeCount().size))
             .arg(QString::number((int)m_node.getMasternodeCount().compatible))
             .arg(QString::number((int)m_node.getMasternodeCount().enabled))
             .arg(QString::number((int)m_node.getMasternodeCount().countIPv4))

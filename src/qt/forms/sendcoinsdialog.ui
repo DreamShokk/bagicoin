@@ -1197,7 +1197,7 @@
         <number>3</number>
        </property>
        <item>
-        <widget class="QCheckBox" name="checkUsePrivateSend">
+        <widget class="QCheckBox" name="checkUseCoinJoin">
          <property name="minimumSize">
           <size>
            <width>95</width>
@@ -1205,7 +1205,7 @@
           </size>
          </property>
          <property name="text">
-          <string>PrivateSend</string>
+          <string>CoinJoin</string>
          </property>
          <property name="checked">
           <bool>false</bool>

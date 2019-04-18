@@ -86,8 +86,9 @@ public:
     const std::vector<SeedSpec6>& FixedSeeds() const { return vFixedSeeds; }
     const CCheckpointData& Checkpoints() const { return checkpointData; }
     const ChainTxData& TxData() const { return chainTxData; }
-    int PoolMaxTransactions() const { return nPoolMaxTransactions; }
-    int FulfilledRequestExpireTime() const { return nFulfilledRequestExpireTime; }
+    unsigned int PoolMinInputs() const { return nPoolMinInputs; }
+    unsigned int PoolMaxInputs() const { return nPoolMaxInputs; }
+    unsigned int FulfilledRequestExpireTime() const { return nFulfilledRequestExpireTime; }
 protected:
     CChainParams() {}
 
@@ -109,8 +110,9 @@ protected:
     bool fAllowMultiplePorts;
     CCheckpointData checkpointData;
     ChainTxData chainTxData;
-    int nPoolMaxTransactions;
-    int nFulfilledRequestExpireTime;
+    unsigned int nPoolMinInputs;
+    unsigned int nPoolMaxInputs;
+    unsigned int nFulfilledRequestExpireTime;
     bool m_fallback_fee_enabled;
 };
 

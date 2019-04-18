@@ -167,8 +167,8 @@ BITCOIN_CORE_H = \
   modules/platform/funding_validators.h \
   modules/platform/funding_vote.h \
   modules/platform/funding_votedb.h \
-  modules/privatesend/privatesend.h \
-  modules/privatesend/privatesend_server.h \
+  modules/coinjoin/coinjoin.h \
+  modules/coinjoin/coinjoin_server.h \
   net.h \
   net_processing.h \
   netaddress.h \
@@ -235,7 +235,7 @@ BITCOIN_CORE_H = \
   wallet/db.h \
   wallet/feebumper.h \
   wallet/fees.h \
-  wallet/privatesend_client.h \
+  wallet/coinjoin_client.h \
   wallet/psctwallet.h \
   wallet/rpcwallet.h \
   wallet/wallet.h \
@@ -295,8 +295,8 @@ libchaincoin_server_a_SOURCES = \
   modules/platform/funding_validators.cpp \
   modules/platform/funding_vote.cpp \
   modules/platform/funding_votedb.cpp \
-  modules/privatesend/privatesend.cpp \
-  modules/privatesend/privatesend_server.cpp \
+  modules/coinjoin/coinjoin.cpp \
+  modules/coinjoin/coinjoin_server.cpp \
   net.cpp \
   netfulfilledman.cpp \
   net_processing.cpp \
@@ -351,12 +351,12 @@ libchaincoin_wallet_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 libchaincoin_wallet_a_SOURCES = \
   interfaces/wallet.cpp \
   wallet/coincontrol.cpp \
+  wallet/coinjoin_client.cpp \
   wallet/crypter.cpp \
   wallet/db.cpp \
   wallet/feebumper.cpp \
   wallet/fees.cpp \
   wallet/init.cpp \
-  wallet/privatesend_client.cpp \
   wallet/psctwallet.cpp \
   wallet/rpcdump.cpp \
   wallet/rpcwallet.cpp \

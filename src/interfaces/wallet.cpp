@@ -28,7 +28,7 @@
 #include <validation.h>
 #include <wallet/feebumper.h>
 #include <wallet/fees.h>
-#include <wallet/privatesend_client.h>
+#include <wallet/coinjoin_client.h>
 #include <wallet/rpcwallet.h>
 #include <wallet/wallet.h>
 #include <wallet/walletutil.h>
@@ -53,12 +53,12 @@ public:
     bool commit(WalletValueMap value_map,
         WalletOrderForm order_form,
         std::string& reject_reason,
-        bool fPrivateSend) override
+        bool fCoinJoin) override
     {
         auto locked_chain = m_wallet.chain().lock();
         LOCK(m_wallet.cs_wallet);
         CValidationState state;
-        if (!m_wallet.CommitTransaction(m_tx, std::move(value_map), std::move(order_form), m_key, g_connman.get(), state, fPrivateSend)) {
+        if (!m_wallet.CommitTransaction(m_tx, std::move(value_map), std::move(order_form), m_key, g_connman.get(), state, fCoinJoin)) {
             reject_reason = state.GetRejectReason();
             return false;
         }
@@ -247,7 +247,7 @@ public:
         int& change_pos,
         CAmount& fee,
         std::string& fail_reason,
-        bool fPrivateSend) override
+        bool fCoinJoin) override
     {
         auto locked_chain = m_wallet->chain().lock();
         LOCK(m_wallet->cs_wallet);
@@ -382,7 +382,7 @@ public:
         result.mixing_progress = m_wallet->UpdateProgress();
         return result;
     }
-    bool tryGetBalances(WalletBalances& balances, PrivateSendStatus& status, int& num_blocks) override
+    bool tryGetBalances(WalletBalances& balances, CoinJoinStatus& status, int& num_blocks) override
     {
         auto locked_chain = m_wallet->chain().lock(true /* try_lock */);
         if (!locked_chain) return false;
@@ -391,7 +391,7 @@ public:
             return false;
         }
         balances = getBalances();
-        status = getPrivateSendStatus();
+        status = getCoinJoinStatus();
         num_blocks = locked_chain->getHeight().get_value_or(-1);
         return true;
     }
@@ -456,9 +456,9 @@ public:
         }
         return result;
     }
-    int getCappedOutpointPrivateSendRounds(const COutPoint& outpoint) override
+    int getCappedOutpointCoinJoinRounds(const COutPoint& outpoint) override
     {
-        return m_wallet->GetCappedOutpointPrivateSendRounds(outpoint);
+        return m_wallet->GetCappedOutpointCoinJoinRounds(outpoint);
     }
     CAmount getRequiredFee(unsigned int tx_bytes) override { return GetRequiredFee(*m_wallet, tx_bytes); }
     CAmount getMinimumFee(unsigned int tx_bytes,
@@ -480,62 +480,59 @@ public:
     OutputType getDefaultAddressType() override { return m_wallet->m_default_address_type; }
     OutputType getDefaultChangeType() override { return m_wallet->m_default_change_type; }
 
-    int getPSRounds() override { return m_wallet->privateSendClient->nPrivateSendRounds; }
+    int getPSRounds() override { return m_wallet->coinjoinClient->nCoinJoinRounds; }
 
-    void setPrivateSendParams(const int& rounds, const int& amount, const bool& multi) override
+    void setCoinJoinParams(const int& rounds, const int& amount) override
     {
-        m_wallet->privateSendClient->nPrivateSendRounds = rounds;
-        m_wallet->privateSendClient->nPrivateSendAmount = amount;
-        m_wallet->privateSendClient->fPrivateSendMultiSession = multi;
-        m_wallet->privateSendClient->nCachedNumBlocks = std::numeric_limits<int>::max();
+        m_wallet->coinjoinClient->nCoinJoinRounds = rounds;
+        m_wallet->coinjoinClient->nCoinJoinAmount = amount;
+        m_wallet->coinjoinClient->nCachedNumBlocks = std::numeric_limits<int>::max();
     }
 
-    PrivateSendConstants getPrivateSendConstants() override
+    CoinJoinConstants getCoinJoinConstants() override
     {
-        PrivateSendConstants result;
-        result.minamount = CPrivateSend::GetSmallestDenomination() + CPrivateSend::GetMaxCollateralAmount();
-        result.defaultamount = DEFAULT_PRIVATESEND_AMOUNT;
-        result.defaultrounds = DEFAULT_PRIVATESEND_ROUNDS;
-        result.keyswarning = PRIVATESEND_KEYS_THRESHOLD_WARNING;
-        result.defaultmulti = DEFAULT_PRIVATESEND_MULTISESSION;
+        CoinJoinConstants result;
+        result.minamount = COINJOIN_LOW_DENOM;
+        result.defaultamount = DEFAULT_COINJOIN_AMOUNT;
+        result.defaultrounds = DEFAULT_COINJOIN_ROUNDS;
+        result.keyswarning = COINJOIN_KEYS_THRESHOLD_WARNING;
         return result;
     }
 
-    PrivateSendStatus getPrivateSendStatus() override
+    CoinJoinStatus getCoinJoinStatus() override
     {
-        PrivateSendStatus result;
-        result.enabled = m_wallet->privateSendClient->fEnablePrivateSend;
-        result.cachednumblocks = m_wallet->privateSendClient->nCachedNumBlocks;
-        result.amount = m_wallet->privateSendClient->nPrivateSendAmount;
-        result.rounds = m_wallet->privateSendClient->nPrivateSendRounds;
-        result.multisession = m_wallet->privateSendClient->fPrivateSendMultiSession;
-        result.denom = m_wallet->privateSendClient->GetSessionDenoms();
-        result.status = m_wallet->privateSendClient->GetStatuses();
+        CoinJoinStatus result;
+        result.enabled = m_wallet->coinjoinClient->fEnableCoinJoin;
+        result.cachednumblocks = m_wallet->coinjoinClient->nCachedNumBlocks;
+        result.amount = m_wallet->coinjoinClient->nCoinJoinAmount;
+        result.rounds = m_wallet->coinjoinClient->nCoinJoinRounds;
+        result.denom = m_wallet->coinjoinClient->GetSessionDenoms();
+        result.status = m_wallet->coinjoinClient->GetStatuses();
         result.keysleft = m_wallet->nKeysLeftSinceAutoBackup;
         return result;
     }
 
     void disableAutoBackup() override
     {
-        m_wallet->privateSendClient->fCreateAutoBackups = false;
+        m_wallet->coinjoinClient->fCreateAutoBackups = false;
     }
 
     void setNumBlocks(const int& nCache) override
     {
-        m_wallet->privateSendClient->nCachedNumBlocks = nCache;
+        m_wallet->coinjoinClient->nCachedNumBlocks = nCache;
     }
 
     void resetPool() override
     {
-        m_wallet->privateSendClient->ResetPool();
+        m_wallet->coinjoinClient->ResetPool();
     }
 
     void toggleMixing(const bool& fOff) override
     {
         if (fOff)
-            m_wallet->privateSendClient->fEnablePrivateSend = false;
+            m_wallet->coinjoinClient->fEnableCoinJoin = false;
         else
-            m_wallet->privateSendClient->fEnablePrivateSend = !m_wallet->privateSendClient->fEnablePrivateSend;
+            m_wallet->coinjoinClient->fEnableCoinJoin = !m_wallet->coinjoinClient->fEnableCoinJoin;
     }
 
     bool DoAutoBackup(std::string walletIn, std::string& strBackupWarning, std::string& strBackupError) override

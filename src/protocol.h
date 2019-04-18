@@ -246,14 +246,13 @@ extern const char *MASTERNODEPAYMENTVOTE;
 extern const char *MASTERNODEPAYMENTSYNC;
 extern const char *MNANNOUNCE;
 extern const char *MNPING;
-extern const char *DSACCEPT;
-extern const char *DSVIN;
-extern const char *DSFINALTX;
-extern const char *DSSIGNFINALTX;
-extern const char *DSCOMPLETE;
-extern const char *DSSTATUSUPDATE;
-extern const char *DSTX;
-extern const char *DSQUEUE;
+extern const char *CJACCEPT;
+extern const char *CJTXIN;
+extern const char *CJFINALTX;
+extern const char *CJSIGNFINALTX;
+extern const char *CJCOMPLETE;
+extern const char *CJSTATUSUPDATE;
+extern const char *CJQUEUE;
 extern const char *DSEG;
 extern const char *SYNCSTATUSCOUNT;
 extern const char *MNGOVERNANCESYNC;
@@ -411,7 +410,7 @@ enum GetDataMsg
     MSG_DEPRECATED_03 = 14, // not implemented
     MSG_MASTERNODE_ANNOUNCE = 15,
     MSG_MASTERNODE_PING = 16,
-    MSG_DSTX = 17,
+    MSG_DEPRECATED_04 = 17,
     MSG_GOVERNANCE_OBJECT = 18,
     MSG_GOVERNANCE_OBJECT_VOTE = 19,
     MSG_MASTERNODE_VERIFY = 20,

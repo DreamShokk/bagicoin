@@ -8,8 +8,8 @@
 #include <modules/masternode/masternode_man.h>
 #include <modules/masternode/masternode_payments.h>
 #include <modules/masternode/masternode_sync.h>
-#include <modules/privatesend/privatesend.h>
-#include <modules/privatesend/privatesend_server.h>
+#include <modules/coinjoin/coinjoin.h>
+#include <modules/coinjoin/coinjoin_server.h>
 
 void ModuleInterface::InitializeCurrentBlockTip()
 {
@@ -19,30 +19,32 @@ void ModuleInterface::InitializeCurrentBlockTip()
 
 void ModuleInterface::ProcessModuleMessage(CNode* pfrom, const NetMsgDest& dest, const std::string& strCommand, CDataStream& vRecv, CConnman* connman)
 {
+    CDataStream ss(vRecv);
+
     switch (dest) {
     case NetMsgDest::MSG_NONE:
         return;
     case NetMsgDest::MSG_FUND:
-        governance.ProcessModuleMessage(pfrom, strCommand, vRecv, connman);
+        governance.ProcessModuleMessage(pfrom, strCommand, ss, connman);
         return;
     case NetMsgDest::MSG_MN_MAN:
-        mnodeman.ProcessModuleMessage(pfrom, strCommand, vRecv, connman);
+        mnodeman.ProcessModuleMessage(pfrom, strCommand, ss, connman);
         return;
     case NetMsgDest::MSG_MN_SYNC:
-        masternodeSync.ProcessModuleMessage(pfrom, strCommand, vRecv);
+        masternodeSync.ProcessModuleMessage(pfrom, strCommand, ss);
         return;
     case NetMsgDest::MSG_MN_PAY:
-        mnpayments.ProcessModuleMessage(pfrom, strCommand, vRecv, connman);
+        mnpayments.ProcessModuleMessage(pfrom, strCommand, ss, connman);
         return;
     case NetMsgDest::MSG_PSEND:
-        privateSendServer.ProcessModuleMessage(pfrom, strCommand, vRecv, connman);
+        coinJoinServer.ProcessModuleMessage(pfrom, strCommand, ss, connman);
         return;
     case NetMsgDest::MSG_ALL:
-        governance.ProcessModuleMessage(pfrom, strCommand, vRecv, connman);
-        mnodeman.ProcessModuleMessage(pfrom, strCommand, vRecv, connman);
-        masternodeSync.ProcessModuleMessage(pfrom, strCommand, vRecv);
-        mnpayments.ProcessModuleMessage(pfrom, strCommand, vRecv, connman);
-        privateSendServer.ProcessModuleMessage(pfrom, strCommand, vRecv, connman);
+        governance.ProcessModuleMessage(pfrom, strCommand, ss, connman);
+        mnodeman.ProcessModuleMessage(pfrom, strCommand, ss, connman);
+        masternodeSync.ProcessModuleMessage(pfrom, strCommand, ss);
+        mnpayments.ProcessModuleMessage(pfrom, strCommand, ss, connman);
+        coinJoinServer.ProcessModuleMessage(pfrom, strCommand, ss, connman);
     }
 }
 
@@ -53,24 +55,11 @@ void ModuleInterface::UpdatedBlockTip(const CBlockIndex *pindexNew, const CBlock
 
     masternodeSync.UpdatedBlockTip(pindexNew, fInitialDownload, connman);
 
-    if (fInitialDownload || fLiteMode)
-        return;
+    if (fLiteMode || fInitialDownload) return;
 
+    coinJoinServer.UpdatedBlockTip(pindexNew);
     mnodeman.UpdatedBlockTip(pindexNew);
-    CPrivateSend::UpdatedBlockTip(pindexNew);
     mnpayments.UpdatedBlockTip(pindexNew, fInitialDownload, connman);
     governance.UpdatedBlockTip(pindexNew, fInitialDownload, connman);
 }
 
-void ModuleInterface::TransactionAddedToMempool(const CTransactionRef &tx)
-{
-    CPrivateSend::SyncTransaction(tx, nullptr);
-}
-
-void ModuleInterface::BlockDisconnected(const std::shared_ptr<const CBlock>& pblock)
-{
-    for (const CTransactionRef& ptx : pblock->vtx) {
-        // Do a normal sync for each transaction removed in block disconnection
-        CPrivateSend::SyncTransaction(ptx, nullptr);
-    }
-}

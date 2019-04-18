@@ -3,7 +3,7 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include <wallet/coinselection.h>
-#include <modules/privatesend/privatesend.h>
+#include <modules/coinjoin/coinjoin.h>
 
 #include <util/system.h>
 #include <util/moneystr.h>
@@ -218,10 +218,10 @@ bool less_then_denom(const CInputCoin& pcoin1, const CInputCoin& pcoin2)
 {
     bool found1 = false;
     bool found2 = false;
-    for (const auto& d : CPrivateSend::GetStandardDenominations()) // loop through predefined denoms
+    for (auto denom = COINJOIN_LOW_DENOM; denom <= COINJOIN_HIGH_DENOM; denom >>= 1) // loop through predefined denoms
     {
-        if(pcoin1.txout.nValue == d) found1 = true;
-        if(pcoin2.txout.nValue == d) found2 = true;
+        if(pcoin1.txout.nValue == denom) found1 = true;
+        if(pcoin2.txout.nValue == denom) found2 = true;
     }
     return (!found1 && found2);
 }

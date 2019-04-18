@@ -40,7 +40,7 @@ WalletModel::WalletModel(std::unique_ptr<interfaces::Wallet> wallet, interfaces:
     cachedNumBlocks(0)
 {
     fHaveWatchOnly = m_wallet->haveWatchOnly();
-    m_privsendconfig = m_wallet->getPrivateSendConstants();
+    m_privsendconfig = m_wallet->getCoinJoinConstants();
 
     addressTableModel = new AddressTableModel(this);
     transactionTableModel = new TransactionTableModel(platformStyle, this);
@@ -51,7 +51,7 @@ WalletModel::WalletModel(std::unique_ptr<interfaces::Wallet> wallet, interfaces:
     connect(pollTimer, &QTimer::timeout, this, &WalletModel::pollBalanceChanged);
     pollTimer->start(MODEL_UPDATE_DELAY);
 
-    connect(getOptionsModel(), &OptionsModel::privateSendConfigChanged, this, &WalletModel::privateSendConfigChanged);
+    connect(getOptionsModel(), &OptionsModel::coinJoinConfigChanged, this, &WalletModel::coinJoinConfigChanged);
 
     subscribeToCoreSignals();
 }
@@ -77,7 +77,7 @@ void WalletModel::pollBalanceChanged()
     // holding the locks for a longer time - for example, during a wallet
     // rescan.
     interfaces::WalletBalances new_balances;
-    interfaces::PrivateSendStatus new_status;
+    interfaces::CoinJoinStatus new_status;
     int numBlocks = -1;
     if (!m_wallet->tryGetBalances(new_balances, new_status, numBlocks)) {
         return;
@@ -91,7 +91,7 @@ void WalletModel::pollBalanceChanged()
         cachedNumBlocks = m_node.getNumBlocks();
 
         checkBalanceChanged(new_balances);
-        checkPrivateSendChanged(new_status);
+        checkCoinJoinChanged(new_status);
         if(transactionTableModel)
             transactionTableModel->updateConfirmations();
     }
@@ -105,11 +105,11 @@ void WalletModel::checkBalanceChanged(const interfaces::WalletBalances& new_bala
     }
 }
 
-void WalletModel::checkPrivateSendChanged(const interfaces::PrivateSendStatus& new_status)
+void WalletModel::checkCoinJoinChanged(const interfaces::CoinJoinStatus& new_status)
 {
-    if(new_status.privateSendChanged(m_cached_status)) {
+    if(new_status.coinJoinChanged(m_cached_status)) {
         m_cached_status = new_status;
-        Q_EMIT privateSendChanged(new_status);
+        Q_EMIT coinJoinChanged(new_status);
     }
 }
 
@@ -141,7 +141,7 @@ WalletModel::SendCoinsReturn WalletModel::prepareTransaction(WalletModelTransact
 {
     CAmount total = 0;
     bool fSubtractFeeFromAmount = false;
-    bool fPrivateSend = false;
+    bool fCoinJoin = false;
     QList<SendCoinsRecipient> recipients = transaction.getRecipients();
     std::vector<CRecipient> vecSend;
 
@@ -156,8 +156,8 @@ WalletModel::SendCoinsReturn WalletModel::prepareTransaction(WalletModelTransact
     // Pre-check input data for validity
     for (const SendCoinsRecipient &rcp : recipients)
     {
-        if (rcp.fPrivateSend)
-            fPrivateSend = true;
+        if (rcp.fCoinJoin)
+            fCoinJoin = true;
 
         if (rcp.fSubtractFeeFromAmount)
             fSubtractFeeFromAmount = true;
@@ -223,7 +223,7 @@ WalletModel::SendCoinsReturn WalletModel::prepareTransaction(WalletModelTransact
         std::string strFailReason;
 
         auto& newTx = transaction.getWtx();
-        newTx = m_wallet->createTransaction(vecSend, coinControl, true /* sign */, nChangePosRet, nFeeRequired, strFailReason, fPrivateSend);
+        newTx = m_wallet->createTransaction(vecSend, coinControl, true /* sign */, nChangePosRet, nFeeRequired, strFailReason, fCoinJoin);
         transaction.setTransactionFee(nFeeRequired);
         if (fSubtractFeeFromAmount && newTx)
             transaction.reassignAmounts(nChangePosRet);
@@ -277,18 +277,18 @@ WalletModel::SendCoinsReturn WalletModel::sendCoins(WalletModelTransaction &tran
         }
 
         auto& newTx = transaction.getWtx();
-        bool fPrivateSend = true;
-        // PrivateSend is executed per-tx
+        bool fCoinJoin = true;
+        // CoinJoin is executed per-tx
         for (const SendCoinsRecipient &rcp : transaction.getRecipients())
         {
-            if (!rcp.fPrivateSend)
+            if (!rcp.fCoinJoin)
             {
-                fPrivateSend = false;
+                fCoinJoin = false;
                 continue;
             }
         }
         std::string rejectReason;
-        if (!newTx->commit({} /* mapValue */, std::move(vOrderForm), rejectReason, fPrivateSend))
+        if (!newTx->commit({} /* mapValue */, std::move(vOrderForm), rejectReason, fCoinJoin))
             return SendCoinsReturn(TransactionCommitFailed, QString::fromStdString(rejectReason));
 
         CDataStream ssTx(SER_NETWORK, PROTOCOL_VERSION);
@@ -326,7 +326,7 @@ WalletModel::SendCoinsReturn WalletModel::sendCoins(WalletModelTransaction &tran
     }
 
     checkBalanceChanged(m_wallet->getBalances()); // update balance immediately, otherwise there could be a short noticeable delay until pollBalanceChanged hits
-    checkPrivateSendChanged(m_wallet->getPrivateSendStatus()); // update status immediately, otherwise there could be a short noticeable delay until pollBalanceChanged hits
+    checkCoinJoinChanged(m_wallet->getCoinJoinStatus()); // update status immediately, otherwise there could be a short noticeable delay until pollBalanceChanged hits
 
     return SendCoinsReturn(OK);
 }
@@ -405,10 +405,10 @@ bool WalletModel::changePassphrase(const SecureString &oldPass, const SecureStri
     return m_wallet->changeWalletPassphrase(oldPass, newPass);
 }
 
-void WalletModel::privateSendConfigChanged(const int &rounds, const int &amount, const bool &multi)
+void WalletModel::coinJoinConfigChanged(const int &rounds, const int &amount)
 {
 
-    m_wallet->setPrivateSendParams(rounds, amount, multi);
+    m_wallet->setCoinJoinParams(rounds, amount);
     fForceCheckBalanceChanged = true;
 }
 

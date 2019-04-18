@@ -14,7 +14,7 @@
 #include <util/moneystr.h>
 #include <validation.h>
 #include <walletinitinterface.h>
-#include <wallet/privatesend_client.h>
+#include <wallet/coinjoin_client.h>
 #include <wallet/rpcwallet.h>
 #include <wallet/wallet.h>
 #include <wallet/walletutil.h>
@@ -66,12 +66,10 @@ void WalletInit::AddWalletOptions() const
     gArgs.AddArg("-zapwallettxes=<mode>", "Delete all wallet transactions and only recover those parts of the blockchain through -rescan on startup"
                                " (1 = keep tx meta data e.g. payment request information, 2 = drop tx meta data)", false, OptionsCategory::WALLET);
 
-    gArgs.AddArg("-enableprivatesend=<n>", strprintf(_("Enable use of automated PrivateSend for funds stored in this wallet (0-1, default: %u)"), 0), false, OptionsCategory::WALLET);
-    gArgs.AddArg("-privatesendmultisession=<n>", strprintf(_("Enable multiple PrivateSend mixing sessions per block, experimental (0-1, default: %u)"), DEFAULT_PRIVATESEND_MULTISESSION), false, OptionsCategory::WALLET);
-    gArgs.AddArg("-privatesendsessions=<n>", strprintf(_("Use N separate masternodes in parallel to mix funds (%u-%u, default: %u)"), MIN_PRIVATESEND_SESSIONS, MAX_PRIVATESEND_SESSIONS, DEFAULT_PRIVATESEND_SESSIONS), false, OptionsCategory::WALLET);
-    gArgs.AddArg("-privatesendrounds=<n>", strprintf(_("Use N separate masternodes for each denominated input to mix funds (%u-%u, default: %u)"), MIN_PRIVATESEND_ROUNDS, MAX_PRIVATESEND_ROUNDS, DEFAULT_PRIVATESEND_ROUNDS), false, OptionsCategory::WALLET);
-    gArgs.AddArg("-privatesendamount=<n>", strprintf(_("Keep N CHC anonymized (default: %u)"), DEFAULT_PRIVATESEND_AMOUNT), false, OptionsCategory::WALLET);
-    gArgs.AddArg("-liquidityprovider=<n>", strprintf(_("Provide liquidity to PrivateSend by infrequently mixing coins on a continual basis (%u-%u, default: %u, 1=very frequent, high fees, 100=very infrequent, low fees)"), MIN_PRIVATESEND_LIQUIDITY, MAX_PRIVATESEND_LIQUIDITY, DEFAULT_PRIVATESEND_LIQUIDITY), false, OptionsCategory::WALLET);
+    gArgs.AddArg("-enableprivatesend=<n>", strprintf(_("Enable use of automated CoinJoin for funds stored in this wallet (0-1, default: %u)"), 0), false, OptionsCategory::WALLET);
+    gArgs.AddArg("-privatesendrounds=<n>", strprintf(_("Use N separate masternodes for each denominated input to mix funds (%u-%u, default: %u)"), MIN_COINJOIN_ROUNDS, MAX_COINJOIN_ROUNDS, DEFAULT_COINJOIN_ROUNDS), false, OptionsCategory::WALLET);
+    gArgs.AddArg("-privatesendamount=<n>", strprintf(_("Keep N CHC anonymized (default: %u)"), DEFAULT_COINJOIN_AMOUNT), false, OptionsCategory::WALLET);
+    gArgs.AddArg("-liquidityprovider=<n>", strprintf(_("Provide liquidity to CoinJoin by infrequently mixing coins on a continual basis (%u-%u, default: %u, 1=very frequent, high fees, 100=very infrequent, low fees)"), MIN_COINJOIN_LIQUIDITY, MAX_COINJOIN_LIQUIDITY, DEFAULT_COINJOIN_LIQUIDITY), false, OptionsCategory::WALLET);
 
     gArgs.AddArg("-dblogsize=<n>", strprintf("Flush wallet database activity from memory to disk log every <n> megabytes (default: %u)", DEFAULT_WALLET_DBLOGSIZE), true, OptionsCategory::WALLET_DEBUG_TEST);
     gArgs.AddArg("-flushwallet", strprintf("Run a thread to flush wallet periodically (default: %u)", DEFAULT_FLUSHWALLET), true, OptionsCategory::WALLET_DEBUG_TEST);
@@ -137,14 +135,14 @@ bool WalletInit::ParameterInteraction() const
                     _("The wallet will avoid paying less than the minimum relay fee."));
 
 
-    int nLiqProvTmp = gArgs.GetArg("-liquidityprovider", DEFAULT_PRIVATESEND_LIQUIDITY);
+    int nLiqProvTmp = gArgs.GetArg("-liquidityprovider", DEFAULT_COINJOIN_LIQUIDITY);
     if (nLiqProvTmp > 0) {
         gArgs.ForceSetArg("-enableprivatesend", "1");
         LogPrintf("%s: parameter interaction: -liquidityprovider=%d -> setting -enableprivatesend=1\n", __func__, nLiqProvTmp);
         gArgs.ForceSetArg("-privatesendrounds", itostr(std::numeric_limits<int>::max()));
         LogPrintf("%s: parameter interaction: -liquidityprovider=%d -> setting -privatesendrounds=%d\n", __func__, nLiqProvTmp, itostr(std::numeric_limits<int>::max()));
-        gArgs.ForceSetArg("-privatesendamount", itostr(MAX_PRIVATESEND_AMOUNT));
-        LogPrintf("%s: parameter interaction: -liquidityprovider=%d -> setting -privatesendamount=%d\n", __func__, nLiqProvTmp, MAX_PRIVATESEND_AMOUNT);
+        gArgs.ForceSetArg("-privatesendamount", itostr(MAX_COINJOIN_AMOUNT));
+        LogPrintf("%s: parameter interaction: -liquidityprovider=%d -> setting -privatesendamount=%d\n", __func__, nLiqProvTmp, MAX_COINJOIN_AMOUNT);
     }
 
     return true;
@@ -229,7 +227,7 @@ void StartWallets(CScheduler& scheduler)
 
     // Run a thread to flush wallet periodically
     scheduler.scheduleEvery(MaybeCompactWalletDB, 500);
-    scheduler.scheduleEvery(privateSendClientTask, 1000);
+    scheduler.scheduleEvery(coinJoinClientTask, 1000);
 }
 
 void FlushWallets()
@@ -242,9 +240,9 @@ void FlushWallets()
 void StopWallets()
 {
     for (const std::shared_ptr<CWallet>& pwallet : GetWallets()) {
-        // Stop PrivateSend, release keys
-        pwallet->privateSendClient->fEnablePrivateSend = false;
-        pwallet->privateSendClient->ResetPool();
+        // Stop CoinJoin, release keys
+        pwallet->coinjoinClient->fEnableCoinJoin = false;
+        pwallet->coinjoinClient->ResetPool();
         pwallet->Flush(true);
     }
 }
@@ -273,7 +271,7 @@ void GetMixingMasternodesInfo(std::vector<masternode_info_t>& vecMnInfoRet)
 {
     for (const std::shared_ptr<CWallet>& pwallet : GetWallets()) {
         std::vector<masternode_info_t> vecMnInfoSession;
-        if (pwallet->privateSendClient->GetMixingMasternodesInfo(vecMnInfoSession)) {
+        if (pwallet->coinjoinClient->GetMixingMasternodesInfo(vecMnInfoSession)) {
             vecMnInfoRet.reserve(vecMnInfoRet.size() + vecMnInfoSession.size());
             vecMnInfoRet.insert(vecMnInfoRet.end(), vecMnInfoSession.begin(), vecMnInfoSession.end());
         }

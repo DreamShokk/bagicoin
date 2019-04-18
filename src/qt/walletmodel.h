@@ -65,7 +65,7 @@ public:
     // Todo: This is a hack, should be replaced with a cleaner solution!
     QString address;
     QString label;
-    bool fPrivateSend;
+    bool fCoinJoin;
     CAmount amount;
     // If from a payment request, this is used for storing the memo
     QString message;
@@ -228,7 +228,7 @@ public:
     interfaces::Node& node() const { return m_node; }
     interfaces::Wallet& wallet() const { return *m_wallet; }
 
-    interfaces::PrivateSendConstants m_privsendconfig;
+    interfaces::CoinJoinConstants m_privsendconfig;
 
     QString getWalletName() const;
     QString getDisplayName() const;
@@ -260,7 +260,7 @@ private:
 
     // Cache some values to be able to detect changes
     interfaces::WalletBalances m_cached_balances;
-    interfaces::PrivateSendStatus m_cached_status;
+    interfaces::CoinJoinStatus m_cached_status;
     EncryptionStatus cachedEncryptionStatus;
     int cachedNumBlocks;
 
@@ -269,14 +269,14 @@ private:
     void subscribeToCoreSignals();
     void unsubscribeFromCoreSignals();
     void checkBalanceChanged(const interfaces::WalletBalances& new_balances);
-    void checkPrivateSendChanged(const interfaces::PrivateSendStatus& new_status);
+    void checkCoinJoinChanged(const interfaces::CoinJoinStatus& new_status);
 
 Q_SIGNALS:
     // Signal that balance in wallet changed
     void balanceChanged(const interfaces::WalletBalances& balances);
 
     // Signal that balance in wallet changed
-    void privateSendChanged(const interfaces::PrivateSendStatus& status);
+    void coinJoinChanged(const interfaces::CoinJoinStatus& status);
 
     // Encryption status of wallet changed
     void encryptionStatusChanged();
@@ -315,8 +315,8 @@ public Q_SLOTS:
     void updateWatchOnlyFlag(bool fHaveWatchonly);
     /* Current, immature or unconfirmed balance might have changed - emit 'balanceChanged' if so */
     void pollBalanceChanged();
-    /* PrivateSend config changed */
-    void privateSendConfigChanged(const int &rounds, const int &amount, const bool &multi);
+    /* CoinJoin config changed */
+    void coinJoinConfigChanged(const int &rounds, const int &amount);
 };
 
 #endif // BITCOIN_QT_WALLETMODEL_H

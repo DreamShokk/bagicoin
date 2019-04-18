@@ -27,16 +27,16 @@ QT_TRANSLATE_NOOP("chaincoin-core", ""
 "keypool. Please use -upgradewallet=169900 or -upgradewallet with no version "
 "specified."),
 QT_TRANSLATE_NOOP("chaincoin-core", ""
-"Disable all Chaincoin specific functionality (Masternodes, PrivateSend, "
+"Disable all Chaincoin specific functionality (Masternodes, CoinJoin, "
 "Governance) (0-1, default: %u)"),
 QT_TRANSLATE_NOOP("chaincoin-core", ""
 "Distributed under the MIT software license, see the accompanying file "
 "COPYING or <http://www.opensource.org/licenses/mit-license.php>."),
 QT_TRANSLATE_NOOP("chaincoin-core", ""
-"Enable multiple PrivateSend mixing sessions per block, experimental (0-1, "
+"Enable multiple CoinJoin mixing sessions per block, experimental (0-1, "
 "default: %u)"),
 QT_TRANSLATE_NOOP("chaincoin-core", ""
-"Enable use of automated PrivateSend for funds stored in this wallet (0-1, "
+"Enable use of automated CoinJoin for funds stored in this wallet (0-1, "
 "default: %u)"),
 QT_TRANSLATE_NOOP("chaincoin-core", ""
 "Error reading %s! All keys read correctly, but transaction data or address "
@@ -60,10 +60,10 @@ QT_TRANSLATE_NOOP("chaincoin-core", ""
 "Please contribute if you find %s useful. Visit %s for further information "
 "about the software."),
 QT_TRANSLATE_NOOP("chaincoin-core", ""
-"PrivateSend uses exact denominated amounts to send funds, you might simply "
+"CoinJoin uses exact denominated amounts to send funds, you might simply "
 "need to anonymize some more coins."),
 QT_TRANSLATE_NOOP("chaincoin-core", ""
-"Provide liquidity to PrivateSend by infrequently mixing coins on a continual "
+"Provide liquidity to CoinJoin by infrequently mixing coins on a continual "
 "basis (0-100, default: %u, 1=very frequent, high fees, 100=very infrequent, "
 "low fees)"),
 QT_TRANSLATE_NOOP("chaincoin-core", ""
@@ -99,9 +99,9 @@ QT_TRANSLATE_NOOP("chaincoin-core", ""
 "Total length of network version string (%i) exceeds maximum length (%i). "
 "Reduce the number or size of uacomments."),
 QT_TRANSLATE_NOOP("chaincoin-core", ""
-"Unable to locate enough PrivateSend denominated funds for this transaction."),
+"Unable to locate enough CoinJoin denominated funds for this transaction."),
 QT_TRANSLATE_NOOP("chaincoin-core", ""
-"Unable to locate enough PrivateSend non-denominated funds for this "
+"Unable to locate enough CoinJoin non-denominated funds for this "
 "transaction that are not equal 1000 CHC."),
 QT_TRANSLATE_NOOP("chaincoin-core", ""
 "Unable to replay blocks. You will need to rebuild the database using -"
@@ -219,8 +219,8 @@ QT_TRANSLATE_NOOP("chaincoin-core", "Invalid port detected in masternode.conf"),
 QT_TRANSLATE_NOOP("chaincoin-core", "Invalid script detected."),
 QT_TRANSLATE_NOOP("chaincoin-core", "Keep N CHC anonymized (default: %u)"),
 QT_TRANSLATE_NOOP("chaincoin-core", "Keypool ran out, please call keypoolrefill first"),
-QT_TRANSLATE_NOOP("chaincoin-core", "Last PrivateSend was too recent."),
-QT_TRANSLATE_NOOP("chaincoin-core", "Last successful PrivateSend action was too recent."),
+QT_TRANSLATE_NOOP("chaincoin-core", "Last CoinJoin was too recent."),
+QT_TRANSLATE_NOOP("chaincoin-core", "Last successful CoinJoin action was too recent."),
 QT_TRANSLATE_NOOP("chaincoin-core", "Line: %d"),
 QT_TRANSLATE_NOOP("chaincoin-core", "Loading P2P addresses..."),
 QT_TRANSLATE_NOOP("chaincoin-core", "Loading banlist..."),
@@ -246,9 +246,9 @@ QT_TRANSLATE_NOOP("chaincoin-core", "Not enough file descriptors available."),
 QT_TRANSLATE_NOOP("chaincoin-core", "Not enough funds to anonymize."),
 QT_TRANSLATE_NOOP("chaincoin-core", "Not in the Masternode list."),
 QT_TRANSLATE_NOOP("chaincoin-core", "Port: %d"),
-QT_TRANSLATE_NOOP("chaincoin-core", "PrivateSend is idle."),
-QT_TRANSLATE_NOOP("chaincoin-core", "PrivateSend request complete:"),
-QT_TRANSLATE_NOOP("chaincoin-core", "PrivateSend request incomplete:"),
+QT_TRANSLATE_NOOP("chaincoin-core", "CoinJoin is idle."),
+QT_TRANSLATE_NOOP("chaincoin-core", "CoinJoin request complete:"),
+QT_TRANSLATE_NOOP("chaincoin-core", "CoinJoin request incomplete:"),
 QT_TRANSLATE_NOOP("chaincoin-core", "Prune cannot be configured with a negative value."),
 QT_TRANSLATE_NOOP("chaincoin-core", "Prune mode is incompatible with -txindex."),
 QT_TRANSLATE_NOOP("chaincoin-core", "Pruning blockstore..."),

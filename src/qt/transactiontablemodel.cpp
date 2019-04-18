@@ -348,8 +348,8 @@ QString TransactionTableModel::formatTxType(const TransactionRecord *wtx) const
         return tr("Received with");
     case TransactionRecord::RecvFromOther:
         return tr("Received from");
-    case TransactionRecord::RecvWithPrivateSend:
-        return tr("Received via PrivateSend");
+    case TransactionRecord::RecvWithCoinJoin:
+        return tr("Received via CoinJoin");
     case TransactionRecord::SendToAddress:
     case TransactionRecord::SendToOther:
         return tr("Sent to");
@@ -358,16 +358,12 @@ QString TransactionTableModel::formatTxType(const TransactionRecord *wtx) const
     case TransactionRecord::Generated:
         return tr("Mined");
 
-    case TransactionRecord::PrivateSendDenominate:
-        return tr("PrivateSend Denominate");
-    case TransactionRecord::PrivateSendCollateralPayment:
-        return tr("PrivateSend Collateral Payment");
-    case TransactionRecord::PrivateSendMakeCollaterals:
-        return tr("PrivateSend Make Collateral Inputs");
-    case TransactionRecord::PrivateSendCreateDenominations:
-        return tr("PrivateSend Create Denominations");
-    case TransactionRecord::PrivateSend:
-        return tr("PrivateSend");
+    case TransactionRecord::CoinJoinDenominate:
+        return tr("CoinJoin Denominate");
+    case TransactionRecord::CoinJoinCreateDenominations:
+        return tr("CoinJoin Create Denominations");
+    case TransactionRecord::CoinJoin:
+        return tr("CoinJoin");
 
     default:
         return QString();
@@ -381,7 +377,7 @@ QVariant TransactionTableModel::txAddressDecoration(const TransactionRecord *wtx
     {
     case TransactionRecord::Generated:
         return QIcon(":/icons/" + theme + "/tx_mined");
-    case TransactionRecord::RecvWithPrivateSend:
+    case TransactionRecord::RecvWithCoinJoin:
     case TransactionRecord::RecvWithAddress:
     case TransactionRecord::RecvFromOther:
         return QIcon(":/icons/" + theme + "/tx_input");
@@ -406,10 +402,10 @@ QString TransactionTableModel::formatTxToAddress(const TransactionRecord *wtx, b
     case TransactionRecord::RecvFromOther:
         return QString::fromStdString(wtx->address) + watchAddress;
     case TransactionRecord::RecvWithAddress:
-    case TransactionRecord::RecvWithPrivateSend:
+    case TransactionRecord::RecvWithCoinJoin:
     case TransactionRecord::SendToAddress:
     case TransactionRecord::Generated:
-    case TransactionRecord::PrivateSend:
+    case TransactionRecord::CoinJoin:
         return lookupAddress(wtx->address, tooltip) + watchAddress;
     case TransactionRecord::SendToOther:
         return QString::fromStdString(wtx->address) + watchAddress;
@@ -427,19 +423,16 @@ QVariant TransactionTableModel::addressColor(const TransactionRecord *wtx) const
     case TransactionRecord::RecvWithAddress:
     case TransactionRecord::SendToAddress:
     case TransactionRecord::Generated:
-    case TransactionRecord::PrivateSend:
-    case TransactionRecord::RecvWithPrivateSend:
+    case TransactionRecord::CoinJoin:
+    case TransactionRecord::RecvWithCoinJoin:
         {
         QString label = walletModel->getAddressTableModel()->labelForAddress(QString::fromStdString(wtx->address));
         if(label.isEmpty())
             return COLOR_BAREADDRESS;
         } break;
     case TransactionRecord::SendToSelf:
-    case TransactionRecord::PrivateSendCreateDenominations:
-    case TransactionRecord::PrivateSendDenominate:
-    case TransactionRecord::PrivateSendMakeCollaterals:
-    case TransactionRecord::PrivateSendCollateralPayment:
-        return COLOR_BAREADDRESS;
+    case TransactionRecord::CoinJoinCreateDenominations:
+    case TransactionRecord::CoinJoinDenominate:
     default:
         break;
     }

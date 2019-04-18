@@ -57,7 +57,7 @@ namespace BCLog {
         MNODESYNC   = (1 << 22),
         MNODEPAY    = (1 << 23),
         GOV         = (1 << 24),
-        PRIVSEND    = (1 << 25),
+        CJOIN    = (1 << 25),
         ALL         = ~(uint32_t)0,
     };
 

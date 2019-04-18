@@ -279,7 +279,7 @@ struct Stacks
 };
 }
 
-// Extracts signatures and scripts from incomplete scriptSigs. Please do not extend this, use PSCT instead
+// Extracts signatures and scripts from incomplete scriptSigs. Please do not extend this, use PSBT instead
 SignatureData DataFromTransaction(const CMutableTransaction& tx, unsigned int nIn, const CTxOut& txout)
 {
     SignatureData data;

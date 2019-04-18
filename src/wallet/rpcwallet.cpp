@@ -37,7 +37,7 @@
 #include <validation.h>
 #include <wallet/coincontrol.h>
 #include <wallet/feebumper.h>
-#include <wallet/psctwallet.h>
+#include <wallet/psbtwallet.h>
 #include <wallet/rpcwallet.h>
 #include <wallet/wallet.h>
 #include <wallet/walletdb.h>
@@ -3982,7 +3982,7 @@ void AddKeypathToMap(const CWallet* pwallet, const CKeyID& keyID, std::map<CPubK
     hd_keypaths.emplace(vchPubKey, std::move(info));
 }
 
-UniValue walletprocesspsct(const JSONRPCRequest& request)
+UniValue walletprocesspsbt(const JSONRPCRequest& request)
 {
     std::shared_ptr<CWallet> const wallet = GetWalletForJSONRPCRequest(request);
     CWallet* const pwallet = wallet.get();
@@ -3993,14 +3993,14 @@ UniValue walletprocesspsct(const JSONRPCRequest& request)
 
     if (request.fHelp || request.params.size() < 1 || request.params.size() > 4)
         throw std::runtime_error(
-            RPCHelpMan{"walletprocesspsct",
-                "\nUpdate a PSCT with input information from our wallet and then sign inputs\n"
+            RPCHelpMan{"walletprocesspsbt",
+                "\nUpdate a PSBT with input information from our wallet and then sign inputs\n"
                 "that we can sign for." +
                     HelpRequiringPassphrase(pwallet) + "\n",
                 {
-                    {"psct", RPCArg::Type::STR, RPCArg::Optional::NO, "The transaction base64 string"},
+                    {"psbt", RPCArg::Type::STR, RPCArg::Optional::NO, "The transaction base64 string"},
                     {"sign", RPCArg::Type::BOOL, /* default */ "true", "Also sign the transaction when updating"},
-                    {"sighashtype", RPCArg::Type::STR, /* default */ "ALL", "The signature hash type to sign with if not specified by the PSCT. Must be one of\n"
+                    {"sighashtype", RPCArg::Type::STR, /* default */ "ALL", "The signature hash type to sign with if not specified by the PSBT. Must be one of\n"
             "       \"ALL\"\n"
             "       \"NONE\"\n"
             "       \"SINGLE\"\n"
@@ -4011,22 +4011,22 @@ UniValue walletprocesspsct(const JSONRPCRequest& request)
                 },
                 RPCResult{
             "{\n"
-            "  \"psct\" : \"value\",          (string) The base64-encoded partially signed transaction\n"
+            "  \"psbt\" : \"value\",          (string) The base64-encoded partially signed transaction\n"
             "  \"complete\" : true|false,   (boolean) If the transaction has a complete set of signatures\n"
             "  ]\n"
             "}\n"
                 },
                 RPCExamples{
-                    HelpExampleCli("walletprocesspsct", "\"psct\"")
+                    HelpExampleCli("walletprocesspsbt", "\"psbt\"")
                 },
             }.ToString());
 
     RPCTypeCheck(request.params, {UniValue::VSTR, UniValue::VBOOL, UniValue::VSTR});
 
     // Unserialize the transaction
-    PartiallySignedTransaction psctx;
+    PartiallySignedTransaction psbtx;
     std::string error;
-    if (!DecodeBase64PSCT(psctx, request.params[0].get_str(), error)) {
+    if (!DecodeBase64PSBT(psbtx, request.params[0].get_str(), error)) {
         throw JSONRPCError(RPC_DESERIALIZATION_ERROR, strprintf("TX decode failed %s", error));
     }
 
@@ -4037,21 +4037,21 @@ UniValue walletprocesspsct(const JSONRPCRequest& request)
     bool sign = request.params[1].isNull() ? true : request.params[1].get_bool();
     bool bip32derivs = request.params[3].isNull() ? false : request.params[3].get_bool();
     bool complete = true;
-    const TransactionError err = FillPSCT(pwallet, psctx, complete, nHashType, sign, bip32derivs);
+    const TransactionError err = FillPSBT(pwallet, psbtx, complete, nHashType, sign, bip32derivs);
     if (err != TransactionError::OK) {
         throw JSONRPCTransactionError(err);
     }
 
     UniValue result(UniValue::VOBJ);
     CDataStream ssTx(SER_NETWORK, PROTOCOL_VERSION);
-    ssTx << psctx;
-    result.pushKV("psct", EncodeBase64(ssTx.str()));
+    ssTx << psbtx;
+    result.pushKV("psbt", EncodeBase64(ssTx.str()));
     result.pushKV("complete", complete);
 
     return result;
 }
 
-UniValue walletcreatefundedpsct(const JSONRPCRequest& request)
+UniValue walletcreatefundedpsbt(const JSONRPCRequest& request)
 {
     std::shared_ptr<CWallet> const wallet = GetWalletForJSONRPCRequest(request);
     CWallet* const pwallet = wallet.get();
@@ -4062,7 +4062,7 @@ UniValue walletcreatefundedpsct(const JSONRPCRequest& request)
 
     if (request.fHelp || request.params.size() < 2 || request.params.size() > 5)
         throw std::runtime_error(
-            RPCHelpMan{"walletcreatefundedpsct",
+            RPCHelpMan{"walletcreatefundedpsbt",
                 "\nCreates and funds a transaction in the Partially Signed Transaction format. Inputs will be added if supplied inputs are not enough\n"
                 "Implements the Creator and Updater roles.\n",
                 {
@@ -4124,14 +4124,14 @@ UniValue walletcreatefundedpsct(const JSONRPCRequest& request)
                 },
                 RPCResult{
                             "{\n"
-                            "  \"psct\": \"value\",        (string)  The resulting raw transaction (base64-encoded string)\n"
+                            "  \"psbt\": \"value\",        (string)  The resulting raw transaction (base64-encoded string)\n"
                             "  \"fee\":       n,         (numeric) Fee in " + CURRENCY_UNIT + " the resulting transaction pays\n"
                             "  \"changepos\": n          (numeric) The position of the added change output, or -1\n"
                             "}\n"
                                 },
                                 RPCExamples{
                             "\nCreate a transaction with no inputs\n"
-                            + HelpExampleCli("walletcreatefundedpsct", "\"[{\\\"txid\\\":\\\"myid\\\",\\\"vout\\\":0}]\" \"[{\\\"data\\\":\\\"00010203\\\"}]\"")
+                            + HelpExampleCli("walletcreatefundedpsbt", "\"[{\\\"txid\\\":\\\"myid\\\",\\\"vout\\\":0}]\" \"[{\\\"data\\\":\\\"00010203\\\"}]\"")
                                 },
                             }.ToString());
 
@@ -4149,23 +4149,23 @@ UniValue walletcreatefundedpsct(const JSONRPCRequest& request)
     CMutableTransaction rawTx = ConstructTransaction(request.params[0], request.params[1], request.params[2], request.params[3]["replaceable"]);
     FundTransaction(pwallet, rawTx, fee, change_position, request.params[3]);
 
-    // Make a blank psct
-    PartiallySignedTransaction psctx(rawTx);
+    // Make a blank psbt
+    PartiallySignedTransaction psbtx(rawTx);
 
     // Fill transaction with out data but don't sign
     bool bip32derivs = request.params[4].isNull() ? false : request.params[4].get_bool();
     bool complete = true;
-    const TransactionError err = FillPSCT(pwallet, psctx, complete, 1, false, bip32derivs);
+    const TransactionError err = FillPSBT(pwallet, psbtx, complete, 1, false, bip32derivs);
     if (err != TransactionError::OK) {
         throw JSONRPCTransactionError(err);
     }
 
-    // Serialize the PSCT
+    // Serialize the PSBT
     CDataStream ssTx(SER_NETWORK, PROTOCOL_VERSION);
-    ssTx << psctx;
+    ssTx << psbtx;
 
     UniValue result(UniValue::VOBJ);
-    result.pushKV("psct", EncodeBase64(ssTx.str()));
+    result.pushKV("psbt", EncodeBase64(ssTx.str()));
     result.pushKV("fee", ValueFromAmount(fee));
     result.pushKV("changepos", change_position);
     return result;
@@ -4446,11 +4446,11 @@ static const CRPCCommand commands[] =
     { "wallet",             "signmessage",                      &signmessage,                   {"address","message"} },
     { "wallet",             "signrawtransactionwithwallet",     &signrawtransactionwithwallet,  {"hexstring","prevtxs","sighashtype"} },
     { "wallet",             "unloadwallet",                     &unloadwallet,                  {"wallet_name"} },
-    { "wallet",             "walletcreatefundedpsct",           &walletcreatefundedpsct,        {"inputs","outputs","locktime","options","bip32derivs"} },
+    { "wallet",             "walletcreatefundedpsbt",           &walletcreatefundedpsbt,        {"inputs","outputs","locktime","options","bip32derivs"} },
     { "wallet",             "walletlock",                       &walletlock,                    {} },
     { "wallet",             "walletpassphrase",                 &walletpassphrase,              {"passphrase","timeout"} },
     { "wallet",             "walletpassphrasechange",           &walletpassphrasechange,        {"oldpassphrase","newpassphrase"} },
-    { "wallet",             "walletprocesspsct",                &walletprocesspsct,             {"psct","sign","sighashtype","bip32derivs"} },
+    { "wallet",             "walletprocesspsbt",                &walletprocesspsbt,             {"psbt","sign","sighashtype","bip32derivs"} },
 };
 // clang-format on
 

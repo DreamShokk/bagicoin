@@ -157,34 +157,34 @@ bool CCoinJoinBaseManager::GetQueueItem(CCoinJoinQueue& queueRet)
     return false;
 }
 
-bool CCoinJoinBaseSession::CheckTransaction(PartiallySignedTransaction& psctxIn, CAmount& nFeeRet, PoolMessage& errRet, bool fUnsigned)
+bool CCoinJoinBaseSession::CheckTransaction(PartiallySignedTransaction& psbtxIn, CAmount& nFeeRet, PoolMessage& errRet, bool fUnsigned)
 {
     //check it like a partially signed transaction
     CAmount in_amt = 0;
 
     // Get the output amount
-    CAmount out_amt = std::accumulate(psctxIn.tx->vout.begin(), psctxIn.tx->vout.end(), CAmount(0),
+    CAmount out_amt = std::accumulate(psbtxIn.tx->vout.begin(), psbtxIn.tx->vout.end(), CAmount(0),
                                       [](CAmount a, const CTxOut& b) {
         return a += b.nValue;
     }
     );
 
     // Estimate the size
-    CMutableTransaction mtx(*psctxIn.tx);
+    CMutableTransaction mtx(*psbtxIn.tx);
     CCoinsView view_dummy;
     CCoinsViewCache view(&view_dummy);
 
-    for (unsigned int i = 0; i < psctxIn.tx->vin.size(); ++i) {
-        PSCTInput& input = psctxIn.inputs[i];
+    for (unsigned int i = 0; i < psbtxIn.tx->vin.size(); ++i) {
+        PSBTInput& input = psbtxIn.inputs[i];
 
         CTxOut utxo;
-        if (!psctxIn.GetInputUTXO(utxo, i)) {
-            LogPrintf("CCoinJoinBaseSession::CheckTransaction -- missing input! tx=%s\n", psctxIn.tx->GetHash().ToString());
+        if (!psbtxIn.GetInputUTXO(utxo, i)) {
+            LogPrintf("CCoinJoinBaseSession::CheckTransaction -- missing input! tx=%s\n", psbtxIn.tx->GetHash().ToString());
             errRet = ERR_MISSING_TX;
             return false;
         }
         if (!CCoinJoin::IsDenominatedAmount(utxo.nValue)) {
-            LogPrintf("CCoinJoinBaseSession::CheckTransaction -- input not denominated! tx=%s\n", psctxIn.tx->GetHash().ToString());
+            LogPrintf("CCoinJoinBaseSession::CheckTransaction -- input not denominated! tx=%s\n", psbtxIn.tx->GetHash().ToString());
             errRet = ERR_INVALID_INPUT;
             return false;
         }
@@ -194,20 +194,20 @@ bool CCoinJoinBaseSession::CheckTransaction(PartiallySignedTransaction& psctxIn,
         LogPrint(BCLog::CJOIN, "CCoinJoinBaseSession::CheckTransaction -- fee calc: out_amt=%d, in_amt=%d, nFeeRet=%d\n", out_amt, in_amt, nFeeRet);
         if (fUnsigned) continue;
 
-        if (SignPSCTInput(DUMMY_SIGNING_PROVIDER, psctxIn, i, 1, nullptr, true)) {
+        if (SignPSBTInput(DUMMY_SIGNING_PROVIDER, psbtxIn, i, 1, nullptr, true)) {
             mtx.vin[i].scriptSig = input.final_script_sig;
             mtx.vin[i].scriptWitness = input.final_script_witness;
 
             Coin newcoin;
-            if (!psctxIn.GetInputUTXO(newcoin.out, i)) {
-                LogPrintf("CCoinJoinBaseSession::CheckTransaction -- missing input! tx=%s\n", psctxIn.tx->GetHash().ToString());
+            if (!psbtxIn.GetInputUTXO(newcoin.out, i)) {
+                LogPrintf("CCoinJoinBaseSession::CheckTransaction -- missing input! tx=%s\n", psbtxIn.tx->GetHash().ToString());
                 errRet = ERR_MISSING_TX;
                 return false;
             }
             newcoin.nHeight = 1;
-            view.AddCoin(psctxIn.tx->vin[i].prevout, std::move(newcoin), true);
+            view.AddCoin(psbtxIn.tx->vin[i].prevout, std::move(newcoin), true);
         } else {
-            LogPrintf("CCoinJoinBaseSession::CheckTransaction -- dummy signing input failed! tx=%s\n", psctxIn.tx->GetHash().ToString());
+            LogPrintf("CCoinJoinBaseSession::CheckTransaction -- dummy signing input failed! tx=%s\n", psbtxIn.tx->GetHash().ToString());
             errRet = ERR_INVALID_INPUT;
             return false;
         }
@@ -224,7 +224,7 @@ bool CCoinJoinBaseSession::CheckTransaction(PartiallySignedTransaction& psctxIn,
 
     // There should be fee in mixing tx right now, but no sig data - simple check
     if (feerate < ::minRelayTxFee.GetFeePerK() || feerate > HIGH_TX_FEE_PER_KB || nFeeRet > HIGH_MAX_TX_FEE) {
-        LogPrintf("CCoinJoinBaseSession::CheckTransaction -- there must be fee in mixing tx! feerate: %lld, tx=%s\n", feerate.ToString(), psctxIn.tx->GetHash().ToString());
+        LogPrintf("CCoinJoinBaseSession::CheckTransaction -- there must be fee in mixing tx! feerate: %lld, tx=%s\n", feerate.ToString(), psbtxIn.tx->GetHash().ToString());
         errRet = ERR_FEES;
         return false;
     }

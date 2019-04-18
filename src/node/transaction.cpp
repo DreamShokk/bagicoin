@@ -27,10 +27,10 @@ std::string TransactionErrorString(const TransactionError err)
             return "Transaction rejected by AcceptToMemoryPool";
         case TransactionError::MEMPOOL_ERROR:
             return "AcceptToMemoryPool failed";
-        case TransactionError::INVALID_PSCT:
-            return "PSCT is not sane";
-        case TransactionError::PSCT_MISMATCH:
-            return "PSCTs not compatible (different transactions)";
+        case TransactionError::INVALID_PSBT:
+            return "PSBT is not sane";
+        case TransactionError::PSBT_MISMATCH:
+            return "PSBTs not compatible (different transactions)";
         case TransactionError::SIGHASH_MISMATCH:
             return "Specified sighash value does not match existing value";
         // no default case, so the compiler can warn about missing cases

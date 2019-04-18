@@ -8,7 +8,7 @@
 #include <chain.h>
 #include <chainparams.h>
 #include <primitives/transaction.h>
-#include <psct.h>
+#include <psbt.h>
 #include <pubkey.h>
 #include <sync.h>
 #include <timedata.h>
@@ -93,20 +93,20 @@ class CCoinJoinEntry
 {
 public:
     int nSessionID;
-    PartiallySignedTransaction psctx;
+    PartiallySignedTransaction psbtx;
     // mem only
     CService addr;
 
     CCoinJoinEntry() :
         nSessionID(0),
-        psctx(PartiallySignedTransaction()),
+        psbtx(PartiallySignedTransaction()),
         addr(CService())
     {
     }
 
-    CCoinJoinEntry(const int& nSessionID, const PartiallySignedTransaction& psctx) :
+    CCoinJoinEntry(const int& nSessionID, const PartiallySignedTransaction& psbtx) :
         nSessionID(nSessionID),
-        psctx(psctx),
+        psbtx(psbtx),
         addr(CService())
     {
     }
@@ -117,7 +117,7 @@ public:
     inline void SerializationOp(Stream& s, Operation ser_action)
     {
         READWRITE(nSessionID);
-        READWRITE(psctx);
+        READWRITE(psbtx);
     }
 };
 
@@ -210,23 +210,23 @@ class CCoinJoinBroadcastTx
 
 public:
     int nSessionID;
-    PartiallySignedTransaction psctx;
+    PartiallySignedTransaction psbtx;
     COutPoint masternodeOutpoint;
     std::vector<unsigned char> vchSig;
     int64_t sigTime;
 
     CCoinJoinBroadcastTx() :
         nSessionID(0),
-        psctx(),
+        psbtx(),
         masternodeOutpoint(),
         vchSig(),
         sigTime(0)
     {
     }
 
-    CCoinJoinBroadcastTx(const int& _nSessionID, const PartiallySignedTransaction& _psctx, COutPoint _outpoint, int64_t _sigTime) :
+    CCoinJoinBroadcastTx(const int& _nSessionID, const PartiallySignedTransaction& _psbtx, COutPoint _outpoint, int64_t _sigTime) :
         nSessionID(_nSessionID),
-        psctx(_psctx),
+        psbtx(_psbtx),
         masternodeOutpoint(_outpoint),
         vchSig(),
         sigTime(_sigTime)
@@ -239,7 +239,7 @@ public:
     inline void SerializationOp(Stream& s, Operation ser_action)
     {
         READWRITE(nSessionID);
-        READWRITE(psctx);
+        READWRITE(psbtx);
         READWRITE(masternodeOutpoint);
         if (!(s.GetType() & SER_GETHASH)) {
             READWRITE(vchSig);
@@ -249,7 +249,7 @@ public:
 
     friend bool operator==(const CCoinJoinBroadcastTx& a, const CCoinJoinBroadcastTx& b)
     {
-        return *a.psctx.tx == *b.psctx.tx;
+        return *a.psbtx.tx == *b.psbtx.tx;
     }
     friend bool operator!=(const CCoinJoinBroadcastTx& a, const CCoinJoinBroadcastTx& b)
     {
@@ -299,7 +299,7 @@ public:
     int GetState() const { return nState; }
     std::string GetStateString() const;
 
-    bool CheckTransaction(PartiallySignedTransaction &psctxIn, CAmount& nFeeRet, PoolMessage& errRet, bool fUnsigned);
+    bool CheckTransaction(PartiallySignedTransaction &psbtxIn, CAmount& nFeeRet, PoolMessage& errRet, bool fUnsigned);
 
     int GetEntriesCount() const { return vecEntries.size(); }
 };

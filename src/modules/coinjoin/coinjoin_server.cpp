@@ -655,6 +655,7 @@ void CCoinJoinServer::RelayFinalTransaction(const PartiallySignedTransaction& tx
     finalTx.Sign();
 
     // final mixing tx with empty signatures should be relayed to mixing participants only
+    bool allOK = true;
     for (std::vector<CCoinJoinEntry>::iterator it = vecEntries.begin(); it != vecEntries.end(); ++it) {
         bool fOk = connman->ForNode(it->addr, [&finalTx, &connman](CNode* pnode) {
             CNetMsgMaker msgMaker(pnode->GetSendVersion());
@@ -666,8 +667,10 @@ void CCoinJoinServer::RelayFinalTransaction(const PartiallySignedTransaction& tx
             LogPrintf("CCoinJoinServer::%s -- client(s) disconnected, removing entry: %s nSessionID: %d  nSessionDenom: %d (%s)\n",
                     __func__, it->addr.ToStringIPPort(), nSessionID, nSessionDenom, CCoinJoin::GetDenominationsToString(nSessionDenom));
             vecEntries.erase(it--);
+            allOK = false;
         }
     }
+    if (allOK) return;
     if (vecEntries.size() >= CCoinJoin::GetMinPoolInputs()) {
         CreateFinalTransaction(connman);
     } else SetNull();

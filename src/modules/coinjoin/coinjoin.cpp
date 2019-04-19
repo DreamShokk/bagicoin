@@ -191,7 +191,7 @@ bool CCoinJoinBaseSession::CheckTransaction(PartiallySignedTransaction& psbtxIn,
 
         in_amt += utxo.nValue;
         nFeeRet = in_amt - out_amt;
-        LogPrint(BCLog::CJOIN, "CCoinJoinBaseSession::CheckTransaction -- fee calc: out_amt=%d, in_amt=%d, nFeeRet=%d\n", out_amt, in_amt, nFeeRet);
+
         if (fUnsigned) continue;
 
         if (SignPSBTInput(DUMMY_SIGNING_PROVIDER, psbtxIn, i, 1, nullptr, true)) {

@@ -34,7 +34,7 @@ static const int COINJOIN_DEFAULT_TIMEOUT        = 10;
 //! minimum peer version accepted by mixing pool
 static const int MIN_COINJOIN_PEER_PROTO_VERSION            = 70017;
 //! maximum number of inputs on a single pool transaction
-static const size_t COINJOIN_ENTRY_MAX_SIZE                 = 98;
+static const size_t COINJOIN_ENTRY_MAX_SIZE                 = 135;
 //! number of denoms each size before new ones are created
 static const unsigned int COINJOIN_DENOM_THRESHOLD          = 3;
 //! number of denoms each size before new ones are created

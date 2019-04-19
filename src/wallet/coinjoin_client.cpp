@@ -704,7 +704,7 @@ bool CCoinJoinClientManager::IsMixingRequired(std::vector<std::pair<CTxIn, CTxOu
     // Liquidity providers: don't use the full portfolio, remove randomly
     for (auto denom = COINJOIN_LOW_DENOM; denom <= COINJOIN_HIGH_DENOM; denom <<= 1) {
         int64_t count = 0;
-        int threshold = std::max(1, GetRandInt(COINJOIN_DENOM_THRESHOLD));
+        int threshold = (1 + GetRandInt(COINJOIN_DENOM_THRESHOLD));
         for(std::vector<std::pair<CTxIn, CTxOut> >::iterator it = portfolio.begin(); it != portfolio.end(); it++) {
             if (it->second.nValue < denom) continue;
             if (it->second.nValue > denom) break;
@@ -985,7 +985,8 @@ bool CCoinJoinClientSession::AddFeesAndLocktime(std::vector<CAmount>& vecAmounts
         CAmount feeRetTmp (nFeeRet);
 
         // not enough selected? try to add additional inputs
-        selected = m_wallet_session->SelectJoinCoins(2 * COINJOIN_LOW_DENOM, std::min(2 * nFeeNeeded, 2 * COINJOIN_LOW_DENOM), tmp_select, 0, MAX_COINJOIN_ROUNDS);
+        int n = nFeeNeeded % COINJOIN_LOW_DENOM  == 0 ? nFeeNeeded / COINJOIN_LOW_DENOM : nFeeNeeded / COINJOIN_LOW_DENOM + 1;
+        selected = m_wallet_session->SelectJoinCoins(n * 2 * COINJOIN_LOW_DENOM, n * 2 * COINJOIN_LOW_DENOM, tmp_select, 0, MAX_COINJOIN_ROUNDS);
         for (std::vector<std::pair<CTxIn, CTxOut> >::iterator it = tmp_select.begin(); it != tmp_select.end(); it++) {
             if (it->second.nValue != COINJOIN_LOW_DENOM) {
                 LogPrint(BCLog::CJOIN, "%s CCoinJoinClientSession::AddFeesAndLocktime --- no inputs available for fees, trying to reduce outputs.\n", m_wallet_session->GetDisplayName());

@@ -685,7 +685,7 @@ bool CCoinJoinClientManager::IsMixingRequired(std::vector<std::pair<CTxIn, CTxOu
         int rounds = nLiquidityProvider ? MAX_COINJOIN_ROUNDS : nCoinJoinRounds;
         if (it->second.nRounds < rounds) {
             fMixOnly = true;
-        } else { // add some entropy
+        } else {
             LOCK(m_wallet->cs_wallet);
             m_wallet->UnlockCoin(it->first.prevout);
             portfolio.erase(it--);
@@ -704,13 +704,13 @@ bool CCoinJoinClientManager::IsMixingRequired(std::vector<std::pair<CTxIn, CTxOu
     // Liquidity providers: don't use the full portfolio, remove randomly
     for (auto denom = COINJOIN_LOW_DENOM; denom <= COINJOIN_HIGH_DENOM; denom <<= 1) {
         int64_t count = 0;
-        int threshold = std::min(1, GetRandInt(COINJOIN_DENOM_THRESHOLD));
+        int threshold = std::max(1, GetRandInt(COINJOIN_DENOM_THRESHOLD));
         for(std::vector<std::pair<CTxIn, CTxOut> >::iterator it = portfolio.begin(); it != portfolio.end(); it++) {
             if (it->second.nValue < denom) continue;
             if (it->second.nValue > denom) break;
             if (it->second.nValue == denom) {
                 count++;
-                if (count >= threshold) {
+                if (count > threshold) {
                     LOCK(m_wallet->cs_wallet);
                     m_wallet->UnlockCoin(it->first.prevout);
                     portfolio.erase(it--);

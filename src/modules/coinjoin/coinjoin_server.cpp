@@ -707,9 +707,10 @@ void CCoinJoinServer::RelayStatus(PoolStatusUpdate nStatusUpdate, CConnman* conn
         });
     }
 
-    if (nDisconnected == vecEntries.size()) {
+    if (nDisconnected == vecEntries.size() || GetState() == POOL_STATE_SIGNING) {
         // all clients disconnected, there is probably some issues with our own connection
-        // do not charge any fees, just reset the pool
+        // in signing state we can't recover if we lost a peer, reset
+        // do not ban anyone, just reset the pool
         SetNull();
     }
 }

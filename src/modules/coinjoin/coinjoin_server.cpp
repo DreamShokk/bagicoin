@@ -25,7 +25,7 @@ CCoinJoinServer coinJoinServer;
 void CCoinJoinServer::ProcessModuleMessage(CNode* pfrom, const std::string& strCommand, CDataStream& vRecv, CConnman* connman)
 {
     if (!fMasternodeMode) return;
-    if (fLiteMode) return; // ignore all Chaincoin related functionality
+    if (fLiteMode) return; // ignore all CoinJoin related functionality
     if (!masternodeSync.IsBlockchainSynced()) return;
 
     if (strCommand == NetMsgType::CJACCEPT) {

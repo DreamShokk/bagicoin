@@ -39,11 +39,14 @@ void CCoinJoinServer::ProcessModuleMessage(CNode* pfrom, const std::string& strC
         CAmount nDenom;
         vRecv >> nDenom;
 
-        if (IsSessionFull()) {
-            // too many users in this session already, reject new ones
-            LogPrintf("CJACCEPT -- queue is already full, trying to start a new one\n");
-            PushStatus(pfrom, STATUS_ACCEPTED, ERR_QUEUE_FULL, connman);
-            return;
+        if (IsSessionClosed()) {
+            CloseQueue();
+            if (IsSessionFull()) {
+                // too many users in this session already, reject new ones
+                LogPrintf("CJACCEPT -- queue is already full, trying to start a new one\n");
+                PushStatus(pfrom, STATUS_ACCEPTED, ERR_QUEUE_FULL, connman);
+                return;
+            }
         }
 
         LogPrint(BCLog::CJOIN, "CJACCEPT -- nDenom %d\n", FormatMoney(nDenom));
@@ -243,9 +246,8 @@ void CCoinJoinServer::ProcessModuleMessage(CNode* pfrom, const std::string& strC
     }
 }
 
-void CCoinJoinServer::SetNull()
+void CCoinJoinServer::CloseQueue()
 {
-    // MN side
     LOCK(cs_vecqueue);
     // notify the network about the closed queue
     for (std::vector<CCoinJoinQueue>::iterator it = vecCoinJoinQueue.begin(); it!=vecCoinJoinQueue.end(); ++it) {
@@ -258,8 +260,17 @@ void CCoinJoinServer::SetNull()
             vecCoinJoinQueue.erase(it--);
         }
     }
-    vecDenom.clear();
+}
 
+
+void CCoinJoinServer::SetNull()
+{
+    // MN side
+    CloseQueue();
+
+    LOCK(cs_vecqueue);
+
+    vecDenom.clear();
     CCoinJoinBaseSession::SetNull();
     CCoinJoinBaseManager::SetNull();
 }

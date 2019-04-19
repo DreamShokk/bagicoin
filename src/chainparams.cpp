@@ -159,7 +159,7 @@ public:
         fAllowMultiplePorts = false;
 
         nPoolMinInputs = 3;
-        nPoolMaxInputs = 5;
+        nPoolMaxInputs = 8;
         nFulfilledRequestExpireTime = 60*60; // fulfilled requests expire in 1 hour
 
         checkpointData = {  // PM-Tech: ChainCoin
@@ -281,7 +281,7 @@ public:
         fAllowMultiplePorts = true;
 
         nPoolMinInputs = 3;
-        nPoolMaxInputs = 5;
+        nPoolMaxInputs = 8;
         nFulfilledRequestExpireTime = 5*60; // fulfilled requests expire in 5 minutes
 
         checkpointData = {
@@ -378,7 +378,7 @@ public:
         fAllowMultiplePorts = true;
 
         nPoolMinInputs = 3;
-        nPoolMaxInputs = 5;
+        nPoolMaxInputs = 8;
         nFulfilledRequestExpireTime = 5*60; // fulfilled requests expire in 5 minutes
 
         checkpointData = {

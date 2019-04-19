@@ -41,6 +41,7 @@ private:
     bool AddUserToExistingSession(const CAmount& nDenom, PoolMessage &nMessageIDRet);
     /// Do we have enough users to take entries?
     bool IsSessionReady() { return vecDenom.size() >= CCoinJoin::GetMinPoolInputs(); }
+    bool IsSessionClosed() { return vecDenom.size() >= CCoinJoin::GetMaxPoolInputs() - 1; }
     bool IsSessionFull() { return vecDenom.size() >= CCoinJoin::GetMaxPoolInputs(); }
 
     /// Are these outputs compatible with other client in the pool?
@@ -56,6 +57,7 @@ private:
     void RelayCompletedTransaction(PoolMessage nMessageID, CConnman* connman);
 
     void ClientTask(CConnman* connman);
+    void CloseQueue();
     void SetNull();
 
 public:

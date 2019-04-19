@@ -840,7 +840,7 @@ bool CCoinJoinClientSession::CreateSessionTransaction(std::vector<std::pair<CTxI
             if (nValueRem < denom) break;
             auto count = 0;
             auto threshold = denom == COINJOIN_LOW_DENOM ? COINJOIN_FEE_DENOM_THRESHOLD : COINJOIN_DENOM_THRESHOLD;
-            auto target = (GetRand(COINJOIN_DENOM_WINDOW * threshold) + threshold - 1);
+            auto target = std::max((GetRandInt((COINJOIN_DENOM_WINDOW * threshold) - threshold) + threshold), (COINJOIN_DENOM_WINDOW * threshold - 2));
             for (const auto& value : vecAmounts) {
                 if (nValueRem < value || count >= static_cast<int>(target)) break;
                 if (value < denom) continue;

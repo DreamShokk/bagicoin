@@ -109,6 +109,8 @@ private:
     CPendingCJaRequest pendingCJaRequest;
     CKeyHolderStorage keyHolderStorage;
 
+    const bool fMixingOnly;
+
     bool JoinExistingQueue();
     bool StartNewQueue();
 
@@ -118,7 +120,7 @@ private:
     void SetState(PoolState nStateNew);
 
     /// Create the transaction we want to include in the mixing pool
-    bool CreateSessionTransaction(std::vector<std::pair<CTxIn, CTxOut> >& vecPair, CAmount& nDenom, std::vector<CAmount>& vecAmounts, bool& fMixOnly);
+    bool CreateSessionTransaction(std::vector<std::pair<CTxIn, CTxOut> >& vecPair, CAmount& nDenom, std::vector<CAmount>& vecAmounts);
 
     /// Add some fees
     bool AddFeesAndLocktime(std::vector<CAmount>& vecAmounts);
@@ -133,7 +135,7 @@ private:
     void UnlockCoins();
 
 public:
-    explicit CCoinJoinClientSession(CWallet* pwallet) :
+    explicit CCoinJoinClientSession(CWallet* pwallet, bool fMixingOnly) :
         m_wallet_session(pwallet),
         mtxSession(CMutableTransaction()),
         nEntriesCount(0),
@@ -143,7 +145,8 @@ public:
         strAutoCoinJoinResult(),
         infoMixingMasternode(),
         pendingCJaRequest(),
-        keyHolderStorage()
+        keyHolderStorage(),
+        fMixingOnly(fMixingOnly)
     {
     }
 
@@ -154,7 +157,7 @@ public:
     bool GetMixingMasternodeInfo(masternode_info_t& mnInfoRet) const;
 
     /// Passively run mixing in the background according to the configuration in settings
-    void CoinJoin(std::vector<std::pair<CTxIn, CTxOut> >& vecPair, std::vector<CAmount>& vecAmounts, bool &fMixOnly);
+    void CoinJoin(std::vector<std::pair<CTxIn, CTxOut> >& vecPair, std::vector<CAmount>& vecAmounts);
 
     /// As a client, submit part of a future mixing transaction to a Masternode to start the process
     bool SendDenominate();
@@ -193,7 +196,7 @@ private:
     bool CreateDenominated(const CAmount& nValue, bool fOnlyFees = false);
 
     /// Check if mixing is needed
-    bool IsMixingRequired(std::vector<std::pair<CTxIn, CTxOut> >& portfolio, std::vector<CAmount>& vecAmounts, bool fMixOnly);
+    bool IsMixingRequired(std::vector<std::pair<CTxIn, CTxOut> >& portfolio, std::vector<CAmount>& vecAmounts, bool& fMixOnly);
 
     bool WaitForAnotherBlock();
 

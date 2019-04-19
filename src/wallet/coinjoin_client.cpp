@@ -652,7 +652,7 @@ void CCoinJoinClientManager::UpdatedSuccessBlock()
 }
 
 // check if we should initiate a mixing process and if so, pass some flags to determine the priorities later
-bool CCoinJoinClientManager::IsMixingRequired(std::vector<std::pair<CTxIn, CTxOut> >& portfolio, std::vector<CAmount>& vecAmounts, bool fMixOnly)
+bool CCoinJoinClientManager::IsMixingRequired(std::vector<std::pair<CTxIn, CTxOut> >& portfolio, std::vector<CAmount>& vecAmounts, bool& fMixOnly)
 {
     // first check for portfolio denoms unless we are alredy in mix only mode
     CAmount nTotal = 0;
@@ -784,7 +784,7 @@ bool CCoinJoinClientManager::CheckAutomaticBackup()
     return true;
 }
 
-bool CCoinJoinClientSession::CreateSessionTransaction(std::vector<std::pair<CTxIn, CTxOut> >& vecPair, CAmount& nDenom, std::vector<CAmount>& vecAmounts, bool& fMixOnly)
+bool CCoinJoinClientSession::CreateSessionTransaction(std::vector<std::pair<CTxIn, CTxOut> >& vecPair, CAmount& nDenom, std::vector<CAmount>& vecAmounts)
 {
     nDenom = 0;
     strAutoCoinJoinResult = _("Creating transaction");
@@ -801,7 +801,7 @@ bool CCoinJoinClientSession::CreateSessionTransaction(std::vector<std::pair<CTxI
                  m_wallet_session->GetDisplayName(),
                  it->first.ToString(),
                  FormatMoney(it->second.nValue));
-        if (fMixOnly) {
+        if (fMixingOnly) {
             nValueRem -= it->second.nValue;
             std::shared_ptr<CReserveScript> scriptDenom = std::make_shared<CReserveScript>();
             keyHolderStorage.AddKey(scriptDenom, m_wallet_session);
@@ -816,7 +816,7 @@ bool CCoinJoinClientSession::CreateSessionTransaction(std::vector<std::pair<CTxI
         vecPair.erase(it--);
     }
 
-    if (!fMixOnly) {
+    if (!fMixingOnly) {
         std::sort(vecAmounts.begin(), vecAmounts.end());
 
         // fill missing denoms, small to large
@@ -1040,7 +1040,7 @@ bool CCoinJoinClientSession::AddFeesAndLocktime(std::vector<CAmount>& vecAmounts
 //
 // Passively run mixing in the background to anonymize funds based on the given configuration.
 //
-void CCoinJoinClientSession::CoinJoin(std::vector<std::pair<CTxIn, CTxOut> >& vecPair, std::vector<CAmount>& vecAmounts, bool& fMixOnly)
+void CCoinJoinClientSession::CoinJoin(std::vector<std::pair<CTxIn, CTxOut> >& vecPair, std::vector<CAmount>& vecAmounts)
 {
     if (nState != POOL_STATE_IDLE) return;
 
@@ -1069,7 +1069,7 @@ void CCoinJoinClientSession::CoinJoin(std::vector<std::pair<CTxIn, CTxOut> >& ve
     SetNull();
 
     // Attemt to create our transaction
-    if (!CreateSessionTransaction(vecPair, nSessionDenom, vecAmounts, fMixOnly)) {
+    if (!CreateSessionTransaction(vecPair, nSessionDenom, vecAmounts)) {
         strAutoCoinJoinResult = _("Failed to create Transaction!");
         SetState(POOL_STATE_ERROR);
         return;
@@ -1227,8 +1227,8 @@ void CCoinJoinClientManager::CoinJoin()
     }
 
     while (portfolio.size() > 2 && (int)deqSessions.size() < MAX_COINJOIN_SESSIONS) {
-        deqSessions.emplace_back(m_wallet);
-        deqSessions.back().CoinJoin(portfolio, vecAmounts, fMixOnly);
+        deqSessions.emplace_back(m_wallet, fMixOnly);
+        deqSessions.back().CoinJoin(portfolio, vecAmounts);
         LogPrint(BCLog::CJOIN, "%s CCoinJoinClientManager::CoinJoin -- Added session, queue size: %d\n", m_wallet->GetDisplayName(), GetQueueSize());
         if (!IsMixingRequired(portfolio, vecAmounts, fMixOnly)) break;
     }

@@ -1091,16 +1091,17 @@ void CCoinJoinClientSession::CoinJoin(std::vector<std::pair<CTxIn, CTxOut> >& ve
     // Attemt to create our transaction
     if (!CreateSessionTransaction(vecPair, nSessionDenom, vecAmounts)) {
         strAutoCoinJoinResult = _("Failed to create Transaction!");
-        SetState(POOL_STATE_ERROR);
+        SetNull();
+        SetState(POOL_STATE_IDLE);
         return;
     }
 
     // don't use the queues all of the time for mixing unless we are a liquidity provider
-    if ((m_wallet_session->coinjoinClient->nLiquidityProvider || true /*GetRandInt(100) > 33*/) && JoinExistingQueue()) return;
+    if ((m_wallet_session->coinjoinClient->nLiquidityProvider || GetRandInt(100) > 33) && JoinExistingQueue()) return;
 
     // do not initiate queue if we are a liquidity provider to avoid useless inter-mixing
     if (m_wallet_session->coinjoinClient->nLiquidityProvider) {
-        UnlockCoins();
+        strAutoCoinJoinResult = _("Liquidity Provider: Idle...");
         SetNull();
         SetState(POOL_STATE_IDLE);
         return;

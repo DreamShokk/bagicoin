@@ -1185,7 +1185,7 @@ void CCoinJoinClientManager::CoinJoin()
             strAutoCoinJoinResult = _("Failed to create denominated outputs.");
         }
     }
-/*
+
     //if we are am LP and there aren't any queues active, we're done
     {
         LOCK(cs_vecqueue);
@@ -1194,7 +1194,7 @@ void CCoinJoinClientManager::CoinJoin()
             return;
         }
     }
-*/
+
     // anything there to work on?
     if (nBalanceDenominated <= COINJOIN_FEE_DENOM_THRESHOLD * COINJOIN_LOW_DENOM) {
         strAutoCoinJoinResult = _("Low balance (denominated).");

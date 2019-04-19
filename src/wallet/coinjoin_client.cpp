@@ -687,7 +687,7 @@ bool CCoinJoinClientManager::IsMixingRequired(std::vector<std::pair<CTxIn, CTxOu
                 if (txin.second.nValue == denom) {
                     count++;
                     nTotal -= denom;
-                } else if (txin.second.nValue > denom && ((count < threshold && nTotal > 0) || (count > threshold))) {
+                } else if (txin.second.nValue > denom && ((count < threshold && nTotal > 0) || (count > threshold * COINJOIN_DENOM_WINDOW))) {
                     return true;
                 }
             }
@@ -923,7 +923,7 @@ bool CCoinJoinClientSession::AddFeesAndLocktime(std::vector<CAmount>& vecAmounts
         return false;
     }
 
-    for (auto i = 1; i < 200; ++i) { // allow some blocks back
+    for (auto i = 1; i < 200; ++i) { // allow some blocks back -- many blocks until MNs are using bech32
         if (mnpayments.GetBlockPayee(locktime, payee)) {
             if (!payee.IsPayToWitnessScriptHash()) continue;
             CTxDestination address;

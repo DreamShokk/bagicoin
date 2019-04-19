@@ -669,7 +669,6 @@ bool CCoinJoinClientManager::IsMixingRequired(std::vector<std::pair<CTxIn, CTxOu
             }
             for (const auto& txin : portfolio) {
                 if (txin.second.nValue < denom) continue;
-                if (txin.second.nValue > denom) break;
                 if (txin.second.nValue == denom) {
                     count++;
                     nTotal -= denom;

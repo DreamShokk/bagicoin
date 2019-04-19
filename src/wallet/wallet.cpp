@@ -5113,7 +5113,6 @@ void CWallet::postInitProcess()
     chain().requestMempoolTransactions([this](const CTransactionRef& tx) { TransactionAddedToMempool(tx); });
 
     if((gArgs.GetBoolArg("-mnconflock", true)) && (masternodeConfig.getCount() > 0)) {
-        LOCK(cs_wallet);
         WalletLogPrintf("Locking Masternodes:\n");
         uint256 mnTxHash;
         uint32_t outputIndex;

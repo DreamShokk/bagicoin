@@ -81,7 +81,7 @@ void CKeyHolderStorage::ReturnAll()
 
 void CCoinJoinClientManager::ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStream& vRecv, CConnman* connman)
 {
-    if (fLiteMode) return; // ignore all Chaincoin related functionality
+    if (fLiteMode) return; // ignore all CoinJoin related functionality
     if (!masternodeSync.IsBlockchainSynced()) return;
 
     if (!CheckDiskSpace()) {
@@ -177,8 +177,11 @@ void CCoinJoinClientManager::ProcessMessage(CNode* pfrom, const std::string& str
 
 void CCoinJoinClientSession::ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStream& vRecv, CConnman* connman)
 {
-    if (fLiteMode) return; // ignore all Dash related functionality
+    if (fLiteMode) return; // ignore all CoinJoin related functionality
     if (!masternodeSync.IsBlockchainSynced()) return;
+
+    if (!infoMixingMasternode.fInfoValid) return;
+    if (infoMixingMasternode.addr != pfrom->addr) return;
 
     if (strCommand == NetMsgType::CJSTATUSUPDATE) {
 
@@ -186,12 +189,6 @@ void CCoinJoinClientSession::ProcessMessage(CNode* pfrom, const std::string& str
             LogPrint(BCLog::CJOIN, "%s CJSTATUSUPDATE -- peer=%d using obsolete version %i\n", m_wallet_session->GetDisplayName(), pfrom->GetId(), pfrom->GetSendVersion());
             connman->PushMessage(pfrom, CNetMsgMaker(pfrom->GetSendVersion()).Make(NetMsgType::REJECT, strCommand, REJECT_OBSOLETE,
                                strprintf("Version must be %d or greater", MIN_COINJOIN_PEER_PROTO_VERSION)));
-            return;
-        }
-
-        if (!infoMixingMasternode.fInfoValid) return;
-        if (infoMixingMasternode.addr != pfrom->addr) {
-            LogPrint(BCLog::CJOIN, "%s CJSTATUSUPDATE -- message received from different Masternode: infoMixingMasternode %s addr %s\n", m_wallet_session->GetDisplayName(), infoMixingMasternode.addr.ToString(), pfrom->addr.ToString());
             return;
         }
 
@@ -232,13 +229,6 @@ void CCoinJoinClientSession::ProcessMessage(CNode* pfrom, const std::string& str
             return;
         }
 
-        if (!infoMixingMasternode.fInfoValid) return;
-        if (infoMixingMasternode.addr != pfrom->addr) {
-            LogPrint(BCLog::CJOIN, "%s CJFINALTX -- message received from different Masternode: infoMixingMasternode %s addr %s\n", m_wallet_session->GetDisplayName(), infoMixingMasternode.addr.ToString(), pfrom->addr.ToString());
-            return;
-        }
-
-
         CCoinJoinBroadcastTx psbtxFinal;
         vRecv >> psbtxFinal;
 
@@ -261,12 +251,6 @@ void CCoinJoinClientSession::ProcessMessage(CNode* pfrom, const std::string& str
             LogPrint(BCLog::CJOIN, "%s CJCOMPLETE -- peer=%d using obsolete version %i\n", m_wallet_session->GetDisplayName(), pfrom->GetId(), pfrom->GetSendVersion());
             connman->PushMessage(pfrom, CNetMsgMaker(pfrom->GetSendVersion()).Make(NetMsgType::REJECT, strCommand, REJECT_OBSOLETE,
                                strprintf("Version must be %d or greater", MIN_COINJOIN_PEER_PROTO_VERSION)));
-            return;
-        }
-
-        if (!infoMixingMasternode.fInfoValid) return;
-        if (infoMixingMasternode.addr != pfrom->addr) {
-            LogPrint(BCLog::CJOIN, "%s CJCOMPLETE -- message received from different Masternode: infoMixingMasternode=%s  addr=%s\n", m_wallet_session->GetDisplayName(), infoMixingMasternode.addr.ToString(), pfrom->addr.ToString());
             return;
         }
 

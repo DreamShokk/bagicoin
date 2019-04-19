@@ -1016,9 +1016,10 @@ bool CCoinJoinClientSession::AddFeesAndLocktime(std::vector<CAmount>& vecAmounts
                     mtxSession = mtxTmp;
                     vecOutPointLocked = outTmp;
                     nFeeRet = feeRetTmp;
-                    continue;
+                    break;
                 }
             }
+            continue;
         }
 
         // not enough inputs left, try to remove some outputs

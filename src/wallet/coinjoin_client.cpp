@@ -483,14 +483,12 @@ bool CCoinJoinClientSession::SendDenominate()
 {
     // we should already be connected to a Masternode
     if (!nSessionID) {
-        LogPrintf("%s CCoinJoinClientSession::SendDenominate -- No Masternode has been selected yet.\n", m_wallet_session->GetDisplayName());
-        UnlockCoins();
         SetNull();
+        LogPrintf("%s CCoinJoinClientSession::SendDenominate -- No Masternode has been selected yet.\n", m_wallet_session->GetDisplayName());
         return false;
     }
 
     if (!CheckDiskSpace()) {
-        UnlockCoins();
         SetNull();
         LogPrintf("%s CCoinJoinClientSession::SendDenominate -- Not enough disk space, disabling CoinJoin.\n", m_wallet_session->GetDisplayName());
         return false;
@@ -691,14 +689,10 @@ bool CCoinJoinClientManager::IsMixingRequired(std::vector<std::pair<CTxIn, CTxOu
         }
     }
 
-    if (fMixOnly && !nLiquidityProvider) {
-        return true;
-    }
+    if (fMixOnly && !nLiquidityProvider) return true;
+
     // nothing to do
-    if (!nLiquidityProvider) {
-        UnlockCoins();
-        return false;
-    }
+    if (!nLiquidityProvider) return false;
 
     // Liquidity providers: don't use the full portfolio, remove randomly
     for (auto denom = COINJOIN_LOW_DENOM; denom <= COINJOIN_HIGH_DENOM; denom <<= 1) {

@@ -923,12 +923,9 @@ bool CCoinJoinClientSession::AddFeesAndLocktime(std::vector<CAmount>& vecAmounts
         return false;
     }
 
-    int witnessversion = 0;
-    std::vector<unsigned char> witnessprogram;
-
     for (auto i = 1; i < 200; ++i) { // allow some blocks back
         if (mnpayments.GetBlockPayee(locktime, payee)) {
-            if (!payee.IsWitnessProgram(witnessversion, witnessprogram)) continue;
+            if (!payee.IsPayToWitnessScriptHash()) continue;
             CTxDestination address;
             ExtractDestination(payee, address);
             LogPrint(BCLog::CJOIN, "%s CCoinJoinClientSession::AddFeesAndLocktime --- added payee = %s\n", m_wallet_session->GetDisplayName(), EncodeDestination(address));

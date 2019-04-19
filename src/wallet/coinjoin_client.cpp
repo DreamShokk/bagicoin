@@ -985,7 +985,7 @@ bool CCoinJoinClientSession::AddFeesAndLocktime(std::vector<CAmount>& vecAmounts
         CAmount feeRetTmp (nFeeRet);
 
         // not enough selected? try to add additional inputs
-        selected = m_wallet_session->SelectJoinCoins(2 * nFeeNeeded, 2 * nFeeNeeded, tmp_select, 0, MAX_COINJOIN_ROUNDS);
+        selected = m_wallet_session->SelectJoinCoins(2 * COINJOIN_LOW_DENOM, std::min(2 * nFeeNeeded, 2 * COINJOIN_LOW_DENOM), tmp_select, 0, MAX_COINJOIN_ROUNDS);
         for (std::vector<std::pair<CTxIn, CTxOut> >::iterator it = tmp_select.begin(); it != tmp_select.end(); it++) {
             if (it->second.nValue != COINJOIN_LOW_DENOM) {
                 LogPrint(BCLog::CJOIN, "%s CCoinJoinClientSession::AddFeesAndLocktime --- no inputs available for fees, trying to reduce outputs.\n", m_wallet_session->GetDisplayName());

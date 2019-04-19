@@ -360,8 +360,6 @@ void CCoinJoinServer::CreateFinalTransaction(CConnman* connman)
     LogPrint(BCLog::CJOIN, "CCoinJoinServer::CreateFinalTransaction -- finalPartiallySignedTransaction=%s\n",
              finalPartiallySignedTransaction.tx->GetHash().ToString());
     RelayFinalTransaction(finalPartiallySignedTransaction, connman);
-
-    // TODO: identify corrupt psbt and retry with remaining
 }
 
 void CCoinJoinServer::CommitFinalTransaction(CConnman* connman)
@@ -657,18 +655,22 @@ void CCoinJoinServer::RelayFinalTransaction(const PartiallySignedTransaction& tx
     finalTx.Sign();
 
     // final mixing tx with empty signatures should be relayed to mixing participants only
-    for (const auto& entry : vecEntries) {
-        bool fOk = connman->ForNode(entry.addr, [&finalTx, &connman](CNode* pnode) {
+    for (std::vector<CCoinJoinEntry>::iterator it = vecEntries.begin(); it != vecEntries.end(); ++it) {
+        bool fOk = connman->ForNode(it->addr, [&finalTx, &connman](CNode* pnode) {
             CNetMsgMaker msgMaker(pnode->GetSendVersion());
             connman->PushMessage(pnode, msgMaker.Make(NetMsgType::CJFINALTX, finalTx));
             return true;
         });
         if (!fOk) {
             // no such node? maybe this client disconnected or our own connection went down
-            RelayStatus(STATUS_REJECTED, connman);
-            break;
+            LogPrintf("CCoinJoinServer::%s -- client(s) disconnected, removing entry: %s nSessionID: %d  nSessionDenom: %d (%s)\n",
+                    __func__, it->addr.ToStringIPPort(), nSessionID, nSessionDenom, CCoinJoin::GetDenominationsToString(nSessionDenom));
+            vecEntries.erase(it--);
         }
     }
+    if (vecEntries.size() >= CCoinJoin::GetMinPoolInputs()) {
+        CreateFinalTransaction(connman);
+    } else SetNull();
 }
 
 void CCoinJoinServer::PushStatus(CNode* pnode, PoolStatusUpdate nStatusUpdate, PoolMessage nMessageID, CConnman* connman)
@@ -680,36 +682,23 @@ void CCoinJoinServer::PushStatus(CNode* pnode, PoolStatusUpdate nStatusUpdate, P
 
 void CCoinJoinServer::RelayStatus(PoolStatusUpdate nStatusUpdate, CConnman* connman, PoolMessage nMessageID)
 {
-    unsigned int nDisconnected{};
     // status updates should be relayed to mixing participants only
-    for (const auto& entry : vecEntries) {
+    for (std::vector<CCoinJoinEntry>::iterator it = vecEntries.begin(); it != vecEntries.end(); ++it) {
         // make sure everyone is still connected
-        bool fOk = connman->ForNode(entry.addr, [&nStatusUpdate, &nMessageID, &connman, this](CNode* pnode) {
+        bool fOk = connman->ForNode(it->addr, [&nStatusUpdate, &nMessageID, &connman, this](CNode* pnode) {
             PushStatus(pnode, nStatusUpdate, nMessageID, connman);
             return true;
         });
         if (!fOk) {
             // no such node? maybe this client disconnected or our own connection went down
-            ++nDisconnected;
+            LogPrintf("CCoinJoinServer::%s -- client(s) disconnected, removing entry: %s nSessionID: %d  nSessionDenom: %d (%s)\n",
+                    __func__, it->addr.ToStringIPPort(), nSessionID, nSessionDenom, CCoinJoin::GetDenominationsToString(nSessionDenom));
+            vecEntries.erase(it--);
         }
     }
-    if (nDisconnected == 0) return; // all is clear
 
-    // smth went wrong
-    LogPrintf("CCoinJoinServer::%s -- can't continue, %llu client(s) disconnected, nSessionID: %d  nSessionDenom: %d (%s)\n",
-            __func__, nDisconnected, nSessionID, nSessionDenom, CCoinJoin::GetDenominationsToString(nSessionDenom));
-
-    // notify everyone else that this session should be terminated
-    for (const auto& entry : vecEntries) {
-        connman->ForNode(entry.addr, [&connman, this](CNode* pnode) {
-            PushStatus(pnode, STATUS_REJECTED, MSG_NOERR, connman);
-            return true;
-        });
-    }
-
-    if (nDisconnected == vecEntries.size() || GetState() == POOL_STATE_SIGNING) {
+    if (vecEntries.empty()) {
         // all clients disconnected, there is probably some issues with our own connection
-        // in signing state we can't recover if we lost a peer, reset
         // do not ban anyone, just reset the pool
         SetNull();
     }
@@ -722,16 +711,11 @@ void CCoinJoinServer::RelayCompletedTransaction(PoolMessage nMessageID, CConnman
 
     // final mixing tx with empty signatures should be relayed to mixing participants only
     for (const auto& entry : vecEntries) {
-        bool fOk = connman->ForNode(entry.addr, [&nMessageID, &connman, this](CNode* pnode) {
+        connman->ForNode(entry.addr, [&nMessageID, &connman, this](CNode* pnode) {
             CNetMsgMaker msgMaker(pnode->GetSendVersion());
             connman->PushMessage(pnode, msgMaker.Make(NetMsgType::CJCOMPLETE, nSessionID, (int)nMessageID));
             return true;
         });
-        if (!fOk) {
-            // no such node? maybe client disconnected or our own connection went down
-            RelayStatus(STATUS_REJECTED, connman);
-            break;
-        }
     }
 }
 

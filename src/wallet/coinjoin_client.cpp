@@ -668,6 +668,8 @@ bool CCoinJoinClientManager::IsMixingRequired(std::vector<std::pair<CTxIn, CTxOu
                 if (amount == denom) count++;
             }
             for (const auto& txin : portfolio) {
+                if (txin.second.nValue < denom) continue;
+                if (txin.second.nValue > denom) break;
                 if (txin.second.nValue == denom) {
                     count++;
                     nTotal -= denom;
@@ -680,27 +682,43 @@ bool CCoinJoinClientManager::IsMixingRequired(std::vector<std::pair<CTxIn, CTxOu
 
     // all in bounds so check if there's something to obscure
     for(std::vector<std::pair<CTxIn, CTxOut> >::iterator it = portfolio.begin(); it != portfolio.end(); it++) {
-        uint64_t count = 0;
         int rounds = nLiquidityProvider ? MAX_COINJOIN_ROUNDS : nCoinJoinRounds;
-        auto threshold = it->second.nValue == COINJOIN_LOW_DENOM ? COINJOIN_FEE_DENOM_THRESHOLD : COINJOIN_DENOM_THRESHOLD;
-        auto target = (GetRand(COINJOIN_DENOM_WINDOW * threshold) + threshold);
         if (it->second.nRounds < rounds) {
-            count++;
-            if (count) fMixOnly = true;
-        } else if (count > target) { // add some entropy
+            fMixOnly = true;
+        } else { // add some entropy
             LOCK(m_wallet->cs_wallet);
             m_wallet->UnlockCoin(it->first.prevout);
             portfolio.erase(it--);
         }
     }
 
-    if (fMixOnly) {
+    if (fMixOnly && !nLiquidityProvider) {
         return true;
-    } else {
-        // nothing to do
+    }
+    // nothing to do
+    if (!nLiquidityProvider) {
         UnlockCoins();
         return false;
     }
+
+    // Liquidity providers: don't use the full portfolio, remove randomly
+    for (auto denom = COINJOIN_LOW_DENOM; denom <= COINJOIN_HIGH_DENOM; denom <<= 1) {
+        int64_t count = 0;
+        int threshold = std::min(1, GetRandInt(COINJOIN_DENOM_THRESHOLD));
+        for(std::vector<std::pair<CTxIn, CTxOut> >::iterator it = portfolio.begin(); it != portfolio.end(); it++) {
+            if (it->second.nValue < denom) continue;
+            if (it->second.nValue > denom) break;
+            if (it->second.nValue == denom) {
+                count++;
+                if (count >= threshold) {
+                    LOCK(m_wallet->cs_wallet);
+                    m_wallet->UnlockCoin(it->first.prevout);
+                    portfolio.erase(it--);
+                }
+            }
+        }
+    }
+    return true;
 }
 
 bool CCoinJoinClientManager::WaitForAnotherBlock()

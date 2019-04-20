@@ -665,12 +665,16 @@ bool CCoinJoinClientManager::IsMixingRequired(std::vector<std::pair<CTxIn, CTxOu
             for (const auto& amount : vecAmounts) {
                 if (amount == denom) count++;
             }
-            for (const auto& txin : portfolio) {
-                if (txin.second.nValue < denom) continue;
-                if (txin.second.nValue == denom) {
+            for(std::vector<std::pair<CTxIn, CTxOut> >::iterator it = portfolio.begin(); it != portfolio.end(); it++) {
+                if (it->second.nValue < denom) continue;
+                if (it->second.nValue == denom) {
                     count++;
                     nTotal -= denom;
-                } else if (txin.second.nValue > denom && ((count < threshold && nTotal > 0) || (count > threshold * COINJOIN_DENOM_WINDOW))) {
+                    if (!nLiquidityProvider && it->second.nRounds >= nCoinJoinRounds) {
+                        vecAmounts.push_back(it->second.nValue);
+                        portfolio.erase(it--);
+                    }
+                } else if (it->second.nValue > denom && ((count < threshold && nTotal > 0) || (count > threshold * COINJOIN_DENOM_WINDOW))) {
                     return true;
                 }
             }
@@ -1165,7 +1169,8 @@ void CCoinJoinClientManager::CoinJoin()
     // denoms
     CAmount nBalanceDenominated = m_wallet->GetDenominatedBalance();
     // amout to denominate
-    CAmount nBalanceNeedsDenom = std::min(nCoinJoinAmount * COIN - nBalanceDenominated, nBalanceAnonimizableNonDenom);
+    CAmount nDifference = nCoinJoinAmount * COIN - nBalanceDenominated > 0 ? nCoinJoinAmount * COIN - nBalanceDenominated : 0;
+    CAmount nBalanceNeedsDenom = std::min(nDifference, nBalanceAnonimizableNonDenom);
 
     LogPrint(BCLog::CJOIN, "%s CCoinJoinClientManager::CoinJoin -- nValueMin: %f, nBalanceNeedsAnonymized: %f, nBalanceAnonimizableNonDenom: %f, nBalanceDenominated: %f\n",
              m_wallet->GetDisplayName(),

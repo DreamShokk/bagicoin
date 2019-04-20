@@ -23,7 +23,7 @@ static const int MAX_COINJOIN_SESSIONS           = 21;
 static const int MAX_COINJOIN_ROUNDS             = 32;
 static const int MAX_COINJOIN_AMOUNT             = MAX_MONEY / COIN;
 static const int MAX_COINJOIN_LIQUIDITY          = 100;
-static const int DEFAULT_COINJOIN_ROUNDS         = 8;
+static const int DEFAULT_COINJOIN_ROUNDS         = 4;
 static const int DEFAULT_COINJOIN_AMOUNT         = 1000;
 static const int DEFAULT_COINJOIN_LIQUIDITY      = 0;
 

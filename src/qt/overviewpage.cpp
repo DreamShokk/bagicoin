@@ -164,7 +164,7 @@ OverviewPage::OverviewPage(const PlatformStyle *platformStyle, QWidget *parent) 
         DisableCoinJoinCompletely();
         ui->labelCoinJoinEnabled->setToolTip(tr("Automatic backups are disabled, no mixing available!"));
     } else {
-        if(!m_privsendstatus.enabled){
+        if(!m_coinjoinstatus.enabled){
             ui->toggleCoinJoin->setText(tr("Start Mixing"));
         } else {
             ui->toggleCoinJoin->setText(tr("Stop Mixing"));
@@ -331,7 +331,7 @@ void OverviewPage::updateCoinJoinProgress()
     if (!clientModel) return;
 
     QString strAmountAndRounds;
-    QString strCoinJoinAmount = BitcoinUnits::formatHtmlWithUnit(nDisplayUnit, m_privsendstatus.amount * COIN, false, BitcoinUnits::separatorAlways);
+    QString strCoinJoinAmount = BitcoinUnits::formatHtmlWithUnit(nDisplayUnit, m_coinjoinstatus.amount * COIN, false, BitcoinUnits::separatorAlways);
 
     if(m_balances.balance == 0) {
         ui->coinJoinProgress->setValue(0);
@@ -339,7 +339,7 @@ void OverviewPage::updateCoinJoinProgress()
 
         // when balance is zero just show info from settings
         strCoinJoinAmount = strCoinJoinAmount.remove(strCoinJoinAmount.indexOf("."), BitcoinUnits::decimals(nDisplayUnit) + 1);
-        strAmountAndRounds = strCoinJoinAmount + " / " + tr("%n Rounds", nullptr, m_privsendstatus.rounds);
+        strAmountAndRounds = strCoinJoinAmount + " / " + tr("Depth: %n", nullptr, m_coinjoinstatus.depth);
 
         ui->labelAmountRounds->setToolTip(tr("No inputs detected"));
         ui->labelAmountRounds->setText(strAmountAndRounds);
@@ -349,15 +349,15 @@ void OverviewPage::updateCoinJoinProgress()
     CAmount nMaxToAnonymize = m_balances.anonymizeable_balance + m_balances.anonymized_balance;
 
     // If it's more than the anon threshold, limit to that.
-    if(nMaxToAnonymize > m_privsendstatus.amount * COIN) nMaxToAnonymize = m_privsendstatus.amount * COIN;
+    if(nMaxToAnonymize > m_coinjoinstatus.amount * COIN) nMaxToAnonymize = m_coinjoinstatus.amount * COIN;
 
     if(nMaxToAnonymize == 0) return;
 
-    if(nMaxToAnonymize >= m_privsendstatus.amount * COIN) {
+    if(nMaxToAnonymize >= m_coinjoinstatus.amount * COIN) {
         ui->labelAmountRounds->setToolTip(tr("Found enough compatible inputs to anonymize %1")
                                           .arg(strCoinJoinAmount));
         strCoinJoinAmount = strCoinJoinAmount.remove(strCoinJoinAmount.indexOf("."), BitcoinUnits::decimals(nDisplayUnit) + 1);
-        strAmountAndRounds = strCoinJoinAmount + " / " + tr("%n Rounds", nullptr, m_privsendstatus.rounds);
+        strAmountAndRounds = strCoinJoinAmount + " / " + tr("Depth: %n", nullptr, m_coinjoinstatus.depth);
     } else {
         QString strMaxToAnonymize = BitcoinUnits::formatHtmlWithUnit(nDisplayUnit, nMaxToAnonymize, false, BitcoinUnits::separatorAlways);
         ui->labelAmountRounds->setToolTip(tr("Not enough compatible inputs to anonymize <span style='color:red;'>%1</span>,<br>"
@@ -367,7 +367,7 @@ void OverviewPage::updateCoinJoinProgress()
         strMaxToAnonymize = strMaxToAnonymize.remove(strMaxToAnonymize.indexOf("."), BitcoinUnits::decimals(nDisplayUnit) + 1);
         strAmountAndRounds = "<span style='color:red;'>" +
                 QString(BitcoinUnits::factor(nDisplayUnit) == 1 ? "" : "~") + strMaxToAnonymize +
-                " / " + tr("%n Rounds", nullptr, m_privsendstatus.rounds) + "</span>";
+                " / " + tr("Depth: %n", nullptr, m_coinjoinstatus.depth) + "</span>";
     }
     ui->labelAmountRounds->setText(strAmountAndRounds);
 
@@ -404,24 +404,24 @@ void OverviewPage::coinJoinStatus(const interfaces::CoinJoinStatus& status)
     if (!clientModel) return;
     if (!walletModel) return;
 
-    m_privsendstatus = status;
+    m_coinjoinstatus = status;
 
     static int64_t nLastDSProgressBlockTime = 0;
 
     int nBestHeight = clientModel->cachedBestHeaderHeight;
 
     // We are processing more then 1 block per second, we'll just leave
-    if(((nBestHeight - m_privsendstatus.cachednumblocks) / (GetTimeMillis() - nLastDSProgressBlockTime + 1) > 1)) return;
+    if(((nBestHeight - m_coinjoinstatus.cachednumblocks) / (GetTimeMillis() - nLastDSProgressBlockTime + 1) > 1)) return;
     nLastDSProgressBlockTime = GetTimeMillis();
 
-    QString strKeysLeftText(tr("keys left: %1").arg(m_privsendstatus.keysleft));
-    if(m_privsendstatus.keysleft < walletModel->m_privsendconfig.keyswarning) {
+    QString strKeysLeftText(tr("keys left: %1").arg(m_coinjoinstatus.keysleft));
+    if(m_coinjoinstatus.keysleft < walletModel->m_privsendconfig.keyswarning) {
         strKeysLeftText = "<span style='color:red;'>" + strKeysLeftText + "</span>";
     }
     ui->labelCoinJoinEnabled->setToolTip(strKeysLeftText);
 
-    if (!m_privsendstatus.enabled) {
-        if (nBestHeight != m_privsendstatus.cachednumblocks) {
+    if (!m_coinjoinstatus.enabled) {
+        if (nBestHeight != m_coinjoinstatus.cachednumblocks) {
             walletModel->setNumBlocks(nBestHeight);
         }
         updateCoinJoinProgress();
@@ -441,7 +441,7 @@ void OverviewPage::coinJoinStatus(const interfaces::CoinJoinStatus& status)
 
     // Warn user that wallet is running out of keys
     // NOTE: we do NOT warn user and do NOT create autobackups if mixing is not running
-    if (nWalletBackups > 0 && m_privsendstatus.keysleft < walletModel->m_privsendconfig.keyswarning) {
+    if (nWalletBackups > 0 && m_coinjoinstatus.keysleft < walletModel->m_privsendconfig.keyswarning) {
         QSettings settings;
         if(settings.value("fLowKeysWarning").toBool()) {
             QString strWarn =   tr("Very low number of keys left since last automatic backup!") + "<br><br>" +
@@ -480,7 +480,7 @@ void OverviewPage::coinJoinStatus(const interfaces::CoinJoinStatus& status)
         }
     }
 
-    QString strEnabled = m_privsendstatus.enabled ? tr("Enabled") : tr("Disabled");
+    QString strEnabled = m_coinjoinstatus.enabled ? tr("Enabled") : tr("Disabled");
     // Show how many keys left in advanced PS UI mode only
     if(fShowAdvancedPSUI) strEnabled += ", " + strKeysLeftText;
     ui->labelCoinJoinEnabled->setText(strEnabled);
@@ -502,13 +502,13 @@ void OverviewPage::coinJoinStatus(const interfaces::CoinJoinStatus& status)
     }
 
     // check darksend status and unlock if needed
-    if(nBestHeight != m_privsendstatus.cachednumblocks) {
+    if(nBestHeight != m_coinjoinstatus.cachednumblocks) {
         // Balance and number of transactions might have changed
         walletModel->setNumBlocks(nBestHeight);
         updateCoinJoinProgress();
     }
 
-    QString strStatus = QString::fromStdString(m_privsendstatus.status);
+    QString strStatus = QString::fromStdString(m_coinjoinstatus.status);
 
     QString s = tr("CoinJoin status:\n") + strStatus;
 
@@ -517,7 +517,7 @@ void OverviewPage::coinJoinStatus(const interfaces::CoinJoinStatus& status)
 
     ui->labelCoinJoinLastMessage->setText(s);
 
-    ui->labelSubmittedDenom->setText(QString::fromStdString(m_privsendstatus.denom));
+    ui->labelSubmittedDenom->setText(QString::fromStdString(m_coinjoinstatus.denom));
 
 }
 
@@ -547,7 +547,7 @@ void OverviewPage::toggleCoinJoin(){
                 QMessageBox::Ok, QMessageBox::Ok);
         settings.setValue("hasMixed", "hasMixed");
     }
-    if(!m_privsendstatus.enabled){
+    if(!m_coinjoinstatus.enabled){
         const CAmount nMinAmount = walletModel->m_privsendconfig.minamount;
         if(m_balances.balance < nMinAmount){
             QString strMinAmount(BitcoinUnits::formatWithUnit(nDisplayUnit, nMinAmount));

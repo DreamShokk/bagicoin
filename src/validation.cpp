@@ -19,6 +19,7 @@
 #include <cuckoocache.h>
 #include <hash.h>
 #include <index/txindex.h>
+#include <modules/coinjoin/coinjoin.h>
 #include <policy/fees.h>
 #include <policy/policy.h>
 #include <policy/rbf.h>
@@ -46,6 +47,7 @@
 #include <modules/masternode/masternode_payments.h>
 
 #include <future>
+#include <numeric>
 #include <sstream>
 
 #include <boost/algorithm/string/replace.hpp>
@@ -4867,6 +4869,113 @@ double GuessVerificationProgress(const ChainTxData& data, const CBlockIndex *pin
     }
 
     return pindex->nChainTx / fTxTotal;
+}
+
+int AnalyzeCoin(const COutPoint& outpoint)
+{
+    static std::map<uint256, std::vector<CTxOut> > mDenomTx;
+
+    uint256 hash = outpoint.hash;
+    unsigned int nout = outpoint.n;
+
+    CTransactionRef tx;
+    uint256 hash_block;
+
+    if(GetTransaction(hash, tx, Params().GetConsensus(), hash_block))
+    {
+        std::map<uint256, std::vector<CTxOut> >::iterator mdwi = mDenomTx.find(hash);
+        if (mdwi == mDenomTx.end()) {
+            // not known yet, let's add it
+            LogPrint(BCLog::CJOIN, "[chain] AnalyzeCoin INSERTING %s\n", hash.ToString());
+            mDenomTx.emplace(hash, std::vector<CTxOut>(tx->vout));
+        } else if (mdwi->second[nout].nDepth != -10) {
+            // found and it's not an initial value, just return it
+            return mdwi->second[nout].nDepth;
+        }
+
+        mdwi = mDenomTx.find(hash);
+
+        //make sure the final output is non-denominate
+        if (!CCoinJoin::IsDenominatedAmount(mdwi->second[nout].nValue)) { //NOT DENOM
+            mdwi->second[nout].nDepth = -2;
+            LogPrint(BCLog::CJOIN, "[chain] AnalyzeCoin UPDATED to -2   %s %3d %3d\n", hash.ToString(), nout, mdwi->second[nout].nDepth);
+            return mdwi->second[nout].nDepth;
+        }
+
+        bool fAllDenoms = true;
+        for (const auto& out : mdwi->second) {
+            fAllDenoms = fAllDenoms && CCoinJoin::IsDenominatedAmount(out.nValue);
+        }
+
+        // this one is denominated but there is another non-denominated output found in the same tx
+        if (!fAllDenoms) {
+            mdwi->second[nout].nDepth = 0;
+            LogPrint(BCLog::CJOIN, "[chain] AnalyzeCoin UPDATED to  0   %s %3d %3d\n", hash.ToString(), nout, mdwi->second[nout].nDepth);
+            return mdwi->second[nout].nDepth;
+        }
+
+        // only denoms here so let's look up
+        std::vector<int> roots;
+        const int64_t analyze_tx_start_time = GetTimeMillis();
+
+        if (FindRoot(outpoint, roots) && !roots.empty()) {
+            mdwi->second[nout].nDepth = std::accumulate(roots.begin(), roots.end(), 0) / roots.size();
+            LogPrint(BCLog::CJOIN, "[chain] AnalyzeCoin UPDATED as analyzed   %s %3d %3d analyze %15dms\n", hash.ToString(), nout, mdwi->second[nout].nDepth, GetTimeMillis() - analyze_tx_start_time);
+            return mdwi->second[nout].nDepth;
+        }
+    }
+
+    return 1;
+}
+
+bool FindRoot(const COutPoint& outpoint, std::vector<int>& vRoots, int nDepth)
+{
+    if(nDepth >= MAX_COINJOIN_DEPTH) {
+        // limit the depth of analysis
+        return false;
+    }
+
+    static std::map<uint256, std::pair<CMutableTransaction, bool> > mDenomTxCache;
+
+    uint256 hash = outpoint.hash;
+    unsigned int nout = outpoint.n;
+
+    std::map<uint256, std::pair<CMutableTransaction, bool> >::const_iterator mdwi = mDenomTxCache.find(hash);
+    if (mdwi == mDenomTxCache.end()) {
+        CTransactionRef tx;
+        uint256 hash_block;
+        if(GetTransaction(hash, tx, Params().GetConsensus(), hash_block))
+            mDenomTxCache.emplace(hash, std::make_pair(CMutableTransaction(*tx), false));
+        else return false;
+    }
+
+    if (!mDenomTxCache[hash].second && nDepth > 1) return false;
+
+    if (!CCoinJoin::IsDenominatedAmount(mDenomTxCache[hash].first.vout[nout].nValue)) return false;
+
+    bool fAllDenoms = true;
+    for (const auto& out : mDenomTxCache[hash].first.vout) {
+        fAllDenoms = fAllDenoms && CCoinJoin::IsDenominatedAmount(out.nValue);
+    }
+
+    // this one is denominated but there is another non-denominated output found in the same tx
+    if (fAllDenoms) {
+        mDenomTxCache[hash].second = true;
+    } else {
+        mDenomTxCache[hash].second = false;
+        return false;
+    }
+
+    nDepth++;
+
+    // only denoms here so let's look up
+    for (const auto& txinNext : mDenomTxCache[hash].first.vin) {
+        if (!FindRoot(txinNext.prevout, vRoots, nDepth)) {
+            vRoots.push_back(nDepth);
+        }
+    }
+    if (!vRoots.empty()) return true;
+    else return false;
 }
 
 class CMainCleanup

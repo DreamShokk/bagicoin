@@ -458,7 +458,7 @@ public:
     }
     int getCappedOutpointCoinJoinRounds(const COutPoint& outpoint) override
     {
-        return m_wallet->GetCappedOutpointCoinJoinRounds(outpoint);
+        return m_wallet->chain().analyzeCoin(outpoint);
     }
     CAmount getRequiredFee(unsigned int tx_bytes) override { return GetRequiredFee(*m_wallet, tx_bytes); }
     CAmount getMinimumFee(unsigned int tx_bytes,
@@ -480,11 +480,11 @@ public:
     OutputType getDefaultAddressType() override { return m_wallet->m_default_address_type; }
     OutputType getDefaultChangeType() override { return m_wallet->m_default_change_type; }
 
-    int getPSRounds() override { return m_wallet->coinjoinClient->nCoinJoinRounds; }
+    int getCJDepth() override { return m_wallet->coinjoinClient->nCoinJoinDepth; }
 
     void setCoinJoinParams(const int& rounds, const int& amount) override
     {
-        m_wallet->coinjoinClient->nCoinJoinRounds = rounds;
+        m_wallet->coinjoinClient->nCoinJoinDepth = rounds;
         m_wallet->coinjoinClient->nCoinJoinAmount = amount;
         m_wallet->coinjoinClient->nCachedNumBlocks = std::numeric_limits<int>::max();
     }
@@ -494,7 +494,7 @@ public:
         CoinJoinConstants result;
         result.minamount = COINJOIN_LOW_DENOM;
         result.defaultamount = DEFAULT_COINJOIN_AMOUNT;
-        result.defaultrounds = DEFAULT_COINJOIN_ROUNDS;
+        result.defaultrounds = DEFAULT_COINJOIN_DEPTH;
         result.keyswarning = COINJOIN_KEYS_THRESHOLD_WARNING;
         return result;
     }
@@ -505,7 +505,7 @@ public:
         result.enabled = m_wallet->coinjoinClient->fEnableCoinJoin;
         result.cachednumblocks = m_wallet->coinjoinClient->nCachedNumBlocks;
         result.amount = m_wallet->coinjoinClient->nCoinJoinAmount;
-        result.rounds = m_wallet->coinjoinClient->nCoinJoinRounds;
+        result.depth = m_wallet->coinjoinClient->nCoinJoinDepth;
         result.denom = m_wallet->coinjoinClient->GetSessionDenoms();
         result.status = m_wallet->coinjoinClient->GetStatuses();
         result.keysleft = m_wallet->nKeysLeftSinceAutoBackup;

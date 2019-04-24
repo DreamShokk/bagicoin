@@ -551,7 +551,7 @@ public:
     // having to resolve the issue of member access into incomplete type CWallet.
     CAmount GetAvailableCredit(interfaces::Chain::Lock& locked_chain, bool fUseCache=true, const isminefilter& filter=ISMINE_SPENDABLE) const NO_THREAD_SAFETY_ANALYSIS;
     CAmount GetImmatureWatchOnlyCredit(interfaces::Chain::Lock& locked_chain, const bool fUseCache=true) const;
-    CAmount GetDenominatedCredit(interfaces::Chain::Lock& locked_chain, int nCoinJoinRounds=0, bool fUseCache=true) const;
+    CAmount GetDenominatedCredit(interfaces::Chain::Lock& locked_chain, int nCoinJoinDepth=0, bool fUseCache=true) const;
     CAmount GetChange() const;
 
     // Get the marginal bytes if spending the specified output from this transaction
@@ -895,20 +895,13 @@ public:
         std::set<CInputCoin>& setCoinsRet, CAmount& nValueRet, const CoinSelectionParams& coin_selection_params, bool& bnb_used) const;
 
     // Coin selection
-    bool SelectJoinCoins(CAmount nValueMin, CAmount nValueMax, std::vector<std::pair<CTxIn, CTxOut> >& mtxPairRet, int nCoinJoinRoundsMin, int nCoinJoinRoundsMax) const;
+    bool SelectJoinCoins(CAmount nValueMin, CAmount nValueMax, std::vector<std::pair<CTxIn, CTxOut> >& mtxPairRet, int nCoinJoinDepthMin, int nCoinJoinDepthMax) const;
     bool SelectCoinsGroupedByAddresses(std::vector<CompactTallyItem>& vecTallyRet, bool fSkipDenominated = true) const;
 
     /// Get 1000CHC output and keys which can be used for the Masternode
     bool GetMasternodeOutpointAndKeys(COutPoint& outpointRet, CTxDestination &destRet, CPubKey& pubKeyRet, CKey& keyRet, const std::string& strTxHash = "", const std::string& strOutputIndex = "");
     /// Extract txin information and keys from output
     bool GetOutpointAndKeysFromOutput(const COutput& out, COutPoint& outpointRet, CTxDestination &destRet, CPubKey& pubKeyRet, CKey& keyRet);
-
-    int  CountInputsWithAmount(CAmount nInputAmount);
-
-    // get the CoinJoin chain depth for a given input
-    int GetRealOutpointCoinJoinRounds(const COutPoint& outpoint, int nRounds = 0) const;
-    // respect current settings
-    int GetCappedOutpointCoinJoinRounds(const COutPoint& outpoint) const;
 
     bool IsDenominated(const COutPoint& outpoint) const;
 

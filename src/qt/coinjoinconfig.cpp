@@ -35,13 +35,13 @@ void CoinJoinConfig::setModel(WalletModel *_model)
 
 void CoinJoinConfig::clickBasic()
 {
-    configure(true, 1000, 2);
+    configure(true, 1000, 1);
 
     QString strAmount(BitcoinUnits::formatWithUnit(
         model->getOptionsModel()->getDisplayUnit(), 1000 * COIN));
     QMessageBox::information(this, tr("CoinJoin Configuration"),
         tr(
-            "CoinJoin was successfully set to basic (%1 and 2 rounds). You can change this at any time by opening Chaincoin's configuration screen."
+            "CoinJoin was successfully set to basic (%1 and 1 parent). You can change this at any time by opening Chaincoin's configuration screen."
         ).arg(strAmount)
     );
 
@@ -50,13 +50,13 @@ void CoinJoinConfig::clickBasic()
 
 void CoinJoinConfig::clickHigh()
 {
-    configure(true, 1000, 8);
+    configure(true, 1000, 2);
 
     QString strAmount(BitcoinUnits::formatWithUnit(
         model->getOptionsModel()->getDisplayUnit(), 1000 * COIN));
     QMessageBox::information(this, tr("CoinJoin Configuration"),
         tr(
-            "CoinJoin was successfully set to high (%1 and 8 rounds). You can change this at any time by opening Chaincoin's configuration screen."
+            "CoinJoin was successfully set to high (%1 and 2 parents). You can change this at any time by opening Chaincoin's configuration screen."
         ).arg(strAmount)
     );
 
@@ -65,13 +65,13 @@ void CoinJoinConfig::clickHigh()
 
 void CoinJoinConfig::clickMax()
 {
-    configure(true, 1000, 16);
+    configure(true, 1000, 3);
 
     QString strAmount(BitcoinUnits::formatWithUnit(
         model->getOptionsModel()->getDisplayUnit(), 1000 * COIN));
     QMessageBox::information(this, tr("CoinJoin Configuration"),
         tr(
-            "CoinJoin was successfully set to maximum (%1 and 16 rounds). You can change this at any time by opening Chaincoin's configuration screen."
+            "CoinJoin was successfully set to maximum (%1 and 3 parents). You can change this at any time by opening Chaincoin's configuration screen."
         ).arg(strAmount)
     );
 
@@ -82,7 +82,7 @@ void CoinJoinConfig::configure(bool enabled, int coins, int rounds) {
 
     QSettings settings;
 
-    settings.setValue("nCoinJoinRounds", rounds);
+    settings.setValue("nCoinJoinDepth", rounds);
     settings.setValue("nCoinJoinAmount", coins);
 
     model->coinJoinConfigChanged(rounds, coins);

@@ -190,6 +190,9 @@ public:
     //! Get unspent outputs associated with a transaction.
     virtual bool getUnspentOutput(const COutPoint& output, Coin& coin) = 0;
 
+    //! Recursively calculate the depth of obscuring a single outpoint.
+    virtual int analyzeCoin(const COutPoint& outpoint) = 0;
+
     //! Module signals
     virtual std::string getModuleSyncStatus() = 0;
     virtual bool isMasternodeChainSynced() = 0;

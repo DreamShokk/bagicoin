@@ -267,20 +267,20 @@
             <string>This setting determines the amount of individual masternodes that an input will be anonymized through.&lt;br/&gt;More rounds of anonymization gives a higher degree of privacy, but also costs more in fees.</string>
            </property>
            <property name="text">
-            <string>CoinJoin rounds to use</string>
+            <string>CoinJoin depth to use</string>
            </property>
           </widget>
          </item>
          <item>
           <widget class="QSpinBox" name="coinJoinRounds">
            <property name="minimum">
-            <number>2</number>
+            <number>1</number>
            </property>
            <property name="maximum">
-            <number>16</number>
+            <number>3</number>
            </property>
            <property name="value">
-            <number>4</number>
+            <number>3</number>
            </property>
           </widget>
          </item>

@@ -16,14 +16,11 @@ class CReserveKey;
 class CWallet;
 class CConnman;
 
-static const int MIN_COINJOIN_ROUNDS             = 2;
 static const int MIN_COINJOIN_AMOUNT             = 2;
 static const int MIN_COINJOIN_LIQUIDITY          = 0;
 static const int MAX_COINJOIN_SESSIONS           = 21;
-static const int MAX_COINJOIN_ROUNDS             = 32;
 static const int MAX_COINJOIN_AMOUNT             = MAX_MONEY / COIN;
 static const int MAX_COINJOIN_LIQUIDITY          = 100;
-static const int DEFAULT_COINJOIN_ROUNDS         = 8;
 static const int DEFAULT_COINJOIN_AMOUNT         = 1000;
 static const int DEFAULT_COINJOIN_LIQUIDITY      = 0;
 
@@ -205,7 +202,7 @@ private:
 
 public:
     std::atomic_bool fActive;
-    int nCoinJoinRounds;
+    int nCoinJoinDepth;
     int nCoinJoinAmount;
     int nLiquidityProvider;
     bool fEnableCoinJoin;
@@ -223,7 +220,7 @@ public:
         strAutoCoinJoinResult(),
         nCachedBlockHeight(0),
         fActive(false),
-        nCoinJoinRounds(DEFAULT_COINJOIN_ROUNDS),
+        nCoinJoinDepth(DEFAULT_COINJOIN_DEPTH),
         nCoinJoinAmount(DEFAULT_COINJOIN_AMOUNT),
         nLiquidityProvider(DEFAULT_COINJOIN_LIQUIDITY),
         fEnableCoinJoin(false),

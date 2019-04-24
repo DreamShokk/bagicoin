@@ -185,6 +185,10 @@ public:
             fn(entry.GetSharedTx());
         }
     }
+    int analyzeCoin(const COutPoint& outpoint) override
+    {
+        return AnalyzeCoin(outpoint);
+    }
 };
 
 } // namespace

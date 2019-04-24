@@ -295,7 +295,7 @@ bool CCoinJoin::IsInDenomRange(const CAmount& nAmount)
 
 bool CCoinJoin::IsDenominatedAmount(CAmount nInputAmount)
 {
-    for (auto denom = COINJOIN_HIGH_DENOM; denom >= COINJOIN_LOW_DENOM; denom >>=1) {
+    for (auto denom = COINJOIN_LOW_DENOM; denom <= COINJOIN_HIGH_DENOM; denom <<=1) {
         if(nInputAmount == denom) {
             return true;
         }

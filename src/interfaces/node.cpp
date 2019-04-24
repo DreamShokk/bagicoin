@@ -442,6 +442,10 @@ public:
     {
         return g_connman ? ::governance.VoteWithAll(hash, strVoteSignal, nResult, g_connman.get()) : false;
     }
+    int analyzeCoin(const COutPoint& outpoint) override
+    {
+        return AnalyzeCoin(outpoint);
+    }
     std::string getWalletDir() override
     {
         return GetWalletDir().string();

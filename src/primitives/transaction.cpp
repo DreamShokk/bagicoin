@@ -48,11 +48,11 @@ std::string CTxIn::ToString() const
     return str;
 }
 
-CTxOut::CTxOut(const CAmount& nValueIn, CScript scriptPubKeyIn, int nRoundsIn)
+CTxOut::CTxOut(const CAmount& nValueIn, CScript scriptPubKeyIn, int nDepthIn)
 {
     nValue = nValueIn;
     scriptPubKey = scriptPubKeyIn;
-    nRounds = nRoundsIn;
+    nDepth = nDepthIn;
 }
 
 std::string CTxOut::ToString() const

@@ -254,7 +254,7 @@ public:
     virtual OutputType getDefaultChangeType() = 0;
 
     //! Return CoinJoin Rounds.
-    virtual int getPSRounds() = 0;
+    virtual int getCJDepth() = 0;
 
     //! Change CoinJoin Params.
     virtual void setCoinJoinParams(const int& rounds, const int& amount) = 0;
@@ -379,7 +379,7 @@ struct CoinJoinStatus
     bool enabled = 0;
     int cachednumblocks = 0;
     int amount = 0;
-    int rounds = 0;
+    int depth = 0;
     bool multisession = false;
     std::string denom = "";
     int64_t keysleft = 0;
@@ -387,7 +387,7 @@ struct CoinJoinStatus
 
     bool coinJoinChanged(const CoinJoinStatus& prev) const
     {
-        return enabled != prev.enabled || cachednumblocks != prev.cachednumblocks || amount != prev.amount || rounds != prev.rounds
+        return enabled != prev.enabled || cachednumblocks != prev.cachednumblocks || amount != prev.amount || depth != prev.depth
                || multisession != prev.multisession || status != prev.status || denom != prev.denom || keysleft != prev.keysleft;
     }
 };

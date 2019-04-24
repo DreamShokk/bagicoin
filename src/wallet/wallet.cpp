@@ -1362,90 +1362,6 @@ CAmount CWallet::GetDebit(const CTxIn &txin, const isminefilter& filter) const
     return 0;
 }
 
-// Recursively determine the rounds of a given input (How deep is the CoinJoin chain for a given input)
-int CWallet::GetRealOutpointCoinJoinRounds(const COutPoint& outpoint, int nRounds) const
-{
-    static std::map<uint256, CMutableTransaction> mDenomWtxes;
-
-    if(nRounds >= MAX_COINJOIN_ROUNDS) {
-        // there can only be MAX_COINJOIN_ROUNDS rounds max
-        return MAX_COINJOIN_ROUNDS - 1;
-    }
-
-    uint256 hash = outpoint.hash;
-    unsigned int nout = outpoint.n;
-
-    const CWalletTx* wtx = GetWalletTx(hash);
-    if(wtx != nullptr)
-    {
-        std::map<uint256, CMutableTransaction>::const_iterator mdwi = mDenomWtxes.find(hash);
-        if (mdwi == mDenomWtxes.end()) {
-            // not known yet, let's add it
-            LogPrint(BCLog::CJOIN, "GetRealOutpointCoinJoinRounds INSERTING %s\n", hash.ToString());
-            mDenomWtxes[hash] = CMutableTransaction(*wtx->tx);
-        } else if(mDenomWtxes[hash].vout[nout].nRounds != -10) {
-            // found and it's not an initial value, just return it
-            return mDenomWtxes[hash].vout[nout].nRounds;
-        }
-
-
-        // bounds check
-        if (nout >= wtx->tx->vout.size()) {
-            // should never actually hit this
-            LogPrint(BCLog::CJOIN, "GetRealOutpointCoinJoinRounds UPDATED   %s %3d %3d\n", hash.ToString(), nout, -4);
-            return -4;
-        }
-
-        //make sure the final output is non-denominate
-        if (!CCoinJoin::IsDenominatedAmount(wtx->tx->vout[nout].nValue)) { //NOT DENOM
-            mDenomWtxes[hash].vout[nout].nRounds = -2;
-            LogPrint(BCLog::CJOIN, "GetRealOutpointCoinJoinRounds UPDATED   %s %3d %3d\n", hash.ToString(), nout, mDenomWtxes[hash].vout[nout].nRounds);
-            return mDenomWtxes[hash].vout[nout].nRounds;
-        }
-
-        bool fAllDenoms = true;
-        for (const auto& out : wtx->tx->vout) {
-            fAllDenoms = fAllDenoms && CCoinJoin::IsDenominatedAmount(out.nValue);
-        }
-
-        // this one is denominated but there is another non-denominated output found in the same tx
-        if (!fAllDenoms) {
-            mDenomWtxes[hash].vout[nout].nRounds = 0;
-            LogPrint(BCLog::CJOIN, "GetRealOutpointCoinJoinRounds UPDATED   %s %3d %3d\n", hash.ToString(), nout, mDenomWtxes[hash].vout[nout].nRounds);
-            return mDenomWtxes[hash].vout[nout].nRounds;
-        }
-
-        int nShortest = -10; // an initial value, should be no way to get this by calculations
-        bool fDenomFound = false;
-        // only denoms here so let's look up
-        for (const auto& txinNext : wtx->tx->vin) {
-            if (IsMine(txinNext)) {
-                int n = GetRealOutpointCoinJoinRounds(txinNext.prevout, nRounds + 1);
-                // denom found, find the shortest chain or initially assign nShortest with the first found value
-                if(n >= 0 && (n < nShortest || nShortest == -10)) {
-                    nShortest = n;
-                    fDenomFound = true;
-                }
-            }
-        }
-        mDenomWtxes[hash].vout[nout].nRounds = fDenomFound
-                ? (nShortest >= MAX_COINJOIN_ROUNDS - 1 ? MAX_COINJOIN_ROUNDS : nShortest + 1) // good, we a +1 to the shortest one but only MAX_COINJOIN_ROUNDS rounds max allowed
-                : 0;            // too bad, we are the fist one in that chain
-        LogPrint(BCLog::CJOIN, "GetRealOutpointCoinJoinRounds UPDATED   %s %3d %3d\n", hash.ToString(), nout, mDenomWtxes[hash].vout[nout].nRounds);
-        return mDenomWtxes[hash].vout[nout].nRounds;
-    }
-
-    return nRounds - 1;
-}
-
-// respect current settings
-int CWallet::GetCappedOutpointCoinJoinRounds(const COutPoint& outpoint) const
-{
-    LOCK(cs_wallet);
-    int realCoinJoinRounds = GetRealOutpointCoinJoinRounds(outpoint);
-    return realCoinJoinRounds > coinjoinClient->nCoinJoinRounds ? coinjoinClient->nCoinJoinRounds : realCoinJoinRounds;
-}
-
 bool CWallet::IsDenominated(const COutPoint& outpoint) const
 {
     LOCK(cs_wallet);
@@ -2185,7 +2101,7 @@ CAmount CWalletTx::GetImmatureWatchOnlyCredit(interfaces::Chain::Lock& locked_ch
     return 0;
 }
 
-CAmount CWalletTx::GetDenominatedCredit(interfaces::Chain::Lock& locked_chain, int nCoinJoinRounds, bool fUseCache) const
+CAmount CWalletTx::GetDenominatedCredit(interfaces::Chain::Lock& locked_chain, int nCoinJoinDepth, bool fUseCache) const
 {
     if (pwallet == nullptr)
         return 0;
@@ -2197,7 +2113,7 @@ CAmount CWalletTx::GetDenominatedCredit(interfaces::Chain::Lock& locked_chain, i
     CAmount* cache = nullptr;
     bool* cache_used = nullptr;
 
-    if (nCoinJoinRounds >= pwallet->coinjoinClient->nCoinJoinRounds) {
+    if (nCoinJoinDepth >= pwallet->coinjoinClient->nCoinJoinDepth) {
         cache = &nAnonymizedCreditCached;
         cache_used = &fAnonymizedCreditCached;
     } else {
@@ -2218,8 +2134,8 @@ CAmount CWalletTx::GetDenominatedCredit(interfaces::Chain::Lock& locked_chain, i
         {
             const CTxOut &txout = tx->vout[i];
             const COutPoint outpoint = COutPoint(hashTx, i);
-            const int nRounds = pwallet->GetCappedOutpointCoinJoinRounds(outpoint);
-            if(nRounds >= nCoinJoinRounds){
+            const int nDepth = pwallet->chain().analyzeCoin(outpoint);
+            if(nDepth >= nCoinJoinDepth){
                 nCredit += pwallet->GetCredit(txout, ISMINE_SPENDABLE);
             }
             if (!MoneyRange(nCredit))
@@ -2406,7 +2322,7 @@ CAmount CWallet::GetAnonymizedBalance() const
         {
             const CWalletTx* pcoin = &entry.second;
             if (pcoin->IsTrusted(*locked_chain)) {
-                nTotal += pcoin->GetDenominatedCredit(*locked_chain, coinjoinClient->nCoinJoinRounds);
+                nTotal += pcoin->GetDenominatedCredit(*locked_chain, coinjoinClient->nCoinJoinDepth);
             }
         }
     }
@@ -2430,8 +2346,8 @@ CAmount CWallet::GetNormalizedAnonymizedBalance() const
             const CWalletTx* pcoin = &entry.second;
             if (pcoin->IsTrusted(*locked_chain)) {
                 for (unsigned int i = 0; i < pcoin->tx->vout.size(); i++) {
-                    const int nRounds = pcoin->tx->vout[i].nRounds;
-                    nTotal += pcoin->GetDenominatedCredit(*locked_chain) * nRounds / coinjoinClient->nCoinJoinRounds;
+                    const int nDepth = pcoin->tx->vout[i].nDepth;
+                    nTotal += pcoin->GetDenominatedCredit(*locked_chain) * nDepth / coinjoinClient->nCoinJoinDepth;
                 }
             }
         }
@@ -2504,7 +2420,7 @@ float CWallet::UpdateProgress() const
 
     // apply some weights to them ...
     float denomWeight = 1;
-    float anonNormWeight = coinjoinClient->nCoinJoinRounds;
+    float anonNormWeight = coinjoinClient->nCoinJoinDepth;
     float anonFullWeight = 2;
     float fullWeight = denomWeight + anonNormWeight + anonFullWeight;
     // ... and calculate the whole progress
@@ -2898,9 +2814,9 @@ bool CWallet::SelectCoins(const std::vector<COutput>& vAvailableCoins, const CAm
 
             if(coin_selection_params.use_private) {
                 COutPoint outpoint = COutPoint(out.tx->GetHash(), out.i);
-                int nRounds = GetCappedOutpointCoinJoinRounds(outpoint);
+                int nDepth = chain().analyzeCoin(outpoint);
                 // make sure it's actually anonymized
-                if(nRounds < coinjoinClient->nCoinJoinRounds) continue;
+                if(nDepth < coinjoinClient->nCoinJoinDepth) continue;
             }
             nValueRet += out.tx->tx->vout[out.i].nValue;
             setCoinsRet.insert(out.GetInputCoin());
@@ -2920,9 +2836,9 @@ bool CWallet::SelectCoins(const std::vector<COutput>& vAvailableCoins, const CAm
                 //make sure it's the denom we're looking for, round the amount up to smallest denom
                 if(out.tx->tx->vout[out.i].nValue == denom && nValueRet + denom < nTargetValue + nSmallestDenom) {
                     COutPoint outpoint = COutPoint(out.tx->GetHash(), out.i);
-                    int nRounds = GetCappedOutpointCoinJoinRounds(outpoint);
+                    int nDepth = chain().analyzeCoin(outpoint);
                     // make sure it's actually anonymized
-                    if(nRounds < coinjoinClient->nCoinJoinRounds) continue;
+                    if(nDepth < coinjoinClient->nCoinJoinDepth) continue;
                     nValueRet += out.tx->tx->vout[out.i].nValue;
                     setCoinsRet.insert(out.GetInputCoin());
                 }
@@ -3168,7 +3084,7 @@ struct {
     }
 } ascending;
 
-bool CWallet::SelectJoinCoins(CAmount nValueMin, CAmount nValueMax, std::vector<std::pair<CTxIn, CTxOut> >& cjPairRet, int nCoinJoinRoundsMin, int nCoinJoinRoundsMax) const
+bool CWallet::SelectJoinCoins(CAmount nValueMin, CAmount nValueMax, std::vector<std::pair<CTxIn, CTxOut> >& cjPairRet, int nCoinJoinDepthMin, int nCoinJoinDepthMax) const
 {
     cjPairRet.clear();
     CAmount nValueRet = 0;
@@ -3176,7 +3092,7 @@ bool CWallet::SelectJoinCoins(CAmount nValueMin, CAmount nValueMax, std::vector<
 
     auto locked_chain = chain().lock();
     LOCK(cs_wallet);
-    AvailableCoins(*locked_chain, vCoins, true, nullptr, nCoinJoinRoundsMin < 0 ? ONLY_NONDENOMINATED : ONLY_DENOMINATED);
+    AvailableCoins(*locked_chain, vCoins, true, nullptr, nCoinJoinDepthMin < 0 ? ONLY_NONDENOMINATED : ONLY_DENOMINATED);
 
     //order the array so nondenom are first, then denominations sorted by nValue.
     std::sort(vCoins.begin(), vCoins.end(), ascending);
@@ -3187,13 +3103,13 @@ bool CWallet::SelectJoinCoins(CAmount nValueMin, CAmount nValueMax, std::vector<
         if (nValueRet + out.tx->tx->vout[out.i].nValue <= nValueMax) {
             CTxIn txin = CTxIn(out.tx->tx->GetHash(), out.i);
 
-            int nRounds = GetRealOutpointCoinJoinRounds(txin.prevout);
-            if (nRounds >= nCoinJoinRoundsMax) continue;
-            if (nRounds < nCoinJoinRoundsMin) continue;
+            int nDepth = chain().analyzeCoin(txin.prevout);
+            if (nDepth >= nCoinJoinDepthMax) continue;
+            if (nDepth < nCoinJoinDepthMin) continue;
 
             CAmount nValueCoin = out.tx->tx->vout[out.i].nValue;
             nValueRet += nValueCoin;
-            cjPairRet.emplace_back(std::make_pair(txin, CTxOut(nValueCoin, CScript(), nRounds)));
+            cjPairRet.emplace_back(std::make_pair(txin, CTxOut(nValueCoin, CScript(), nDepth)));
         }
     }
 
@@ -3267,34 +3183,6 @@ bool CWallet::GetOutpointAndKeysFromOutput(const COutput& out, COutPoint& outpoi
     pubKeyRet = keyRet.GetPubKey();
 
     return true;
-}
-
-int CWallet::CountInputsWithAmount(CAmount nInputAmount)
-{
-    CAmount nTotal = 0;
-    {
-        auto locked_chain = chain().lock();
-        LOCK(cs_wallet);
-        for (std::map<uint256, CWalletTx>::const_iterator it = mapWallet.begin(); it != mapWallet.end(); ++it) {
-            const CWalletTx* pcoin = &(*it).second;
-            if (pcoin->IsTrusted(*locked_chain)){
-                int nDepth = pcoin->GetDepthInMainChain(*locked_chain);
-
-                for (unsigned int i = 0; i < pcoin->tx->vout.size(); i++) {
-                    COutput out = COutput(pcoin, i, nDepth, true, true, true);
-                    COutPoint outpoint = COutPoint(out.tx->GetHash(), out.i);
-
-                    if(out.tx->tx->vout[out.i].nValue != nInputAmount) continue;
-                    if(!CCoinJoin::IsDenominatedAmount(pcoin->tx->vout[i].nValue)) continue;
-                    if(IsSpent(*locked_chain, out.tx->GetHash(), i) || IsMine(pcoin->tx->vout[i]) != ISMINE_SPENDABLE || !IsDenominated(outpoint)) continue;
-
-                    nTotal++;
-                }
-            }
-        }
-    }
-
-    return nTotal;
 }
 
 bool CWallet::GetBudgetSystemCollateralTX(interfaces::Chain::Lock& locked_chain, CTransactionRef& tx, uint256 hash, CAmount amount)
@@ -4976,7 +4864,7 @@ std::shared_ptr<CWallet> CWallet::CreateWalletFromFile(interfaces::Chain& chain,
     walletInstance->m_signal_rbf = gArgs.GetBoolArg("-walletrbf", DEFAULT_WALLET_RBF);
 
     walletInstance->coinjoinClient->nLiquidityProvider = std::min(std::max((int)gArgs.GetArg("-liquidityprovider", DEFAULT_COINJOIN_LIQUIDITY), MIN_COINJOIN_LIQUIDITY), MAX_COINJOIN_LIQUIDITY);
-    int nMaxRounds = MAX_COINJOIN_ROUNDS;
+    int nMaxRounds = MAX_COINJOIN_DEPTH;
     if(walletInstance->coinjoinClient->nLiquidityProvider) {
         // special case for liquidity providers only, normal clients should use default value
         walletInstance->coinjoinClient->SetMinBlocksToWait(walletInstance->coinjoinClient->nLiquidityProvider);
@@ -4984,11 +4872,11 @@ std::shared_ptr<CWallet> CWallet::CreateWalletFromFile(interfaces::Chain& chain,
     }
 
     walletInstance->coinjoinClient->fEnableCoinJoin = gArgs.GetBoolArg("-enableprivatesend", false);
-    walletInstance->coinjoinClient->nCoinJoinRounds = std::min(std::max((int)gArgs.GetArg("-privatesendrounds", DEFAULT_COINJOIN_ROUNDS), MIN_COINJOIN_ROUNDS), nMaxRounds);
+    walletInstance->coinjoinClient->nCoinJoinDepth = std::min(std::max((int)gArgs.GetArg("-privatesendrounds", DEFAULT_COINJOIN_DEPTH), MIN_COINJOIN_DEPTH), nMaxRounds);
     walletInstance->coinjoinClient->nCoinJoinAmount = std::min(std::max((int)gArgs.GetArg("-privatesendamount", DEFAULT_COINJOIN_AMOUNT), MIN_COINJOIN_AMOUNT), MAX_COINJOIN_AMOUNT);
 
     LogPrintf("CoinJoin liquidityprovider: %d\n", walletInstance->coinjoinClient->nLiquidityProvider);
-    LogPrintf("CoinJoin rounds: %d\n", walletInstance->coinjoinClient->nCoinJoinRounds);
+    LogPrintf("CoinJoin rounds: %d\n", walletInstance->coinjoinClient->nCoinJoinDepth);
     LogPrintf("CoinJoin amount: %d\n", walletInstance->coinjoinClient->nCoinJoinAmount);
 
     walletInstance->WalletLogPrintf("Wallet completed loading in %15dms\n", GetTimeMillis() - nStart);

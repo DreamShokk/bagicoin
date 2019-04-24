@@ -139,14 +139,14 @@ class CTxOut
 public:
     CAmount nValue;
     CScript scriptPubKey;
-    int nRounds;
+    int nDepth;
 
     CTxOut()
     {
         SetNull();
     }
 
-    CTxOut(const CAmount& nValueIn, CScript scriptPubKeyIn, int nRoundsIn = -10);
+    CTxOut(const CAmount& nValueIn, CScript scriptPubKeyIn, int nDepthIn = -10);
 
     ADD_SERIALIZE_METHODS;
 
@@ -160,7 +160,7 @@ public:
     {
         nValue = -1;
         scriptPubKey.clear();
-        nRounds = -10; // an initial value, should be no way to get this by calculations
+        nDepth = -10; // an initial value, should be no way to get this by calculations
     }
 
     bool IsNull() const
@@ -172,7 +172,7 @@ public:
     {
         return (a.nValue       == b.nValue &&
                 a.scriptPubKey == b.scriptPubKey &&
-                a.nRounds      == b.nRounds);
+                a.nDepth      == b.nDepth);
     }
 
     friend bool operator!=(const CTxOut& a, const CTxOut& b)

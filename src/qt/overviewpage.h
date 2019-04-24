@@ -50,7 +50,7 @@ private:
     ClientModel *clientModel;
     WalletModel *walletModel;
     interfaces::WalletBalances m_balances;
-    interfaces::CoinJoinStatus m_privsendstatus;
+    interfaces::CoinJoinStatus m_coinjoinstatus;
     int nDisplayUnit;
     bool fShowAdvancedPSUI;
 

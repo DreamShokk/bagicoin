@@ -138,10 +138,10 @@ void OptionsModel::Init(bool resetSettings)
         addOverriddenOption("-spendzeroconfchange");
 
     // CoinJoin
-    if (!settings.contains("nCoinJoinRounds"))
-        settings.setValue("nCoinJoinRounds", 2);
-    nCoinJoinRounds = settings.value("nCoinJoinRounds").toInt();
-    if (!m_node.softSetArg("-privatesendrounds", settings.value("nCoinJoinRounds").toString().toStdString()))
+    if (!settings.contains("nCoinJoinDepth"))
+        settings.setValue("nCoinJoinDepth", 2);
+    nCoinJoinDepth = settings.value("nCoinJoinDepth").toInt();
+    if (!m_node.softSetArg("-privatesendrounds", settings.value("nCoinJoinDepth").toString().toStdString()))
         addOverriddenOption("-privatesendrounds");
 
     if (!settings.contains("nCoinJoinAmount"))
@@ -321,7 +321,7 @@ QVariant OptionsModel::data(const QModelIndex & index, int role) const
         case LowKeysWarning:
             return settings.value("fLowKeysWarning");
         case CoinJoinRounds:
-            return settings.value("nCoinJoinRounds");
+            return settings.value("nCoinJoinDepth");
         case CoinJoinAmount:
             return settings.value("nCoinJoinAmount");
 #endif
@@ -458,17 +458,17 @@ bool OptionsModel::setData(const QModelIndex & index, const QVariant & value, in
             settings.setValue("fLowKeysWarning", value);
             break;
         case CoinJoinRounds:
-            if (settings.value("nCoinJoinRounds") != value) {
-                settings.setValue("nCoinJoinRounds", value);
-                nCoinJoinRounds = value.toInt();
-                Q_EMIT coinJoinConfigChanged(nCoinJoinRounds, nCoinJoinAmount);
+            if (settings.value("nCoinJoinDepth") != value) {
+                settings.setValue("nCoinJoinDepth", value);
+                nCoinJoinDepth = value.toInt();
+                Q_EMIT coinJoinConfigChanged(nCoinJoinDepth, nCoinJoinAmount);
             }
             break;
         case CoinJoinAmount:
             if (settings.value("nCoinJoinAmount") != value) {
                 settings.setValue("nCoinJoinAmount", value);
                 nCoinJoinAmount = value.toInt();
-                Q_EMIT coinJoinConfigChanged(nCoinJoinRounds, nCoinJoinAmount);
+                Q_EMIT coinJoinConfigChanged(nCoinJoinDepth, nCoinJoinAmount);
             }
             break;
 #endif

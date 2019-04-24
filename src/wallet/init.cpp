@@ -67,7 +67,7 @@ void WalletInit::AddWalletOptions() const
                                " (1 = keep tx meta data e.g. payment request information, 2 = drop tx meta data)", false, OptionsCategory::WALLET);
 
     gArgs.AddArg("-enableprivatesend=<n>", strprintf(_("Enable use of automated CoinJoin for funds stored in this wallet (0-1, default: %u)"), 0), false, OptionsCategory::WALLET);
-    gArgs.AddArg("-privatesendrounds=<n>", strprintf(_("Use N separate masternodes for each denominated input to mix funds (%u-%u, default: %u)"), MIN_COINJOIN_ROUNDS, MAX_COINJOIN_ROUNDS, DEFAULT_COINJOIN_ROUNDS), false, OptionsCategory::WALLET);
+    gArgs.AddArg("-privatesendrounds=<n>", strprintf(_("Use N separate masternodes for each denominated input to mix funds (%u-%u, default: %u)"), MIN_COINJOIN_DEPTH, MAX_COINJOIN_DEPTH, DEFAULT_COINJOIN_DEPTH), false, OptionsCategory::WALLET);
     gArgs.AddArg("-privatesendamount=<n>", strprintf(_("Keep N CHC anonymized (default: %u)"), DEFAULT_COINJOIN_AMOUNT), false, OptionsCategory::WALLET);
     gArgs.AddArg("-liquidityprovider=<n>", strprintf(_("Provide liquidity to CoinJoin by infrequently mixing coins on a continual basis (%u-%u, default: %u, 1=very frequent, high fees, 100=very infrequent, low fees)"), MIN_COINJOIN_LIQUIDITY, MAX_COINJOIN_LIQUIDITY, DEFAULT_COINJOIN_LIQUIDITY), false, OptionsCategory::WALLET);
 

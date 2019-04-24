@@ -422,8 +422,8 @@ void CoinControlDialog::viewItemChanged(QTreeWidgetItem* item, int column)
             item->setCheckState(COLUMN_CHECKBOX, Qt::Unchecked);
         else {
             coinControl()->Select(outpt);
-            int nRounds = model->wallet().getCappedOutpointCoinJoinRounds(outpt);
-            if (coinControl()->fUseCoinJoin && nRounds < model->wallet().getPSRounds()) {
+            int nDepth = model->node().analyzeCoin(outpt);
+            if (coinControl()->fUseCoinJoin && nDepth < model->wallet().getCJDepth()) {
                 QMessageBox::warning(this, windowTitle(),
                     tr("Non-anonymized input selected. <b>CoinJoin will be disabled.</b><br><br>If you still want to use CoinJoin, please deselect all non-nonymized inputs first and then check CoinJoin checkbox again."),
                     QMessageBox::Ok, QMessageBox::Ok);
@@ -744,11 +744,11 @@ void CoinControlDialog::updateView()
             itemOutput->setData(COLUMN_DATE, Qt::UserRole, QVariant((qlonglong)out.time));
 
             // CoinJoin rounds
-            int nRounds = model->wallet().getCappedOutpointCoinJoinRounds(output);
+            int nDepth = model->node().analyzeCoin(output);
 
-            if (nRounds >= 0) itemOutput->setText(COLUMN_COINJOIN_ROUNDS, QString::number(nRounds));
+            if (nDepth >= 0) itemOutput->setText(COLUMN_COINJOIN_ROUNDS, QString::number(nDepth));
             else itemOutput->setText(COLUMN_COINJOIN_ROUNDS, QString::fromStdString("n/a"));
-            itemOutput->setData(COLUMN_COINJOIN_ROUNDS, Qt::UserRole, QVariant((qlonglong)nRounds));
+            itemOutput->setData(COLUMN_COINJOIN_ROUNDS, Qt::UserRole, QVariant((qlonglong)nDepth));
 
             // confirmations
             itemOutput->setText(COLUMN_CONFIRMATIONS, QString::number(out.depth_in_main_chain));

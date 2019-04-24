@@ -42,6 +42,11 @@ static const unsigned int COINJOIN_FEE_DENOM_THRESHOLD      = 9;
 //! number of denoms each size before new ones are created
 static const unsigned int COINJOIN_DENOM_WINDOW             = 3;
 
+//! depth boundaries
+static const int MIN_COINJOIN_DEPTH              = 1;
+static const int DEFAULT_COINJOIN_DEPTH          = 2;
+static const int MAX_COINJOIN_DEPTH              = 3;
+
 // pool responses
 enum PoolMessage {
     ERR_ALREADY_HAVE,

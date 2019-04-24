@@ -83,7 +83,7 @@ public:
     bool getProxySettings(QNetworkProxy& proxy) const;
     bool getCoinControlFeatures() const { return fCoinControlFeatures; }
     bool getShowAdvancedPSUI() const { return fShowAdvancedPSUI; }
-    int getCoinJoinRounds() const { return nCoinJoinRounds; }
+    int getCoinJoinRounds() const { return nCoinJoinDepth; }
     int getCoinJoinAmount() const { return nCoinJoinAmount; }
     const QString& getOverriddenByCommandLine() { return strOverriddenByCommandLine; }
 
@@ -104,7 +104,7 @@ private:
     QString strThirdPartyTxUrls;
     bool fCoinControlFeatures;
     bool fShowAdvancedPSUI;
-    int nCoinJoinRounds;
+    int nCoinJoinDepth;
     int nCoinJoinAmount;
     /* settings that were overriden by command-line */
     QString strOverriddenByCommandLine;

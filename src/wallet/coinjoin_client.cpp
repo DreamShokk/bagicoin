@@ -638,6 +638,7 @@ void CCoinJoinClientSession::CompletedTransaction(PoolMessage nMessageID)
     } else {
         LogPrintf("%s CompletedTransaction -- error\n", m_wallet_session->GetDisplayName());
     }
+    keyHolderStorage.KeepAll();
     UnlockCoins();
     SetNull();
     strLastMessage = CCoinJoin::GetMessageByID(nMessageID);

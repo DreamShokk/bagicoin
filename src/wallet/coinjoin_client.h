@@ -9,8 +9,6 @@
 #include <modules/masternode/masternode.h>
 #include <modules/coinjoin/coinjoin.h>
 
-struct CompactTallyItem;
-
 class CCoinJoinClientManager;
 class CReserveKey;
 class CWallet;

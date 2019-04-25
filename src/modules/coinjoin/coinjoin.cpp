@@ -279,7 +279,8 @@ std::string CCoinJoin::GetDenominationsToString(CAmount nDenom)
 
 CAmount CCoinJoin::GetDenomRange()
 {
-    CAmount result = 0;
+    static CAmount result = 0;
+    if (result > 0) return result;
     for (auto denom = COINJOIN_HIGH_DENOM; denom >= COINJOIN_LOW_DENOM; denom >>=1) {
         result |= denom;
     }

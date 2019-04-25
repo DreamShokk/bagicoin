@@ -1158,10 +1158,10 @@ void CCoinJoinClientManager::CoinJoin()
     // there are funds to denominate and denominated balance does not exceed
     // max amount to mix yet.
 
-    // excluding denoms
-    CAmount nBalanceAnonimizableNonDenom = m_wallet->GetAnonymizableBalance(true);
     // denoms
     CAmount nBalanceDenominated = m_wallet->GetDenominatedBalance();
+    // excluding denoms
+    CAmount nBalanceAnonimizableNonDenom = m_wallet->GetBalance() - nBalanceDenominated;
     // amout to denominate
     CAmount nDenomTarget = nCoinJoinAmount * COIN + COINJOIN_LOW_DENOM * COINJOIN_FEE_DENOM_THRESHOLD * COINJOIN_DENOM_WINDOW;
     CAmount nDifference = nDenomTarget - nBalanceDenominated > 0 ? nDenomTarget - nBalanceDenominated : 0;

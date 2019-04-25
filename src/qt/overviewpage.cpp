@@ -346,7 +346,7 @@ void OverviewPage::updateCoinJoinProgress()
         return;
     }
 
-    CAmount nMaxToAnonymize = m_balances.anonymizeable_balance + m_balances.anonymized_balance;
+    CAmount nMaxToAnonymize = m_balances.balance;
 
     // If it's more than the anon threshold, limit to that.
     if(nMaxToAnonymize > m_coinjoinstatus.amount * COIN) nMaxToAnonymize = m_coinjoinstatus.amount * COIN;

@@ -145,17 +145,6 @@ enum AvailableCoinsType
     ONLY_1000, // find masternode outputs including locked ones (use with caution)
 };
 
-struct CompactTallyItem
-{
-    CTxDestination txdest;
-    CAmount nAmount;
-    std::vector<COutPoint> vecOutPoints;
-    CompactTallyItem()
-    {
-        nAmount = 0;
-    }
-};
-
 //! Default for -changetype
 constexpr OutputType DEFAULT_CHANGE_TYPE{OutputType::CHANGE_AUTO};
 
@@ -702,11 +691,6 @@ private:
     int64_t nLastResend = 0;
     bool fBroadcastTransactions = false;
 
-    mutable bool fAnonymizableTallyCached = false;
-    mutable std::vector<CompactTallyItem> vecAnonymizableTallyCached;
-    mutable bool fAnonymizableTallyCachedNonDenom = false;
-    mutable std::vector<CompactTallyItem> vecAnonymizableTallyCachedNonDenom;
-
     /**
      * Used to keep track of spent outpoints, and
      * detect and report conflicts (double-spends or
@@ -896,7 +880,6 @@ public:
 
     // Coin selection
     bool SelectJoinCoins(CAmount nValueMin, CAmount nValueMax, std::vector<std::pair<CTxIn, CTxOut> >& mtxPairRet, int nCoinJoinDepthMin, int nCoinJoinDepthMax) const;
-    bool SelectCoinsGroupedByAddresses(std::vector<CompactTallyItem>& vecTallyRet, bool fSkipDenominated = true) const;
 
     /// Get 1000CHC output and keys which can be used for the Masternode
     bool GetMasternodeOutpointAndKeys(COutPoint& outpointRet, CTxDestination &destRet, CPubKey& pubKeyRet, CKey& keyRet, const std::string& strTxHash = "", const std::string& strOutputIndex = "");
@@ -1017,10 +1000,7 @@ public:
     CAmount GetLegacyBalance(const isminefilter& filter, int minDepth) const;
     CAmount GetAvailableBalance(const CCoinControl* coinControl = nullptr) const;
 
-    CAmount GetAnonymizableBalance(bool fSkipDenominated = false) const;
-    CAmount GetAnonymizedBalance() const;
-    CAmount GetNormalizedAnonymizedBalance() const;
-    CAmount GetDenominatedBalance() const;
+    CAmount GetDenominatedBalance(int nDepth = 0) const;
     float UpdateProgress() const;
 
     bool GetBudgetSystemCollateralTX(interfaces::Chain::Lock& locked_chain, CTransactionRef& tx, uint256 hash, CAmount amount);

@@ -551,7 +551,7 @@ public:
     // having to resolve the issue of member access into incomplete type CWallet.
     CAmount GetAvailableCredit(interfaces::Chain::Lock& locked_chain, bool fUseCache=true, const isminefilter& filter=ISMINE_SPENDABLE) const NO_THREAD_SAFETY_ANALYSIS;
     CAmount GetImmatureWatchOnlyCredit(interfaces::Chain::Lock& locked_chain, const bool fUseCache=true) const;
-    CAmount GetDenominatedCredit(interfaces::Chain::Lock& locked_chain, int nCoinJoinDepth=0, bool fUseCache=true) const;
+    CAmount GetDenominatedCredit(interfaces::Chain::Lock& locked_chain, int nCoinJoinDepth=0, bool fUseCache=true) const NO_THREAD_SAFETY_ANALYSIS;
     CAmount GetChange() const;
 
     // Get the marginal bytes if spending the specified output from this transaction

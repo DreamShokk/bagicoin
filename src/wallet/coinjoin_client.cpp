@@ -672,10 +672,13 @@ bool CCoinJoinClientManager::IsMixingRequired(std::vector<std::pair<CTxIn, CTxOu
                     count++;
                     nTotal -= denom;
                     if (!nLiquidityProvider && it->second.nDepth >= nCoinJoinDepth) {
+                        LOCK(m_wallet->cs_wallet);
+                        m_wallet->UnlockCoin(it->first.prevout);
                         vecAmounts.push_back(it->second.nValue);
                         portfolio.erase(it--);
                     }
-                } else if (it->second.nValue > denom && ((count < threshold && nTotal > 0) || (count > threshold * COINJOIN_DENOM_WINDOW))) {
+                    if (count > threshold * COINJOIN_DENOM_WINDOW) return true;
+                } else if (it->second.nValue > denom && count < threshold && nTotal > 0) {
                     return true;
                 }
             }
@@ -1151,16 +1154,6 @@ void CCoinJoinClientManager::CoinJoin()
         } else break;
     }
 
-    CAmount nBalanceNeedsAnonymized = m_wallet->GetNeedsToBeAnonymizedBalance(COINJOIN_LOW_DENOM);
-
-    // anonymizable balance is way too small
-    if (nBalanceNeedsAnonymized < COINJOIN_LOW_DENOM * COINJOIN_FEE_DENOM_THRESHOLD) {
-        LogPrintf("%s CCoinJoinClientManager::CoinJoin -- Not enough funds to anonymize\n", m_wallet->GetDisplayName());
-        strAutoCoinJoinResult = _("Not enough funds to anonymize, will retry...");
-        fActive = false;
-        return;
-    }
-
     // Check if we have should create more denominated inputs i.e.
     // there are funds to denominate and denominated balance does not exceed
     // max amount to mix yet.
@@ -1170,15 +1163,24 @@ void CCoinJoinClientManager::CoinJoin()
     // denoms
     CAmount nBalanceDenominated = m_wallet->GetDenominatedBalance();
     // amout to denominate
-    CAmount nDifference = nCoinJoinAmount * COIN - nBalanceDenominated > 0 ? nCoinJoinAmount * COIN - nBalanceDenominated : 0;
+    CAmount nDenomTarget = nCoinJoinAmount * COIN + COINJOIN_LOW_DENOM * COINJOIN_FEE_DENOM_THRESHOLD * COINJOIN_DENOM_WINDOW;
+    CAmount nDifference = nDenomTarget - nBalanceDenominated > 0 ? nDenomTarget - nBalanceDenominated : 0;
     CAmount nBalanceNeedsDenom = std::min(nDifference, nBalanceAnonimizableNonDenom);
 
-    LogPrint(BCLog::CJOIN, "%s CCoinJoinClientManager::CoinJoin -- nValueMin: %f, nBalanceNeedsAnonymized: %f, nBalanceAnonimizableNonDenom: %f, nBalanceDenominated: %f\n",
+    LogPrint(BCLog::CJOIN, "%s CCoinJoinClientManager::CoinJoin -- nValueMin: %f, nBalanceNeedsDenom: %f, nBalanceAnonimizableNonDenom: %f, nBalanceDenominated: %f\n",
              m_wallet->GetDisplayName(),
              (float)COINJOIN_LOW_DENOM / COIN,
-             (float)nBalanceNeedsAnonymized / COIN,
+             (float)nBalanceNeedsDenom / COIN,
              (float)nBalanceAnonimizableNonDenom / COIN,
              (float)nBalanceDenominated / COIN);
+
+    // anonymizable balance is way too small
+    if (nBalanceDenominated + nBalanceNeedsDenom < COINJOIN_LOW_DENOM * COINJOIN_FEE_DENOM_THRESHOLD) {
+        LogPrintf("%s CCoinJoinClientManager::CoinJoin -- Not enough funds to anonymize: %s available\n", m_wallet->GetDisplayName(), FormatMoney(nBalanceDenominated + nBalanceNeedsDenom));
+        strAutoCoinJoinResult = _("Not enough funds to anonymize, will retry...");
+        fActive = false;
+        return;
+    }
 
     if (nBalanceNeedsDenom >= COINJOIN_LOW_DENOM) {
         strAutoCoinJoinResult = _("Creating denominated outputs.");
@@ -1228,7 +1230,7 @@ void CCoinJoinClientManager::CoinJoin()
     bool fMixOnly = false;
 
     // lock the coins we are going to use early
-    if (!m_wallet->SelectJoinCoins(COINJOIN_LOW_DENOM, nBalanceNeedsAnonymized, portfolio, 0, MAX_COINJOIN_DEPTH)) {
+    if (!m_wallet->SelectJoinCoins(COINJOIN_LOW_DENOM, nBalanceDenominated, portfolio, 0, MAX_COINJOIN_DEPTH)) {
         // this should never happen
         LogPrintf("%s CCoinJoinClientManager::CoinJoin -- Can't mix: no compatible inputs found!\n", m_wallet->GetDisplayName());
         fActive = false;
@@ -1421,7 +1423,7 @@ void CCoinJoinClientManager::ProcessPendingCJaRequest()
 }
 
 // Create denominations
-bool CCoinJoinClientManager::CreateDenominated(const CAmount& nValue, bool fOnlyFees)
+bool CCoinJoinClientManager::CreateDenominated(const CAmount& nValue)
 {
     if (!m_wallet) return false;
 
@@ -1436,79 +1438,75 @@ bool CCoinJoinClientManager::CreateDenominated(const CAmount& nValue, bool fOnly
 
     // ****** Add outputs for denoms ************ /
 
-    while(nValueLeft > 0) {
-        while(nValueLeft > 0 && mtx.vout.size() < (COINJOIN_DENOM_THRESHOLD * COINJOIN_DENOM_WINDOW) / 2) { // TODO: make configurable
-            if (!fOnlyFees) {
-                // find the next denom that will fit
-                for (auto denom = COINJOIN_HIGH_DENOM; denom >= COINJOIN_LOW_DENOM; denom >>= 1) {
-                    if(nValueLeft > denom) {
-                        nDenomValue = denom;
-                        break;
-                    }
-                }
+    while(nValueLeft > 0 && mtx.vout.size() < (COINJOIN_DENOM_THRESHOLD * COINJOIN_DENOM_WINDOW) / 2) { // TODO: make configurable
+        // find the next denom that will fit
+        for (auto denom = COINJOIN_HIGH_DENOM; denom >= COINJOIN_LOW_DENOM; denom >>= 1) {
+            if(nValueLeft > denom) {
+                nDenomValue = denom;
+                break;
             }
-            std::shared_ptr<CReserveScript> scriptDenom = std::make_shared<CReserveScript>();
-            keyHolderStorageDenom.AddKey(scriptDenom, m_wallet);
-
-            if (!scriptDenom || scriptDenom->reserveScript.empty()) {
-                LogPrintf("%s CCoinJoinClientManager::CreateDenominated -- No script available, Keypool exhausted?\n", m_wallet->GetDisplayName());
-                return false;
-            }
-
-            mtx.vout.push_back(CTxOut(nDenomValue, scriptDenom->reserveScript));
-
-            //subtract denomination amount
-            nValueLeft -= nDenomValue;
-            LogPrint(BCLog::CJOIN, "%s CreateDenominated step 2: mtx: %s, outputs: %u, nValueLeft: %f\n", m_wallet->GetDisplayName(), mtx.GetHash().ToString(), mtx.vout.size(), (float)nValueLeft/COIN);
         }
-        CAmount fee_out = 0;
-        int change_position = -1;
-        std::string strFailReason;
-        std::set<int> setSubtractFeeFromOutputs;
-        CCoinControl coinControl;
-        coinControl.fAllowOtherInputs = true;
+        std::shared_ptr<CReserveScript> scriptDenom = std::make_shared<CReserveScript>();
+        keyHolderStorageDenom.AddKey(scriptDenom, m_wallet);
 
-        if (!m_wallet->FundTransaction(mtx, fee_out, change_position, strFailReason, true, setSubtractFeeFromOutputs, coinControl)) {
-            LogPrintf("%s CCoinJoinClientManager::CreateDenominated -- ERROR: funding transaction failed, mtx=%s, reason=%s\n",
-                                      m_wallet->GetDisplayName(),
-                                      mtx.GetHash().ToString(), strFailReason);
+        if (!scriptDenom || scriptDenom->reserveScript.empty()) {
+            LogPrintf("%s CCoinJoinClientManager::CreateDenominated -- No script available, Keypool exhausted?\n", m_wallet->GetDisplayName());
             return false;
         }
 
-        LogPrint(BCLog::CJOIN, "%s CCoinJoinClientManager::CreateDenominated -- FundTransaction: %s fees: %u\n", m_wallet->GetDisplayName(), mtx.GetHash().ToString(), fee_out);
+        mtx.vout.push_back(CTxOut(nDenomValue, scriptDenom->reserveScript));
 
-        PartiallySignedTransaction ptx(mtx);
+        //subtract denomination amount
+        nValueLeft -= nDenomValue;
+        LogPrint(BCLog::CJOIN, "%s CreateDenominated step 2: mtx: %s, outputs: %u, nValueLeft: %f\n", m_wallet->GetDisplayName(), mtx.GetHash().ToString(), mtx.vout.size(), (float)nValueLeft/COIN);
+    }
+    CAmount fee_out = 0;
+    int change_position = -1;
+    std::string strFailReason;
+    std::set<int> setSubtractFeeFromOutputs;
+    CCoinControl coinControl;
+    coinControl.fAllowOtherInputs = true;
 
-        bool complete = true;
-        bool sign = true;
-        const TransactionError err = FillPSBT(m_wallet, ptx, complete, 1, sign, false);
-        LogPrint(BCLog::CJOIN, "%s CCoinJoinClientManager::CreateDenominated -- FillPSBT completed: %b\n", m_wallet->GetDisplayName(), complete);
+    if (!m_wallet->FundTransaction(mtx, fee_out, change_position, strFailReason, true, setSubtractFeeFromOutputs, coinControl)) {
+        LogPrintf("%s CCoinJoinClientManager::CreateDenominated -- ERROR: funding transaction failed, mtx=%s, reason=%s\n",
+                  m_wallet->GetDisplayName(),
+                  mtx.GetHash().ToString(), strFailReason);
+        return false;
+    }
 
-        if (err != TransactionError::OK) {
-            LogPrintf("%s CCoinJoinClientManager::CreateDenominated -- ERROR: signing transaction failed, ptx=%s, error=%s\n",
-                                      m_wallet->GetDisplayName(),
-                                      ptx.tx->GetHash().ToString(), TransactionErrorString(err));
-            return false;
-        }
+    LogPrint(BCLog::CJOIN, "%s CCoinJoinClientManager::CreateDenominated -- FundTransaction: %s fees: %u\n", m_wallet->GetDisplayName(), mtx.GetHash().ToString(), fee_out);
 
-        if (!FinalizeAndExtractPSBT(ptx, mtx)) {
-            LogPrintf("%s CCoinJoinClientManager::CreateDenominated -- FinalizeAndExtractPSBT() error: Transaction not final\n", m_wallet->GetDisplayName());
-            return false;
-        }
+    PartiallySignedTransaction ptx(mtx);
 
-        CTransactionRef tx(MakeTransactionRef(std::move(mtx)));
-        CWalletTx wtx(m_wallet, tx);
+    bool complete = true;
+    bool sign = true;
+    const TransactionError err = FillPSBT(m_wallet, ptx, complete, 1, sign, false);
+    LogPrint(BCLog::CJOIN, "%s CCoinJoinClientManager::CreateDenominated -- FillPSBT completed: %b\n", m_wallet->GetDisplayName(), complete);
 
-        // make our change address
-        CReserveKey reservekeyChange(m_wallet);
+    if (err != TransactionError::OK) {
+        LogPrintf("%s CCoinJoinClientManager::CreateDenominated -- ERROR: signing transaction failed, ptx=%s, error=%s\n",
+                  m_wallet->GetDisplayName(),
+                  ptx.tx->GetHash().ToString(), TransactionErrorString(err));
+        return false;
+    }
+
+    if (!FinalizeAndExtractPSBT(ptx, mtx)) {
+        LogPrintf("%s CCoinJoinClientManager::CreateDenominated -- FinalizeAndExtractPSBT() error: Transaction not final\n", m_wallet->GetDisplayName());
+        return false;
+    }
+
+    CTransactionRef tx(MakeTransactionRef(std::move(mtx)));
+    CWalletTx wtx(m_wallet, tx);
+
+    // make our change address
+    CReserveKey reservekeyChange(m_wallet);
 
 
-        CValidationState state;
-        if (!m_wallet->CommitTransaction(tx, std::move(wtx.mapValue), {} /* orderForm */, reservekeyChange, g_connman.get(), state)) {
-            LogPrintf("%s CCoinJoinClientManager::CreateDenominated -- CommitTransaction failed! Reason given: %s\n", m_wallet->GetDisplayName(), state.GetRejectReason());
-            keyHolderStorageDenom.ReturnAll();
-            return false;
-        }
+    CValidationState state;
+    if (!m_wallet->CommitTransaction(tx, std::move(wtx.mapValue), {} /* orderForm */, reservekeyChange, g_connman.get(), state)) {
+        LogPrintf("%s CCoinJoinClientManager::CreateDenominated -- CommitTransaction failed! Reason given: %s\n", m_wallet->GetDisplayName(), state.GetRejectReason());
+        keyHolderStorageDenom.ReturnAll();
+        return false;
     }
 
     keyHolderStorageDenom.KeepAll();
@@ -1541,7 +1539,7 @@ void CCoinJoinClientManager::UpdatedBlockTip(const int nHeight) {
     nCachedBlockHeight = nHeight;
     LogPrint(BCLog::CJOIN, "%s CCoinJoinClientManager::UpdatedBlockTip -- nCachedBlockHeight: %d\n", m_wallet->GetDisplayName(), nCachedBlockHeight);
     CheckResult(nCachedBlockHeight);
-    if (fEnableCoinJoin && !WaitForAnotherBlock()) CoinJoin();
+    if (fEnableCoinJoin && !WaitForAnotherBlock() && !fActive) CoinJoin();
 }
 
 void CCoinJoinClientManager::ClientTask()

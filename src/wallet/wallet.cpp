@@ -2356,27 +2356,6 @@ CAmount CWallet::GetNormalizedAnonymizedBalance() const
     return nTotal;
 }
 
-CAmount CWallet::GetNeedsToBeAnonymizedBalance(CAmount nMinBalance) const
-{
-    if(fLiteMode) return 0;
-
-    CAmount nAnonymizedBalance = GetAnonymizedBalance();
-    CAmount nNeedsToAnonymizeBalance = coinjoinClient->nCoinJoinAmount*COIN - nAnonymizedBalance;
-
-    // try to overshoot target CJ balance up to nMinBalance
-    nNeedsToAnonymizeBalance += nMinBalance;
-
-    CAmount nAnonymizableBalance = GetAnonymizableBalance();
-
-    // anonymizable balance is way too small
-    if(nAnonymizableBalance < nMinBalance) return 0;
-
-    // not enough funds to anonymze amount we want, try the max we can
-    if(nNeedsToAnonymizeBalance > nAnonymizableBalance) nNeedsToAnonymizeBalance = nAnonymizableBalance;
-
-    return nNeedsToAnonymizeBalance;
-}
-
 CAmount CWallet::GetDenominatedBalance() const
 {
     if(fLiteMode) return 0;

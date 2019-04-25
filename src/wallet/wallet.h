@@ -1022,7 +1022,6 @@ public:
     CAmount GetAnonymizableBalance(bool fSkipDenominated = false) const;
     CAmount GetAnonymizedBalance() const;
     CAmount GetNormalizedAnonymizedBalance() const;
-    CAmount GetNeedsToBeAnonymizedBalance(CAmount nMinBalance = 0) const;
     CAmount GetDenominatedBalance() const;
     float UpdateProgress() const;
 

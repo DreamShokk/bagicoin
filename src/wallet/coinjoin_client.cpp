@@ -1182,7 +1182,7 @@ void CCoinJoinClientManager::CoinJoin()
         return;
     }
 
-    if (nBalanceNeedsDenom >= COINJOIN_LOW_DENOM) {
+    if (nBalanceNeedsDenom >= COINJOIN_LOW_DENOM * COINJOIN_FEE_DENOM_THRESHOLD) {
         strAutoCoinJoinResult = _("Creating denominated outputs.");
         if (!CreateDenominated(nBalanceNeedsDenom)) {
             strAutoCoinJoinResult = _("Failed to create denominated outputs.");
@@ -1231,12 +1231,11 @@ void CCoinJoinClientManager::CoinJoin()
 
     // lock the coins we are going to use early
     if (!m_wallet->SelectJoinCoins(COINJOIN_LOW_DENOM, nBalanceDenominated, portfolio, 0, MAX_COINJOIN_DEPTH)) {
-        // this should never happen
         LogPrintf("%s CCoinJoinClientManager::CoinJoin -- Can't mix: no compatible inputs found!\n", m_wallet->GetDisplayName());
         fActive = false;
-
         return;
     }
+
     if (IsMixingRequired(portfolio, vecAmounts, fMixOnly)) {
         for (const auto& txin : portfolio) {
             LOCK(m_wallet->cs_wallet);

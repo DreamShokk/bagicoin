@@ -4878,15 +4878,15 @@ int AnalyzeCoin(const COutPoint& outpoint)
     uint256 hash = outpoint.hash;
     unsigned int nout = outpoint.n;
 
-    CTransactionRef tx;
-    uint256 hash_block;
-
     // return early if we have it
     std::map<uint256, std::vector<CTxOut> >::iterator mdwi = mDenomTx.find(hash);
 
     if (mdwi != mDenomTx.end() && mdwi->second[nout].nDepth != -10) {
         return mdwi->second[nout].nDepth;
     }
+
+    CTransactionRef tx;
+    uint256 hash_block;
 
     if(GetTransaction(hash, tx, Params().GetConsensus(), hash_block))
     {
@@ -4919,10 +4919,11 @@ int AnalyzeCoin(const COutPoint& outpoint)
 
         // only denoms here so let's look up
         std::vector<int> roots;
+        roots.clear();
         const int64_t analyze_tx_start_time = GetTimeMillis();
 
         if (FindRoot(outpoint, roots) && !roots.empty()) {
-            mdwi->second[nout].nDepth = std::accumulate(roots.begin(), roots.end(), 0) / roots.size();
+            mdwi->second[nout].nDepth = std::accumulate(roots.begin(), roots.end(), int64_t(0)) / roots.size();
             LogPrint(BCLog::CJOIN, "[chain] AnalyzeCoin UPDATED as analyzed   %s %3d %3d analyze %15dms\n", hash.ToString(), nout, mdwi->second[nout].nDepth, GetTimeMillis() - analyze_tx_start_time);
             return mdwi->second[nout].nDepth;
         }
@@ -4941,7 +4942,6 @@ bool FindRoot(const COutPoint& outpoint, std::vector<int>& vRoots, int nDepth)
     static std::map<uint256, std::pair<CMutableTransaction, bool> > mDenomTxCache;
 
     uint256 hash = outpoint.hash;
-    unsigned int nout = outpoint.n;
 
     std::map<uint256, std::pair<CMutableTransaction, bool> >::const_iterator mdwi = mDenomTxCache.find(hash);
     if (mdwi == mDenomTxCache.end()) {
@@ -4950,23 +4950,21 @@ bool FindRoot(const COutPoint& outpoint, std::vector<int>& vRoots, int nDepth)
         if(GetTransaction(hash, tx, Params().GetConsensus(), hash_block))
             mDenomTxCache.emplace(hash, std::make_pair(CMutableTransaction(*tx), false));
         else return false;
-    }
+    } else if (!mDenomTxCache[hash].second) return false;
 
-    if (!mDenomTxCache[hash].second && nDepth > 1) return false;
+    if (!mDenomTxCache[hash].second) {
+        bool fAllDenoms = true;
+        for (const auto& out : mDenomTxCache[hash].first.vout) {
+            fAllDenoms = fAllDenoms && CCoinJoin::IsDenominatedAmount(out.nValue);
+            if (!fAllDenoms) break;
+        }
 
-    if (!CCoinJoin::IsDenominatedAmount(mDenomTxCache[hash].first.vout[nout].nValue)) return false;
-
-    bool fAllDenoms = true;
-    for (const auto& out : mDenomTxCache[hash].first.vout) {
-        fAllDenoms = fAllDenoms && CCoinJoin::IsDenominatedAmount(out.nValue);
-    }
-
-    // this one is denominated but there is another non-denominated output found in the same tx
-    if (fAllDenoms) {
-        mDenomTxCache[hash].second = true;
-    } else {
-        mDenomTxCache[hash].second = false;
-        return false;
+        // this one is denominated but there is another non-denominated output found in the same tx
+        if (fAllDenoms) {
+            mDenomTxCache[hash].second = true;
+        } else {
+            return false;
+        }
     }
 
     nDepth++;

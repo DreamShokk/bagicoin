@@ -4881,16 +4881,19 @@ int AnalyzeCoin(const COutPoint& outpoint)
     CTransactionRef tx;
     uint256 hash_block;
 
+    // return early if we have it
+    std::map<uint256, std::vector<CTxOut> >::iterator mdwi = mDenomTx.find(hash);
+
+    if (mdwi != mDenomTx.end() && mdwi->second[nout].nDepth != -10) {
+        return mdwi->second[nout].nDepth;
+    }
+
     if(GetTransaction(hash, tx, Params().GetConsensus(), hash_block))
     {
-        std::map<uint256, std::vector<CTxOut> >::iterator mdwi = mDenomTx.find(hash);
         if (mdwi == mDenomTx.end()) {
             // not known yet, let's add it
             LogPrint(BCLog::CJOIN, "[chain] AnalyzeCoin INSERTING %s\n", hash.ToString());
             mDenomTx.emplace(hash, std::vector<CTxOut>(tx->vout));
-        } else if (mdwi->second[nout].nDepth != -10) {
-            // found and it's not an initial value, just return it
-            return mdwi->second[nout].nDepth;
         }
 
         mdwi = mDenomTx.find(hash);

@@ -551,7 +551,7 @@ public:
     // having to resolve the issue of member access into incomplete type CWallet.
     CAmount GetAvailableCredit(interfaces::Chain::Lock& locked_chain, bool fUseCache=true, const isminefilter& filter=ISMINE_SPENDABLE) const NO_THREAD_SAFETY_ANALYSIS;
     CAmount GetImmatureWatchOnlyCredit(interfaces::Chain::Lock& locked_chain, const bool fUseCache=true) const;
-    CAmount GetDenominatedCredit(interfaces::Chain::Lock& locked_chain, int nCoinJoinDepth=0, bool fUseCache=true) const;
+    CAmount GetDenominatedCredit(interfaces::Chain::Lock& locked_chain, int nCoinJoinDepth=0, bool fUseCache=true) const NO_THREAD_SAFETY_ANALYSIS;
     CAmount GetChange() const;
 
     // Get the marginal bytes if spending the specified output from this transaction
@@ -902,8 +902,6 @@ public:
     bool GetMasternodeOutpointAndKeys(COutPoint& outpointRet, CTxDestination &destRet, CPubKey& pubKeyRet, CKey& keyRet, const std::string& strTxHash = "", const std::string& strOutputIndex = "");
     /// Extract txin information and keys from output
     bool GetOutpointAndKeysFromOutput(const COutput& out, COutPoint& outpointRet, CTxDestination &destRet, CPubKey& pubKeyRet, CKey& keyRet);
-
-    bool IsDenominated(const COutPoint& outpoint) const;
 
     bool IsSpent(interfaces::Chain::Lock& locked_chain, const uint256& hash, unsigned int n) const EXCLUSIVE_LOCKS_REQUIRED(cs_wallet);
     std::vector<OutputGroup> GroupOutputs(const std::vector<COutput>& outputs, bool single_coin) const;

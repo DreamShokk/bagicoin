@@ -1362,21 +1362,6 @@ CAmount CWallet::GetDebit(const CTxIn &txin, const isminefilter& filter) const
     return 0;
 }
 
-bool CWallet::IsDenominated(const COutPoint& outpoint) const
-{
-    LOCK(cs_wallet);
-
-    std::map<uint256, CWalletTx>::const_iterator mi = mapWallet.find(outpoint.hash);
-    if (mi != mapWallet.end()) {
-        const CWalletTx& prev = (*mi).second;
-        if (outpoint.n < prev.tx->vout.size()) {
-            return CCoinJoin::IsDenominatedAmount(prev.tx->vout[outpoint.n].nValue);
-        }
-    }
-
-    return false;
-}
-
 isminetype CWallet::IsMine(const CTxOut& txout) const
 {
     return ::IsMine(*this, txout.scriptPubKey);
@@ -2129,12 +2114,11 @@ CAmount CWalletTx::GetDenominatedCredit(interfaces::Chain::Lock& locked_chain, i
     uint256 hashTx = GetHash();
     for (unsigned int i = 0; i < tx->vout.size(); i++)
     {
-        LOCK(pwallet->cs_wallet);
         if(!pwallet->IsSpent(locked_chain, hashTx, i) && CCoinJoin::IsDenominatedAmount(tx->vout[i].nValue))
         {
             const CTxOut &txout = tx->vout[i];
             const COutPoint outpoint = COutPoint(hashTx, i);
-            const int nDepth = pwallet->chain().analyzeCoin(outpoint);
+            const int nDepth = nCoinJoinDepth  ? pwallet->chain().analyzeCoin(outpoint) : 0;
             if(nDepth >= nCoinJoinDepth){
                 nCredit += pwallet->GetCredit(txout, ISMINE_SPENDABLE);
             }

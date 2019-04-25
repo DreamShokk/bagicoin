@@ -2939,7 +2939,7 @@ static UniValue listunspent(const JSONRPCRequest& request)
             entry.pushKV("desc", descriptor->ToString());
         }
         entry.pushKV("safe", out.fSafe);
-        entry.pushKV("cj_depth", pwallet->chain().analyzeCoin(COutPoint(out.tx->GetHash(), out.i)));
+        // temporarily disabled due to lock order entry.pushKV("cj_depth", pwallet->chain().analyzeCoin(COutPoint(out.tx->GetHash(), out.i)));
         results.push_back(entry);
     }
 

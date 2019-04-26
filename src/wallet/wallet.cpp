@@ -1407,13 +1407,12 @@ bool CWallet::IsFromMe(const CTransaction& tx) const
     return (GetDebit(tx, ISMINE_ALL) > 0);
 }
 
-CAmount CWallet::GetDebit(const CTransaction& tx, const isminefilter& filter, const bool& fDenom) const
+CAmount CWallet::GetDebit(const CTransaction& tx, const isminefilter& filter) const
 {
     CAmount nDebit = 0;
     for (const CTxIn& txin : tx.vin)
     {
-        CAmount nValue = GetDebit(txin, filter);
-        nDebit += !fDenom ? nValue : CCoinJoin::IsDenominatedAmount(nValue) ? nValue : 0;
+        nDebit += GetDebit(txin, filter);
         if (!MoneyRange(nDebit))
             throw std::runtime_error(std::string(__func__) + ": value out of range");
     }
@@ -1969,37 +1968,6 @@ CAmount CWalletTx::GetDebit(const isminefilter& filter) const
     return debit;
 }
 
-CAmount CWalletTx::GetDenomDebit(const isminefilter& filter) const
-{
-    if (tx->vin.empty())
-        return 0;
-
-    CAmount debit = 0;
-    if(filter & ISMINE_SPENDABLE)
-    {
-        if (fDebitDenomCached)
-            debit += nDebitDenomCached;
-        else
-        {
-            nDebitDenomCached = pwallet->GetDebit(*tx, ISMINE_SPENDABLE, true);
-            fDebitDenomCached = true;
-            debit += nDebitDenomCached;
-        }
-    }
-    if(filter & ISMINE_WATCH_ONLY)
-    {
-        if(fWatchDebitDenomCached)
-            debit += nWatchDebitDenomCached;
-        else
-        {
-            nWatchDebitDenomCached = pwallet->GetDebit(*tx, ISMINE_WATCH_ONLY, true);
-            fWatchDebitDenomCached = true;
-            debit += nWatchDebitDenomCached;
-        }
-    }
-    return debit;
-}
-
 CAmount CWalletTx::GetCredit(interfaces::Chain::Lock& locked_chain, const isminefilter& filter) const
 {
     // Must wait until coinbase is safely deep enough in the chain before valuing it
@@ -2394,7 +2362,7 @@ CAmount CWallet::GetImmatureWatchOnlyBalance() const
 // wallet, and then subtracts the values of TxIns spending from the wallet. This
 // also has fewer restrictions on which unconfirmed transactions are considered
 // trusted.
-CAmount CWallet::GetLegacyBalance(const isminefilter& filter, int minDepth, const bool& fDenominated) const
+CAmount CWallet::GetLegacyBalance(const isminefilter& filter, int minDepth) const
 {
     LockAnnotation lock(::cs_main); // Temporary, for CheckFinalTx below. Removed in upcoming commit.
     auto locked_chain = chain().lock();
@@ -2411,21 +2379,45 @@ CAmount CWallet::GetLegacyBalance(const isminefilter& filter, int minDepth, cons
         // Loop through tx outputs and add incoming payments. For outgoing txs,
         // treat change outputs specially, as part of the amount debited.
         CAmount debit = wtx.GetDebit(filter);
-        CAmount debitdenom = wtx.GetDenomDebit(filter);
         const bool outgoing = debit > 0;
         for (const CTxOut& out : wtx.tx->vout) {
             if (outgoing && IsChange(out)) {
                 debit -= out.nValue;
-                 if (CCoinJoin::IsDenominatedAmount(out.nValue)) debitdenom -= out.nValue;
             } else if (IsMine(out) & filter && depth >= minDepth) {
-                balance += !fDenominated ? out.nValue : CCoinJoin::IsDenominatedAmount(out.nValue) ? out.nValue : 0;
+                balance += out.nValue;
             }
         }
 
         // For outgoing txs, subtract amount debited.
         if (outgoing) {
             balance -= debit;
-            if (fDenominated) balance -= debitdenom;
+        }
+    }
+
+    return balance;
+}
+
+CAmount CWallet::GetLegacyDenomBalance() const
+{
+    LockAnnotation lock(::cs_main); // Temporary, for CheckFinalTx below. Removed in upcoming commit.
+    auto locked_chain = chain().lock();
+    LOCK(cs_wallet);
+
+    CAmount balance = 0;
+    for (const auto& entry : mapWallet) {
+        const CWalletTx& wtx = entry.second;
+        const int depth = wtx.GetDepthInMainChain(*locked_chain);
+        if (depth < 0 || !CheckFinalTx(*wtx.tx) || wtx.IsImmatureCoinBase(*locked_chain)) {
+            continue;
+        }
+
+        // Loop through tx outputs and add incoming payments.
+        for (unsigned int i = 0; i < wtx.tx->vout.size(); i++) {
+            if (IsMine(wtx.tx->vout[i]) & ISMINE_SPENDABLE) {
+                if (!IsSpent(*locked_chain, wtx.tx->GetHash(), i)) {
+                    balance += CCoinJoin::IsDenominatedAmount(wtx.tx->vout[i].nValue) ? wtx.tx->vout[i].nValue : 0;
+                }
+            }
         }
     }
 
@@ -2902,7 +2894,7 @@ bool CWallet::SelectJoinCoins(CAmount nValueMin, CAmount nValueMax, std::vector<
 
     auto locked_chain = chain().lock();
     LOCK(cs_wallet);
-    AvailableCoins(*locked_chain, vCoins, true, nullptr, nCoinJoinDepthMin < 0 ? ONLY_NONDENOMINATED : ONLY_DENOMINATED, 1, MAX_MONEY, MAX_MONEY, 0, 1);
+    AvailableCoins(*locked_chain, vCoins, true, nullptr, nCoinJoinDepthMin < 0 ? ONLY_NONDENOMINATED : ONLY_DENOMINATED);
 
     //order the array so nondenom are first, then denominations sorted by nValue.
     std::sort(vCoins.begin(), vCoins.end(), ascending);

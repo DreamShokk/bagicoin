@@ -1159,7 +1159,7 @@ void CCoinJoinClientManager::CoinJoin()
     // max amount to mix yet.
 
     // denoms
-    CAmount nBalanceDenominated = m_wallet->GetLegacyBalance(ISMINE_SPENDABLE, 0, true);
+    CAmount nBalanceDenominated = m_wallet->GetLegacyDenomBalance();
     // excluding denoms
     CAmount nBalanceAnonimizableNonDenom = m_wallet->GetLegacyBalance(ISMINE_SPENDABLE, 0) - nBalanceDenominated;
     // amout to denominate

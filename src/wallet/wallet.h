@@ -409,28 +409,24 @@ public:
 
     // memory only
     mutable bool fDebitCached;
-    mutable bool fDebitDenomCached;
     mutable bool fCreditCached;
     mutable bool fImmatureCreditCached;
     mutable bool fAvailableCreditCached;
     mutable bool fAnonymizedCreditCached;
     mutable bool fAvailableDenomCreditCached;
     mutable bool fWatchDebitCached;
-    mutable bool fWatchDebitDenomCached;
     mutable bool fWatchCreditCached;
     mutable bool fImmatureWatchCreditCached;
     mutable bool fAvailableWatchCreditCached;
     mutable bool fChangeCached;
     mutable bool fInMempool;
     mutable CAmount nDebitCached;
-    mutable CAmount nDebitDenomCached;
     mutable CAmount nCreditCached;
     mutable CAmount nImmatureCreditCached;
     mutable CAmount nAvailableCreditCached;
     mutable CAmount nAnonymizedCreditCached;
     mutable CAmount nAvailableDenomCreditCached;
     mutable CAmount nWatchDebitCached;
-    mutable CAmount nWatchDebitDenomCached;
     mutable CAmount nWatchCreditCached;
     mutable CAmount nImmatureWatchCreditCached;
     mutable CAmount nAvailableWatchCreditCached;
@@ -451,7 +447,6 @@ public:
         nTimeSmart = 0;
         fFromMe = false;
         fDebitCached = false;
-        fDebitDenomCached = false;
         fCreditCached = false;
         fImmatureCreditCached = false;
         fAvailableCreditCached = false;
@@ -526,7 +521,6 @@ public:
         fAvailableWatchCreditCached = false;
         fImmatureWatchCreditCached = false;
         fDebitCached = false;
-        fDebitDenomCached = false;
         fChangeCached = false;
     }
 
@@ -538,7 +532,6 @@ public:
 
     //! filter decides which addresses will count towards the debit
     CAmount GetDebit(const isminefilter& filter) const;
-    CAmount GetDenomDebit(const isminefilter& filter) const;
     CAmount GetCredit(interfaces::Chain::Lock& locked_chain, const isminefilter& filter) const;
     CAmount GetImmatureCredit(interfaces::Chain::Lock& locked_chain, bool fUseCache=true) const;
     // TODO: Remove "NO_THREAD_SAFETY_ANALYSIS" and replace it with the correct
@@ -1004,7 +997,7 @@ public:
     CAmount GetImmatureBalance() const;
     CAmount GetUnconfirmedWatchOnlyBalance() const;
     CAmount GetImmatureWatchOnlyBalance() const;
-    CAmount GetLegacyBalance(const isminefilter& filter, int minDepth, const bool& fDenominated = false) const;
+    CAmount GetLegacyBalance(const isminefilter& filter, int minDepth) const;
     CAmount GetAvailableBalance(const CCoinControl* coinControl = nullptr) const;
 
     CAmount GetDenominatedBalance(int nDepth = 0) const;
@@ -1105,7 +1098,7 @@ public:
     bool IsMine(const CTransaction& tx) const;
     /** should probably be renamed to IsRelevantToMe */
     bool IsFromMe(const CTransaction& tx) const;
-    CAmount GetDebit(const CTransaction& tx, const isminefilter& filter, const bool& fDenom = false) const;
+    CAmount GetDebit(const CTransaction& tx, const isminefilter& filter) const;
     /** Returns whether all of the inputs match the filter */
     bool IsAllFromMe(const CTransaction& tx, const isminefilter& filter) const;
     CAmount GetCredit(const CTransaction& tx, const isminefilter& filter) const;

@@ -200,7 +200,6 @@ void CCoinJoinServer::ProcessModuleMessage(CNode* pfrom, const std::string& strC
 
         if (AddEntry(entry, nMessageID)) {
             PushStatus(pfrom, STATUS_ACCEPTED, nMessageID, connman);
-            CheckPool(connman);
             RelayStatus(STATUS_ACCEPTED, connman);
         } else {
             PushStatus(pfrom, STATUS_REJECTED, nMessageID, connman);
@@ -227,6 +226,8 @@ void CCoinJoinServer::ProcessModuleMessage(CNode* pfrom, const std::string& strC
         LogPrint(BCLog::CJOIN, "CJSIGNFINALTX -- received transaction %s from %s\n", ptx.tx->GetHash().ToString(), pfrom->addr.ToStringIPPort());
 
         LOCK(cs_coinjoin);
+        // wrong transaction? just ignore it
+        if (finalPartiallySignedTransaction.tx->GetHash() != ptx.tx->GetHash()) return;
         if (!finalPartiallySignedTransaction.Merge(ptx)) {
             // notify everyone else that this session should be terminated
             for (const auto& entry : vecEntries) {
@@ -287,6 +288,7 @@ void CCoinJoinServer::CheckPool(CConnman* connman)
     // If entries are full, create finalized transaction
     if (nState == POOL_STATE_ACCEPTING_ENTRIES && static_cast<unsigned int>(GetEntriesCount()) >= CCoinJoin::GetMinPoolInputs()) {
         LogPrint(BCLog::CJOIN, "CCoinJoinServer::CheckPool -- FINALIZE TRANSACTIONS\n");
+        SetState(POOL_STATE_SIGNING);
         CreateFinalTransaction(connman);
         return;
     }
@@ -527,7 +529,7 @@ bool CCoinJoinServer::AddEntry(const CCoinJoinEntry& entryNew, PoolMessage& nMes
 {
     if (!fMasternodeMode) return false;
 
-    if (static_cast<unsigned int>(GetEntriesCount()) >= CCoinJoin::GetMaxPoolInputs()) {
+    if (static_cast<unsigned int>(GetEntriesCount()) >= CCoinJoin::GetMaxPoolInputs() || GetState() != POOL_STATE_ACCEPTING_ENTRIES) {
         LogPrint(BCLog::CJOIN, "CCoinJoinServer::AddEntry -- entries is full!\n");
         nMessageIDRet = ERR_ENTRIES_FULL;
         return false;
@@ -746,6 +748,7 @@ void CCoinJoinServer::UpdatedBlockTip(const CBlockIndex *pindexNew) {
     if (!masternodeSync.IsBlockchainSynced())
         return;
 
+    CheckPool(g_connman.get());
     CheckTimeout(nCachedBlockHeight);
 }
 

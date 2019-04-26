@@ -340,11 +340,11 @@ private:
     CCoinJoin& operator= (CCoinJoin const&) = delete;
 
 public:
-    static bool IsDenominatedAmount(CAmount nInputAmount);
+    static bool IsDenominatedAmount(const CAmount& nInputAmount);
     static CAmount GetDenomRange();
     static bool IsInDenomRange(const CAmount& nAmount);
 
-    static std::string GetDenominationsToString(CAmount nDenom);
+    static std::string GetDenominationsToString(const CAmount& nDenom);
 
     static std::string GetMessageByID(PoolMessage nMessageID);
 

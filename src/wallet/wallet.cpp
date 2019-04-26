@@ -2397,6 +2397,33 @@ CAmount CWallet::GetLegacyBalance(const isminefilter& filter, int minDepth) cons
     return balance;
 }
 
+CAmount CWallet::GetLegacyDenomBalance() const
+{
+    LockAnnotation lock(::cs_main); // Temporary, for CheckFinalTx below. Removed in upcoming commit.
+    auto locked_chain = chain().lock();
+    LOCK(cs_wallet);
+
+    CAmount balance = 0;
+    for (const auto& entry : mapWallet) {
+        const CWalletTx& wtx = entry.second;
+        const int depth = wtx.GetDepthInMainChain(*locked_chain);
+        if (depth < 0 || !CheckFinalTx(*wtx.tx) || wtx.IsImmatureCoinBase(*locked_chain)) {
+            continue;
+        }
+
+        // Loop through tx outputs and add incoming payments.
+        for (unsigned int i = 0; i < wtx.tx->vout.size(); i++) {
+            if (IsMine(wtx.tx->vout[i]) & ISMINE_SPENDABLE) {
+                if (!IsSpent(*locked_chain, wtx.tx->GetHash(), i)) {
+                    balance += CCoinJoin::IsDenominatedAmount(wtx.tx->vout[i].nValue) ? wtx.tx->vout[i].nValue : 0;
+                }
+            }
+        }
+    }
+
+    return balance;
+}
+
 CAmount CWallet::GetAvailableBalance(const CCoinControl* coinControl) const
 {
     auto locked_chain = chain().lock();

@@ -998,6 +998,7 @@ public:
     CAmount GetUnconfirmedWatchOnlyBalance() const;
     CAmount GetImmatureWatchOnlyBalance() const;
     CAmount GetLegacyBalance(const isminefilter& filter, int minDepth) const;
+    CAmount GetLegacyDenomBalance() const;
     CAmount GetAvailableBalance(const CCoinControl* coinControl = nullptr) const;
 
     CAmount GetDenominatedBalance(int nDepth = 0) const;

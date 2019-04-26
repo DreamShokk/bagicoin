@@ -256,7 +256,7 @@ std::string CCoinJoinBaseSession::GetStateString() const
 
 
 /*  Check for the nDenom inside boundaries and return a string*/
-std::string CCoinJoin::GetDenominationsToString(CAmount nDenom)
+std::string CCoinJoin::GetDenominationsToString(const CAmount& nDenom)
 {
     std::string strDenom = "";
 
@@ -294,7 +294,7 @@ bool CCoinJoin::IsInDenomRange(const CAmount& nAmount)
 
 }
 
-bool CCoinJoin::IsDenominatedAmount(CAmount nInputAmount)
+bool CCoinJoin::IsDenominatedAmount(const CAmount& nInputAmount)
 {
     for (auto denom = COINJOIN_LOW_DENOM; denom <= COINJOIN_HIGH_DENOM; denom <<=1) {
         if(nInputAmount == denom) {

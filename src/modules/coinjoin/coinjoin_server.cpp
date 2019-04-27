@@ -147,7 +147,7 @@ void CCoinJoinServer::ProcessModuleMessage(CNode* pfrom, const std::string& strC
             return;
         }
 
-        if (!CheckSessionMessage(pfrom, connman)) return;
+        if (!CheckSessionMessage(POOL_STATE_ACCEPTING_ENTRIES, pfrom, connman)) return;
 
         CCoinJoinEntry entry;
         vRecv >> entry;
@@ -208,7 +208,7 @@ void CCoinJoinServer::ProcessModuleMessage(CNode* pfrom, const std::string& strC
             return;
         }
 
-        if (!CheckSessionMessage(pfrom, connman)) return;
+        if (!CheckSessionMessage(POOL_STATE_SIGNING, pfrom, connman)) return;
 
         PartiallySignedTransaction ptx(deserialize, vRecv);
 
@@ -236,18 +236,24 @@ void CCoinJoinServer::ProcessModuleMessage(CNode* pfrom, const std::string& strC
     }
 }
 
-bool CCoinJoinServer::CheckSessionMessage(CNode* pfrom, CConnman* connman) {
-    // check if it's still valid
+bool CCoinJoinServer::CheckSessionMessage(PoolState state, CNode* pfrom, CConnman* connman) {
+    // right state?
+    if (GetState() != state) { // our queue but already closed
+        LogPrintf("CCoinJoinServer::CheckSessionMessage -- incorrect pool state!\n");
+        PushStatus(pfrom, STATUS_REJECTED, ERR_SESSION, connman);
+        return false;
+    }
+    // make sure it's really our session
     LOCK(cs_vecqueue);
     for (std::vector<CCoinJoinQueue>::iterator it = vecCoinJoinQueue.begin(); it!=vecCoinJoinQueue.end(); ++it) {
         if (it!=vecCoinJoinQueue.end() && it->masternodeOutpoint == activeMasternode.outpoint) {
-            if (!it->fOpen && !it->fReady) { // our queue but already closed
-                LogPrintf("CCoinJoinServer::CheckSessionMessage -- session not complete!\n");
+            if (it->fOpen == it->fReady) { // our queue but already closed
+                LogPrintf("CCoinJoinServer::CheckSessionMessage -- queue not ready or open!\n");
                 PushStatus(pfrom, STATUS_REJECTED, ERR_SESSION, connman);
                 return false;
             }
         } else { // queue already removed
-            LogPrintf("CCoinJoinServer::CheckSessionMessage -- session not complete!\n");
+            LogPrintf("CCoinJoinServer::CheckSessionMessage -- session removed!\n");
             PushStatus(pfrom, STATUS_REJECTED, ERR_SESSION, connman);
             return false;
         }
@@ -255,7 +261,7 @@ bool CCoinJoinServer::CheckSessionMessage(CNode* pfrom, CConnman* connman) {
 
     //do we have enough users in the current session?
     if (!IsSessionReady()) {
-        LogPrintf("CCoinJoinServer::CheckSessionMessage -- session not complete!\n");
+        LogPrintf("CCoinJoinServer::CheckSessionMessage -- session not ready!\n");
         PushStatus(pfrom, STATUS_REJECTED, ERR_SESSION, connman);
         return false;
     }

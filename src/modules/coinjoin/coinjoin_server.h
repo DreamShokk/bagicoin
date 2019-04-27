@@ -35,7 +35,7 @@ private:
     void CheckPool(CConnman* connman);
 
     /// Check Session
-    bool CheckSessionMessage(CNode* pnode, CConnman* connman);
+    bool CheckSessionMessage(PoolState state, CNode* pnode, CConnman* connman);
 
     void CreateFinalTransaction(CConnman* connman);
     void CommitFinalTransaction(CConnman* connman);

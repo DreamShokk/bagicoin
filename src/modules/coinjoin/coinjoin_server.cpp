@@ -88,8 +88,6 @@ void CCoinJoinServer::ProcessModuleMessage(CNode* pfrom, const std::string& strC
         }
 
     } else if (strCommand == NetMsgType::CJQUEUE) {
-        LOCK(cs_vecqueue);
-
         if (pfrom->GetSendVersion() < MIN_COINJOIN_PEER_PROTO_VERSION) {
             LogPrint(BCLog::CJOIN, "CJQUEUE -- peer=%d using obsolete version %i\n", pfrom->GetId(), pfrom->GetSendVersion());
             connman->PushMessage(pfrom, CNetMsgMaker(pfrom->GetSendVersion()).Make(NetMsgType::REJECT, strCommand, REJECT_OBSOLETE,
@@ -103,6 +101,7 @@ void CCoinJoinServer::ProcessModuleMessage(CNode* pfrom, const std::string& strC
         if (queue.IsExpired(nCachedBlockHeight)) return;
 
         // process every queue only once
+        LOCK(cs_vecqueue);
         for (std::vector<CCoinJoinQueue>::iterator it = vecCoinJoinQueue.begin(); it!=vecCoinJoinQueue.end(); ++it) {
             if (*it == queue) {
                 LogPrint(BCLog::CJOIN, "CJQUEUE -- %s seen\n", queue.ToString());
@@ -239,6 +238,7 @@ void CCoinJoinServer::ProcessModuleMessage(CNode* pfrom, const std::string& strC
 
 bool CCoinJoinServer::CheckSessionMessage(CNode* pfrom, CConnman* connman) {
     // check if it's still valid
+    LOCK(cs_vecqueue);
     for (std::vector<CCoinJoinQueue>::iterator it = vecCoinJoinQueue.begin(); it!=vecCoinJoinQueue.end(); ++it) {
         if (it!=vecCoinJoinQueue.end() && it->masternodeOutpoint == activeMasternode.outpoint) {
             if (!it->fOpen && !it->fReady) { // our queue but already closed

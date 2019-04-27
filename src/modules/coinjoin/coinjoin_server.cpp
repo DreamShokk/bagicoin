@@ -148,27 +148,7 @@ void CCoinJoinServer::ProcessModuleMessage(CNode* pfrom, const std::string& strC
             return;
         }
 
-        // check if it's still valid
-        for (std::vector<CCoinJoinQueue>::iterator it = vecCoinJoinQueue.begin(); it!=vecCoinJoinQueue.end(); ++it) {
-            if (it!=vecCoinJoinQueue.end() && it->masternodeOutpoint == activeMasternode.outpoint) {
-                if (!it->fOpen && !it->fReady) { // our queue but already closed
-                    LogPrintf("CJTXIN -- session not complete!\n");
-                    PushStatus(pfrom, STATUS_REJECTED, ERR_SESSION, connman);
-                    return;
-                }
-            } else { // queue already removed
-                LogPrintf("CJTXIN -- session not complete!\n");
-                PushStatus(pfrom, STATUS_REJECTED, ERR_SESSION, connman);
-                return;
-            }
-        }
-
-        //do we have enough users in the current session?
-        if (!IsSessionReady()) {
-            LogPrintf("CJTXIN -- session not complete!\n");
-            PushStatus(pfrom, STATUS_REJECTED, ERR_SESSION, connman);
-            return;
-        }
+        if (!CheckSessionMessage(pfrom, connman)) return;
 
         CCoinJoinEntry entry;
         vRecv >> entry;
@@ -229,27 +209,7 @@ void CCoinJoinServer::ProcessModuleMessage(CNode* pfrom, const std::string& strC
             return;
         }
 
-        // check if it's still valid
-        for (std::vector<CCoinJoinQueue>::iterator it = vecCoinJoinQueue.begin(); it!=vecCoinJoinQueue.end(); ++it) {
-            if (it!=vecCoinJoinQueue.end() && it->masternodeOutpoint == activeMasternode.outpoint) {
-                if (!it->fOpen && !it->fReady) { // our queue but already closed
-                    LogPrintf("CJSIGNFINALTX -- session not complete!\n");
-                    PushStatus(pfrom, STATUS_REJECTED, ERR_SESSION, connman);
-                    return;
-                }
-            } else { // queue already removed
-                LogPrintf("CJSIGNFINALTX -- session not complete!\n");
-                PushStatus(pfrom, STATUS_REJECTED, ERR_SESSION, connman);
-                return;
-            }
-        }
-
-        //do we have enough users in the current session?
-        if (!IsSessionReady()) {
-            LogPrintf("CJSIGNFINALTX -- session not complete!\n");
-            PushStatus(pfrom, STATUS_REJECTED, ERR_SESSION, connman);
-            return;
-        }
+        if (!CheckSessionMessage(pfrom, connman)) return;
 
         PartiallySignedTransaction ptx(deserialize, vRecv);
 
@@ -275,6 +235,31 @@ void CCoinJoinServer::ProcessModuleMessage(CNode* pfrom, const std::string& strC
             CommitFinalTransaction(connman);
         }
     }
+}
+
+bool CCoinJoinServer::CheckSessionMessage(CNode* pfrom, CConnman* connman) {
+    // check if it's still valid
+    for (std::vector<CCoinJoinQueue>::iterator it = vecCoinJoinQueue.begin(); it!=vecCoinJoinQueue.end(); ++it) {
+        if (it!=vecCoinJoinQueue.end() && it->masternodeOutpoint == activeMasternode.outpoint) {
+            if (!it->fOpen && !it->fReady) { // our queue but already closed
+                LogPrintf("CCoinJoinServer::CheckSessionMessage -- session not complete!\n");
+                PushStatus(pfrom, STATUS_REJECTED, ERR_SESSION, connman);
+                return false;
+            }
+        } else { // queue already removed
+            LogPrintf("CCoinJoinServer::CheckSessionMessage -- session not complete!\n");
+            PushStatus(pfrom, STATUS_REJECTED, ERR_SESSION, connman);
+            return false;
+        }
+    }
+
+    //do we have enough users in the current session?
+    if (!IsSessionReady()) {
+        LogPrintf("CCoinJoinServer::CheckSessionMessage -- session not complete!\n");
+        PushStatus(pfrom, STATUS_REJECTED, ERR_SESSION, connman);
+        return false;
+    }
+    return true;
 }
 
 void CCoinJoinServer::CloseQueue()

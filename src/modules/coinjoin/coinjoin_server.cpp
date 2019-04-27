@@ -271,6 +271,7 @@ void CCoinJoinServer::CloseQueue(bool fAll)
     // notify the network about the closed queue
     for (std::vector<CCoinJoinQueue>::iterator it = vecCoinJoinQueue.begin(); it!=vecCoinJoinQueue.end(); ++it) {
         if (it!=vecCoinJoinQueue.end() && it->masternodeOutpoint == activeMasternode.outpoint) {
+            LogPrint(BCLog::CJOIN, "CCoinJoinServer::CloseQueue --- closing: %s\n", it->ToString());
             if (!it->IsExpired(nCachedBlockHeight)) {
                 CCoinJoinQueue queue(*it);
                 queue.fOpen = false;

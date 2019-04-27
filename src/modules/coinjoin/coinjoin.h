@@ -28,6 +28,8 @@ static const CAmount COINJOIN_LOW_DENOM = COINJOIN_BASE_DENOM >> COINJOIN_MAX_SH
 static const int COINJOIN_QUEUE_TIMEOUT          = 600;
 // time for all participants to sign
 static const int COINJOIN_SIGNING_TIMEOUT        = 30;
+// timeout for nodes to submit their tx
+static const int COINJOIN_ACCEPT_TIMEOUT         = 60;
 // timeout for queues in blocks
 static const int COINJOIN_DEFAULT_TIMEOUT        = 10;
 

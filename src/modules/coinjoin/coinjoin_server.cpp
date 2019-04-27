@@ -537,11 +537,12 @@ void CCoinJoinServer::CheckForCompleteQueue(CConnman* connman)
 
     if (nState == POOL_STATE_QUEUE && IsSessionReady()) {
         SetState(POOL_STATE_ACCEPTING_ENTRIES);
-
         CCoinJoinQueue queue(nSessionDenom, activeMasternode.outpoint, nCachedBlockHeight, true, false);
         LogPrint(BCLog::CJOIN, "CCoinJoinServer::CheckForCompleteQueue -- queue is ready, signing and relaying (%s)\n", queue.ToString());
         queue.Sign();
         queue.Relay(connman);
+        LOCK(cs_vecqueue);
+        vecCoinJoinQueue.push_back(queue);
     }
 }
 

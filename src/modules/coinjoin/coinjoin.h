@@ -316,7 +316,7 @@ protected:
     mutable CCriticalSection cs_vecqueue;
 
     // The current mixing sessions in progress on the network
-    std::vector<CCoinJoinQueue> vecCoinJoinQueue;
+    std::vector<CCoinJoinQueue> vecCoinJoinQueue GUARDED_BY(cs_vecqueue);
 
     void SetNull();
     void CheckQueue(int nHeight);
@@ -325,7 +325,10 @@ public:
     CCoinJoinBaseManager() :
         vecCoinJoinQueue() {}
 
-    int GetQueueSize() const { return vecCoinJoinQueue.size(); }
+    int GetQueueSize() const {
+        LOCK(cs_vecqueue);
+        return vecCoinJoinQueue.size();
+    }
     bool GetQueueItem(CCoinJoinQueue& queueRet);
 };
 

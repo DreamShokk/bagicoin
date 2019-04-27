@@ -265,7 +265,7 @@ bool CCoinJoinServer::CheckSessionMessage(PoolState state, CNode* pfrom, CConnma
     return true;
 }
 
-void CCoinJoinServer::CloseQueue()
+void CCoinJoinServer::CloseQueue(bool fAll)
 {
     LOCK(cs_vecqueue);
     // notify the network about the closed queue
@@ -277,8 +277,8 @@ void CCoinJoinServer::CloseQueue()
                 queue.Sign();
                 queue.Relay(g_connman.get());
             }
-            vecCoinJoinQueue.erase(it);
-            break;
+            vecCoinJoinQueue.erase(it--);
+            if (!fAll) break;
         }
     }
 }
@@ -287,7 +287,7 @@ void CCoinJoinServer::CloseQueue()
 void CCoinJoinServer::SetNull()
 {
     // MN side
-    CloseQueue();
+    CloseQueue(true);
 
     LOCK(cs_vecqueue);
 

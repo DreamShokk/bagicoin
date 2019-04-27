@@ -195,6 +195,7 @@ void CCoinJoinServer::ProcessModuleMessage(CNode* pfrom, const std::string& strC
         if (AddEntry(entry, nMessageID)) {
             PushStatus(pfrom, STATUS_ACCEPTED, nMessageID, connman);
             RelayStatus(STATUS_ACCEPTED, connman);
+            CheckPool(connman);
         } else {
             PushStatus(pfrom, STATUS_REJECTED, nMessageID, connman);
         }
@@ -307,7 +308,12 @@ void CCoinJoinServer::CheckPool(CConnman* connman)
     LogPrint(BCLog::CJOIN, "CCoinJoinServer::CheckPool -- entries count %lu\n", GetEntriesCount());
 
     // If entries are full, create finalized transaction
-    if (nState == POOL_STATE_ACCEPTING_ENTRIES && static_cast<unsigned int>(GetEntriesCount()) >= CCoinJoin::GetMinPoolInputs()) {
+    // wait a while for all to join, otherwise just go ahead
+    bool fReady = false;
+    if (static_cast<unsigned int>(GetEntriesCount()) >= vecDenom.size()) fReady = true;
+    if (GetTime() - nTimeLastSuccessfulStep >= COINJOIN_ACCEPT_TIMEOUT && static_cast<unsigned int>(GetEntriesCount()) >= CCoinJoin::GetMinPoolInputs()) fReady = true;
+
+    if (GetState() == POOL_STATE_ACCEPTING_ENTRIES && fReady) {
         LogPrint(BCLog::CJOIN, "CCoinJoinServer::CheckPool -- FINALIZE TRANSACTIONS\n");
         SetState(POOL_STATE_SIGNING);
         CreateFinalTransaction(connman);

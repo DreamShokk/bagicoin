@@ -1255,6 +1255,7 @@ void CWallet::TransactionRemovedFromMempool(const CTransactionRef &ptx) {
 }
 
 void CWallet::BlockConnected(const std::shared_ptr<const CBlock>& pblock, const CBlockIndex *pindex, const std::vector<CTransactionRef>& vtxConflicted) {
+    int nHeight {0};
     {
         auto locked_chain = chain().lock();
         LOCK(cs_wallet);
@@ -1276,8 +1277,9 @@ void CWallet::BlockConnected(const std::shared_ptr<const CBlock>& pblock, const 
         }
 
         m_last_block_processed = pindex->GetBlockHash();
+        nHeight = pindex->nHeight;
     }
-    coinjoinClient->UpdatedBlockTip(pindex->nHeight);
+    coinjoinClient->UpdatedBlockTip(nHeight);
 }
 
 void CWallet::BlockDisconnected(const std::shared_ptr<const CBlock>& pblock) {

@@ -1445,6 +1445,7 @@ bool CCoinJoinClientManager::CreateDenominated(const CAmount& nValue, std::vecto
     {
         size_t tx_size = 3 + GetRand(15);
         for (auto denom = COINJOIN_LOW_DENOM; denom <= COINJOIN_HIGH_DENOM; denom <<= 1) {
+            if (nValueLeft < denom) break;
             int64_t count = 0;
             auto target = denom == COINJOIN_LOW_DENOM ? feetarget : normtarget;
             for (const auto& amount : vecAmounts) {
@@ -1453,6 +1454,7 @@ bool CCoinJoinClientManager::CreateDenominated(const CAmount& nValue, std::vecto
             }
             if (count >= target) continue;
             for (std::vector<std::pair<CTxIn, CTxOut> >::iterator it = portfolio.begin(); it == portfolio.end(); it++) {
+                if (nValueLeft < denom) break;
                 if (it != portfolio.end() && it->second.nValue < denom) continue;
                 if (it != portfolio.end() && it->second.nValue == denom) count++;
                 else { // missing denoms
@@ -1479,7 +1481,8 @@ bool CCoinJoinClientManager::CreateDenominated(const CAmount& nValue, std::vecto
 
         // add the remainder
         for (auto denom = COINJOIN_HIGH_DENOM; denom >= COINJOIN_LOW_DENOM; denom >>= 1) {
-            if(nValueLeft >= denom  && mtx.vout.size() < tx_size) {
+            if (nValueLeft == 0) break;
+            if (nValueLeft >= denom  && mtx.vout.size() < tx_size) {
                 std::shared_ptr<CReserveScript> scriptDenom = std::make_shared<CReserveScript>();
                 keyHolderStorageDenom.AddKey(scriptDenom, m_wallet);
 

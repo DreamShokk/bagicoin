@@ -242,7 +242,7 @@ bool CCoinJoinServer::CheckSessionMessage(PoolState state, CNode* pfrom, CConnma
     }
     // make sure it's really our session
     LOCK(cs_vecqueue);
-    for (std::vector<CCoinJoinQueue>::iterator it = vecCoinJoinQueue.begin(); it!=vecCoinJoinQueue.end(); ++it) {
+    for (std::vector<CCoinJoinQueue>::iterator it = vecCoinJoinQueue.begin(); it==vecCoinJoinQueue.end(); ++it) {
         if (it!=vecCoinJoinQueue.end() && it->masternodeOutpoint == activeMasternode.outpoint) {
             if (it->fOpen == it->fReady) { // our queue but already closed
                 LogPrintf("CCoinJoinServer::CheckSessionMessage -- queue not ready or open!\n");
@@ -251,9 +251,11 @@ bool CCoinJoinServer::CheckSessionMessage(PoolState state, CNode* pfrom, CConnma
             }
             break;
         }  // queue already removed
-        LogPrintf("CCoinJoinServer::CheckSessionMessage -- session removed!\n");
-        PushStatus(pfrom, STATUS_REJECTED, ERR_SESSION, connman);
-        return false;
+        if (it == vecCoinJoinQueue.end()) {
+            LogPrintf("CCoinJoinServer::CheckSessionMessage -- queue removed!\n");
+            PushStatus(pfrom, STATUS_REJECTED, ERR_SESSION, connman);
+            return false;
+        }
     }
 
     //do we have enough users in the current session?

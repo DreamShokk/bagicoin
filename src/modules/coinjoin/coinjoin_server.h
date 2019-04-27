@@ -60,7 +60,7 @@ private:
     void RelayCompletedTransaction(PoolMessage nMessageID, CConnman* connman);
 
     void ClientTask(CConnman* connman);
-    void CloseQueue();
+    void CloseQueue(bool fAll = false);
     void SetNull();
 
 public:

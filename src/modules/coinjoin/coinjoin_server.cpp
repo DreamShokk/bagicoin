@@ -58,17 +58,13 @@ void CCoinJoinServer::ProcessModuleMessage(CNode* pfrom, const std::string& strC
         }
 
         if (vecDenom.size() == 0) {
-            {
-                TRY_LOCK(cs_vecqueue, lockRecv);
-                if (!lockRecv) return;
-
-                for (const auto& q : vecCoinJoinQueue) {
-                    if (q.masternodeOutpoint == activeMasternode.outpoint) {
-                        // refuse to create another queue this often
-                        LogPrint(BCLog::CJOIN, "CJACCEPT -- last dsq is still in queue, refuse to mix\n");
-                        PushStatus(pfrom, STATUS_REJECTED, ERR_RECENT, connman);
-                        return;
-                    }
+            LOCK(cs_vecqueue);
+            for (const auto& q : vecCoinJoinQueue) {
+                if (q.masternodeOutpoint == activeMasternode.outpoint) {
+                    // refuse to create another queue this often
+                    LogPrint(BCLog::CJOIN, "CJACCEPT -- last dsq is still in queue, refuse to mix\n");
+                    PushStatus(pfrom, STATUS_REJECTED, ERR_RECENT, connman);
+                    return;
                 }
             }
         }
@@ -253,11 +249,11 @@ bool CCoinJoinServer::CheckSessionMessage(PoolState state, CNode* pfrom, CConnma
                 PushStatus(pfrom, STATUS_REJECTED, ERR_SESSION, connman);
                 return false;
             }
-        } else { // queue already removed
-            LogPrintf("CCoinJoinServer::CheckSessionMessage -- session removed!\n");
-            PushStatus(pfrom, STATUS_REJECTED, ERR_SESSION, connman);
-            return false;
-        }
+            break;
+        }  // queue already removed
+        LogPrintf("CCoinJoinServer::CheckSessionMessage -- session removed!\n");
+        PushStatus(pfrom, STATUS_REJECTED, ERR_SESSION, connman);
+        return false;
     }
 
     //do we have enough users in the current session?

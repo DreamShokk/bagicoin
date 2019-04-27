@@ -634,20 +634,20 @@ bool CCoinJoinServer::CreateNewSession(const CAmount& nDenom, PoolMessage& nMess
 
 bool CCoinJoinServer::AddUserToExistingSession(const CAmount& nDenom, PoolMessage& nMessageIDRet)
 {
-    if (!fMasternodeMode || nSessionID == 0 || IsSessionReady()) return false;
+    if (!fMasternodeMode || nSessionID == 0) return false;
 
     LOCK(cs_coinjoin);
-
-    if (!CCoinJoin::IsInDenomRange(nDenom)) {
-        LogPrint(BCLog::CJOIN, "CCoinJoinServer::%s -- denom not valid!\n", __func__);
-        nMessageIDRet = ERR_DENOM;
-        return false;
-    }
 
     // we only add new users to an existing session when we are in queue mode
     if (nState != POOL_STATE_QUEUE) {
         nMessageIDRet = ERR_MODE;
         LogPrintf("CCoinJoinServer::AddUserToExistingSession -- incompatible mode: nState=%d\n", nState);
+        return false;
+    }
+
+    if (!CCoinJoin::IsInDenomRange(nDenom)) {
+        LogPrint(BCLog::CJOIN, "CCoinJoinServer::%s -- denom not valid!\n", __func__);
+        nMessageIDRet = ERR_DENOM;
         return false;
     }
 

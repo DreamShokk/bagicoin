@@ -188,7 +188,7 @@ private:
     void UnlockCoins();
 
     /// Create denominations
-    bool CreateDenominated(const CAmount& nValue);
+    bool CreateDenominated(const CAmount& nValue, std::vector<CAmount>& vecAmounts);
 
     /// Check if mixing is needed
     bool IsMixingRequired(std::vector<std::pair<CTxIn, CTxOut> >& portfolio, std::vector<CAmount>& vecAmounts, bool& fMixOnly);

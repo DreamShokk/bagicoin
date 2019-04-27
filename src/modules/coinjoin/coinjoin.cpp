@@ -118,6 +118,7 @@ void CCoinJoinBaseSession::SetNull()
     nState = POOL_STATE_IDLE;
     nSessionID = 0;
     nSessionDenom = 0;
+    vecEntries.clear();
     finalPartiallySignedTransaction = PartiallySignedTransaction();
     nTimeLastSuccessfulStep = GetTime();
 }

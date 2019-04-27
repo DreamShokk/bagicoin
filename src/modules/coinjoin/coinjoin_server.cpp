@@ -540,9 +540,9 @@ void CCoinJoinServer::CheckForCompleteQueue(CConnman* connman)
         CCoinJoinQueue queue(nSessionDenom, activeMasternode.outpoint, nCachedBlockHeight, true, false);
         LogPrint(BCLog::CJOIN, "CCoinJoinServer::CheckForCompleteQueue -- queue is ready, signing and relaying (%s)\n", queue.ToString());
         queue.Sign();
-        queue.Relay(connman);
         LOCK(cs_vecqueue);
         vecCoinJoinQueue.push_back(queue);
+        queue.Relay(connman);
     }
 }
 
@@ -621,9 +621,9 @@ bool CCoinJoinServer::CreateNewSession(const CAmount& nDenom, PoolMessage& nMess
         CCoinJoinQueue queue(nDenom, activeMasternode.outpoint, nCachedBlockHeight, false, true);
         LogPrint(BCLog::CJOIN, "CCoinJoinServer::CreateNewSession -- signing and relaying new queue: %s\n", queue.ToString());
         queue.Sign();
-        queue.Relay(connman);
         LOCK(cs_vecqueue);
         vecCoinJoinQueue.push_back(queue);
+        queue.Relay(connman);
     }
 
     vecDenom.push_back(nSessionDenom);

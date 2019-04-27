@@ -57,7 +57,7 @@ void CCoinJoinServer::ProcessModuleMessage(CNode* pfrom, const std::string& strC
             return;
         }
 
-        if (vecDenom.size() == 0) {
+        if (vecDenom.empty()) {
             LOCK(cs_vecqueue);
             for (const auto& q : vecCoinJoinQueue) {
                 if (q.masternodeOutpoint == activeMasternode.outpoint) {
@@ -271,12 +271,14 @@ void CCoinJoinServer::CloseQueue()
     // notify the network about the closed queue
     for (std::vector<CCoinJoinQueue>::iterator it = vecCoinJoinQueue.begin(); it!=vecCoinJoinQueue.end(); ++it) {
         if (it!=vecCoinJoinQueue.end() && it->masternodeOutpoint == activeMasternode.outpoint) {
-            if (it->IsExpired(nCachedBlockHeight)) break;
-            CCoinJoinQueue queue(*it);
-            queue.fOpen = false;
-            queue.Sign();
-            queue.Relay(g_connman.get());
-            vecCoinJoinQueue.erase(it--);
+            if (!it->IsExpired(nCachedBlockHeight)) {
+                CCoinJoinQueue queue(*it);
+                queue.fOpen = false;
+                queue.Sign();
+                queue.Relay(g_connman.get());
+            }
+            vecCoinJoinQueue.erase(it);
+            break;
         }
     }
 }
@@ -310,6 +312,8 @@ void CCoinJoinServer::CheckPool(CConnman* connman)
     if (GetTime() - nTimeLastSuccessfulStep >= COINJOIN_ACCEPT_TIMEOUT && static_cast<unsigned int>(GetEntriesCount()) >= CCoinJoin::GetMinPoolInputs()) fReady = true;
 
     if (GetState() == POOL_STATE_ACCEPTING_ENTRIES && fReady) {
+        // close our not-ready queue. Note: vecCoinJoinQueue is in chronological order, the ready queue remains
+        CloseQueue();
         LogPrint(BCLog::CJOIN, "CCoinJoinServer::CheckPool -- FINALIZE TRANSACTIONS\n");
         SetState(POOL_STATE_SIGNING);
         CreateFinalTransaction(connman);

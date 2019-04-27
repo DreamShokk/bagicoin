@@ -135,7 +135,7 @@ void CCoinJoinBaseManager::CheckQueue(int nHeight)
 
     // check mixing queue objects for timeouts
     for (std::vector<CCoinJoinQueue>::iterator it = vecCoinJoinQueue.begin(); it!=vecCoinJoinQueue.end(); ++it) {
-        if (it->IsExpired(nHeight)) {
+        if (it!=vecCoinJoinQueue.end() && it->IsExpired(nHeight)) {
             LogPrint(BCLog::CJOIN, "CCoinJoinBase::%s -- Removing expired queue (%s)\n", __func__, it->ToString());
             vecCoinJoinQueue.erase(it--);
         }

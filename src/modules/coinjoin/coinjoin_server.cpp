@@ -647,7 +647,7 @@ bool CCoinJoinServer::AddUserToExistingSession(const CAmount& nDenom, PoolMessag
     LOCK(cs_coinjoin);
 
     // we only add new users to an existing session when we are in queue mode
-    if (GetState() < POOL_STATE_QUEUE || GetState() > POOL_STATE_ACCEPTING_ENTRIES) {
+    if (GetState() != POOL_STATE_QUEUE && GetState() != POOL_STATE_ACCEPTING_ENTRIES) {
         nMessageIDRet = ERR_MODE;
         LogPrintf("CCoinJoinServer::AddUserToExistingSession -- incompatible mode: nState=%d\n", GetStateString());
         return false;

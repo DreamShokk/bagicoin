@@ -673,7 +673,7 @@ bool CCoinJoinServer::AddUserToExistingSession(const CAmount& nDenom, PoolMessag
     nTimeLastSuccessfulStep = GetTime();
     vecDenom.push_back(nSessionDenom);
 
-    LogPrintf("CCoinJoinServer::AddUserToExistingSession -- new user accepted, nSessionID: %d  nSessionDenom: %d (%s)  vecSessionCollaterals.size(): %d\n",
+    LogPrintf("CCoinJoinServer::AddUserToExistingSession -- new user accepted, nSessionID: %d  nSessionDenom: %d (%s)  vecDenom.size(): %d\n",
             nSessionID, nSessionDenom, CCoinJoin::GetDenominationsToString(nSessionDenom), vecDenom.size());
 
     return true;

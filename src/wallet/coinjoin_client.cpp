@@ -110,7 +110,7 @@ void CCoinJoinClientManager::ProcessMessage(CNode* pfrom, const std::string& str
         // process every queue only once
         for (std::vector<CCoinJoinQueue>::iterator it = vecCoinJoinQueue.begin(); it!=vecCoinJoinQueue.end(); ++it) {
             if (*it == queue) {
-                LogPrint(BCLog::CJOIN, "%s CJQUEUE -- %s %s\n", m_wallet->GetDisplayName(), queue.ToString(), queue.fOpen ? strprintf("removed") : strprintf("seen"));
+                LogPrint(BCLog::CJOIN, "%s CJQUEUE -- %s %s\n", m_wallet->GetDisplayName(), queue.ToString(), queue.fOpen ? strprintf("seen") : strprintf("removed"));
                 if (!queue.fOpen) {
                     vecCoinJoinQueue.erase(it--);
                     queue.Relay(connman);

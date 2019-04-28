@@ -100,7 +100,7 @@ void CCoinJoinServer::ProcessModuleMessage(CNode* pfrom, const std::string& strC
         LOCK(cs_vecqueue);
         for (std::vector<CCoinJoinQueue>::iterator it = vecCoinJoinQueue.begin(); it!=vecCoinJoinQueue.end(); ++it) {
             if (*it == queue) {
-                LogPrint(BCLog::CJOIN, "CJQUEUE -- %s %s\n", queue.ToString(), queue.fOpen ? strprintf("removed") : strprintf("seen"));
+                LogPrint(BCLog::CJOIN, "CJQUEUE -- %s %s\n", queue.ToString(), queue.fOpen ? strprintf("seen") : strprintf("removed"));
                 if (!queue.fOpen) {
                     vecCoinJoinQueue.erase(it--);
                     queue.Relay(connman);

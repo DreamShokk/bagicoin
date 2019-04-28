@@ -837,7 +837,7 @@ bool CCoinJoinClientSession::CreateSessionTransaction(std::vector<std::pair<CTxI
     CAmount nValueRem = 0;
 
     for (std::vector<std::pair<CTxIn, CTxOut> >::iterator it = vecPair.begin(); it != vecPair.end(); it++) {
-        if (mtxSession.vin.size() >= COINJOIN_ENTRY_MAX_SIZE)  break;
+        if (mtxSession.vin.size() >= COINJOIN_ENTRY_MAX_SIZE - 10)  break;
 
         vecOutPointLocked.emplace_back(it->first.prevout);
         mtxSession.vin.emplace_back(it->first);

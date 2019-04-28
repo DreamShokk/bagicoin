@@ -17,6 +17,7 @@
 #include <wallet/fees.h>
 #include <wallet/psbtwallet.h>
 
+#include <numeric>
 #include <memory>
 
 void CKeyHolderStorage::AddKey(std::shared_ptr<CReserveScript> &script, CWallet* pwalletIn)
@@ -655,10 +656,7 @@ void CCoinJoinClientManager::UpdatedSuccessBlock()
 bool CCoinJoinClientManager::IsMixingRequired(std::vector<std::pair<CTxIn, CTxOut> >& portfolio, std::vector<CAmount>& vecAmounts, std::vector<CAmount>& vecResult, bool& fMixOnly)
 {
     // first check for portfolio denoms unless we are alredy in mix only mode
-    CAmount nTotal = 0;
-    for (auto& amount : portfolio) {
-        nTotal += amount.second.nValue;
-    }
+    CAmount nTotal = std::accumulate(vecAmounts.begin(), vecAmounts.end(), CAmount(0));
 
     std::vector<std::pair<CTxIn, CTxOut> > temp(portfolio);
     int depth = nLiquidityProvider ? MAX_COINJOIN_DEPTH + 1 : nCoinJoinDepth;
@@ -678,12 +676,13 @@ bool CCoinJoinClientManager::IsMixingRequired(std::vector<std::pair<CTxIn, CTxOu
                     for (std::vector<std::pair<CTxIn, CTxOut> >::iterator it = temp.begin(); it != temp.end(); it++) {
                         if (it->second.nValue > denom) break;
                         if (it->second.nValue == denom) {
-                            vecResult.push_back(denom);
                             temp.erase(it);
                             break;
                         }
                     }
-                    if (count > threshold * COINJOIN_DENOM_WINDOW) {
+                    if (count <= threshold * COINJOIN_DENOM_WINDOW) {
+                        vecResult.push_back(denom);
+                    } else {
                         for (const auto& out : unlock) {
                             LOCK(m_wallet->cs_wallet);
                             m_wallet->UnlockCoin(out.first.prevout);

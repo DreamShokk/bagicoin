@@ -153,11 +153,10 @@ void CCoinJoinClientManager::ProcessMessage(CNode* pfrom, const std::string& str
                     return;
                 }
             }
-            for (auto& session : deqSessions) {
+            for (const auto& session : deqSessions) {
                 masternode_info_t mnMixing;
                 if (session.GetMixingMasternodeInfo(mnMixing) && mnMixing.outpoint == queue.masternodeOutpoint) {
                     queue.fTried = true;
-                    return;
                 }
             }
             vecCoinJoinQueue.emplace_back(queue);

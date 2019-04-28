@@ -667,6 +667,7 @@ bool CCoinJoinClientManager::IsMixingRequired(std::vector<std::pair<CTxIn, CTxOu
                 if (amount == denom) count++;
             }
             for (std::vector<std::pair<CTxIn, CTxOut> >::iterator it = portfolio.begin(); it != portfolio.end(); it++) {
+                if (it->second.nValue > denom) break;
                 if (it->second.nValue < denom) continue;
                 if (it->second.nValue == denom) {
                     count++;
@@ -678,10 +679,8 @@ bool CCoinJoinClientManager::IsMixingRequired(std::vector<std::pair<CTxIn, CTxOu
                         portfolio.erase(it--);
                     }
                     if (count > threshold * COINJOIN_DENOM_WINDOW) return true;
-                } else if (it->second.nValue > denom && count < threshold && nTotal > 0) {
-                    return true;
-                }
-            }
+                }            }
+            if (count < threshold && nTotal > 0) return true;
         }
     }
 
@@ -1455,7 +1454,6 @@ bool CCoinJoinClientManager::CreateDenominated(const CAmount& nValue, std::vecto
             if (count >= target) continue;
             for (std::vector<std::pair<CTxIn, CTxOut> >::iterator it = portfolio.begin(); it == portfolio.end(); it++) {
                 if (nValueLeft < denom) break;
-                if (it != portfolio.end() && it->second.nValue < denom) continue;
                 if (it != portfolio.end() && it->second.nValue == denom) count++;
                 else { // missing denoms
                     while (nValueLeft >= denom && count < target && mtx.vout.size() < tx_size) {
@@ -1575,7 +1573,7 @@ void CCoinJoinClientSession::RelayIn(const CCoinJoinEntry& entry)
 
 void CCoinJoinClientSession::SetState(PoolState nStateNew)
 {
-    LogPrintf("%s CCoinJoinClientSession::SetState -- nState: %d, nStateNew: %d\n", m_wallet_session->GetDisplayName(), nState, nStateNew);
+    LogPrintf("%s CCoinJoinClientSession::SetState -- nState: %d, nStateNew: %d\n", m_wallet_session->GetDisplayName(), GetStateString(), nStateNew);
     nState = nStateNew;
 }
 

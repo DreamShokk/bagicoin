@@ -2896,7 +2896,7 @@ bool CWallet::SelectJoinCoins(CAmount nValueMin, CAmount nValueMax, std::vector<
 
     auto locked_chain = chain().lock();
     LOCK(cs_wallet);
-    AvailableCoins(*locked_chain, vCoins, true, nullptr, nCoinJoinDepthMin < 0 ? ONLY_NONDENOMINATED : ONLY_DENOMINATED);
+    AvailableCoins(*locked_chain, vCoins, true, nullptr, nCoinJoinDepthMin < 0 ? ONLY_NONDENOMINATED : ONLY_DENOMINATED, 1, MAX_MONEY, MAX_MONEY, 0, 1);
 
     //order the array so nondenom are first, then denominations sorted by nValue.
     std::sort(vCoins.begin(), vCoins.end(), ascending);

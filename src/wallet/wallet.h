@@ -879,7 +879,7 @@ public:
         std::set<CInputCoin>& setCoinsRet, CAmount& nValueRet, const CoinSelectionParams& coin_selection_params, bool& bnb_used) const;
 
     // Coin selection
-    bool SelectJoinCoins(CAmount nValueMin, CAmount nValueMax, std::vector<std::pair<CTxIn, CTxOut> >& mtxPairRet, int nCoinJoinDepthMin, int nCoinJoinDepthMax) const;
+    bool SelectJoinCoins(CAmount nValueMin, CAmount nValueMax, std::vector<std::pair<CTxIn, CTxOut> >& mtxPairRet, int nMinDepth) const;
 
     /// Get 1000CHC output and keys which can be used for the Masternode
     bool GetMasternodeOutpointAndKeys(COutPoint& outpointRet, CTxDestination &destRet, CPubKey& pubKeyRet, CKey& keyRet, const std::string& strTxHash = "", const std::string& strOutputIndex = "");
@@ -998,7 +998,7 @@ public:
     CAmount GetUnconfirmedWatchOnlyBalance() const;
     CAmount GetImmatureWatchOnlyBalance() const;
     CAmount GetLegacyBalance(const isminefilter& filter, int minDepth) const;
-    CAmount GetLegacyDenomBalance() const;
+    CAmount GetLegacyDenomBalance(std::vector<CAmount>& vecAmounts) const;
     CAmount GetAvailableBalance(const CCoinControl* coinControl = nullptr) const;
 
     CAmount GetDenominatedBalance(int nDepth = 0) const;

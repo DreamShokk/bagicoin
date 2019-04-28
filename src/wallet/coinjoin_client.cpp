@@ -106,20 +106,20 @@ void CCoinJoinClientManager::ProcessMessage(CNode* pfrom, const std::string& str
 
         if (queue.IsExpired(nCachedBlockHeight)) return;
 
-        {
-            LOCK(cs_vecqueue);
-            // process every queue only once
-            for (std::vector<CCoinJoinQueue>::iterator it = vecCoinJoinQueue.begin(); it!=vecCoinJoinQueue.end(); ++it) {
-                if (*it == queue) {
-                    LogPrint(BCLog::CJOIN, "CJQUEUE -- %s seen\n", queue.ToString());
-                    if (!it->fOpen) {
-                        vecCoinJoinQueue.erase(it--);
-                        queue.Relay(connman);
-                    }
-                    return;
+        LOCK2(cs_deqsessions, cs_vecqueue); // have to lock cs_deqsessions first to avoid deadlocks with cs_vecqueue
+        // process every queue only once
+        for (std::vector<CCoinJoinQueue>::iterator it = vecCoinJoinQueue.begin(); it!=vecCoinJoinQueue.end(); ++it) {
+            if (*it == queue) {
+                LogPrint(BCLog::CJOIN, "%s CJQUEUE -- %s %s\n", m_wallet->GetDisplayName(), queue.ToString(), queue.fOpen ? strprintf("removed") : strprintf("seen"));
+                if (!queue.fOpen) {
+                    vecCoinJoinQueue.erase(it--);
+                    queue.Relay(connman);
                 }
+                return;
             }
-        } // cs_vecqueue
+        }
+
+        if (!queue.fOpen) return; // don't re-add closed queues
 
         LogPrint(BCLog::CJOIN, "%s CJQUEUE -- %s new\n", m_wallet->GetDisplayName(), queue.ToString());
 
@@ -132,7 +132,6 @@ void CCoinJoinClientManager::ProcessMessage(CNode* pfrom, const std::string& str
             return;
         }
 
-        LOCK2(cs_deqsessions, cs_vecqueue); // have to lock cs_deqsessions first to avoid deadlocks with cs_vecqueue
         // if the queue is ready, submit if we can
         if (queue.fReady) {
             for (auto& session : deqSessions) {
@@ -143,7 +142,6 @@ void CCoinJoinClientManager::ProcessMessage(CNode* pfrom, const std::string& str
                     return;
                 }             }
         } else {
-            if (!queue.fOpen) return; // don't re-add closed queues
             for (const auto& q : vecCoinJoinQueue) {
                 if (q.masternodeOutpoint == queue.masternodeOutpoint && queue.fOpen) {
                     // no way same mn can send another "not yet ready" queue this soon
@@ -475,6 +473,13 @@ void CCoinJoinClientManager::CheckResult(int nHeight)
             strAutoCoinJoinResult = _("Session timed out.");
         }
     }
+    // let's see if we can free up some space by popping the first finished session
+    while (!deqSessions.empty()) {
+        if (deqSessions.front().GetState() == POOL_STATE_IDLE) {
+            deqSessions.pop_front();
+        } else break;
+    }
+    if (deqSessions.empty()) fActive = false;
 }
 
 //
@@ -1163,14 +1168,6 @@ void CCoinJoinClientManager::CoinJoin()
         return;
     }
 
-    // let's see if we can free up some space by popping the first finished session
-    LOCK(cs_deqsessions);
-    while (deqSessions.size() > 0) {
-        if (deqSessions.front().GetState() == POOL_STATE_IDLE) {
-            deqSessions.pop_front();
-        } else break;
-    }
-
     // Check if we have should create more denominated inputs i.e.
     // there are funds to denominate and denominated balance does not exceed
     // max amount to mix yet.
@@ -1245,7 +1242,6 @@ void CCoinJoinClientManager::CoinJoin()
 
 
     std::vector<std::pair<CTxIn, CTxOut> > portfolio;
-    bool fMixOnly = false;
 
     // lock the coins we are going to use early
     if (!m_wallet->SelectJoinCoins(COINJOIN_LOW_DENOM * COINJOIN_FEE_DENOM_THRESHOLD, nBalanceDenominated, portfolio, 1)) {
@@ -1255,6 +1251,7 @@ void CCoinJoinClientManager::CoinJoin()
     }
 
     std::vector<CAmount> vecResult;
+    bool fMixOnly = false;
 
     if (IsMixingRequired(portfolio, vecAmounts, vecResult, fMixOnly)) {
         for (const auto& txin : portfolio) {
@@ -1267,6 +1264,7 @@ void CCoinJoinClientManager::CoinJoin()
         return; //nothing to do
     }
 
+    LOCK(cs_deqsessions);
     while (portfolio.size() > 2 && (int)deqSessions.size() < MAX_COINJOIN_SESSIONS) {
         deqSessions.emplace_back(m_wallet, fMixOnly);
         deqSessions.back().CoinJoin(portfolio, vecResult);
@@ -1278,8 +1276,8 @@ void CCoinJoinClientManager::CoinJoin()
         LOCK(m_wallet->cs_wallet);
         m_wallet->UnlockCoin(txin.first.prevout);
     }
-
-    fActive = false;
+    // LPs can drop out here to be available for the next user
+    if (nLiquidityProvider && fMixOnly) fActive = false;
 }
 
 void CCoinJoinClientManager::AddUsedMasternode(const COutPoint& outpointMn)
@@ -1451,8 +1449,9 @@ bool CCoinJoinClientManager::CreateDenominated(const CAmount& nValue, std::vecto
     CKeyHolderStorage keyHolderStorageDenom;
     CMutableTransaction mtx;
 
-    auto feetarget = COINJOIN_FEE_DENOM_THRESHOLD * COINJOIN_DENOM_WINDOW - 1;
-    auto normtarget = std::max((GetRandInt((COINJOIN_DENOM_WINDOW * COINJOIN_DENOM_THRESHOLD) - COINJOIN_DENOM_THRESHOLD) + COINJOIN_DENOM_THRESHOLD), (COINJOIN_DENOM_WINDOW * COINJOIN_DENOM_THRESHOLD - 1));
+    auto feetarget = COINJOIN_FEE_DENOM_THRESHOLD * COINJOIN_DENOM_WINDOW - 2;
+    auto normtarget = COINJOIN_DENOM_WINDOW * COINJOIN_DENOM_THRESHOLD - GetRandInt(COINJOIN_DENOM_THRESHOLD);
+    if (normtarget == COINJOIN_DENOM_WINDOW * COINJOIN_DENOM_THRESHOLD) normtarget -= 2;
 
     // ****** Add outputs for denoms ************ /
 

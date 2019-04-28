@@ -106,16 +106,18 @@ void CCoinJoinClientManager::ProcessMessage(CNode* pfrom, const std::string& str
 
         if (queue.IsExpired(nCachedBlockHeight)) return;
 
-        LOCK2(cs_deqsessions, cs_vecqueue);
-        // process every queue only once
-        for (std::vector<CCoinJoinQueue>::iterator it = vecCoinJoinQueue.begin(); it != vecCoinJoinQueue.end(); ++it) {
-            if (*it == queue) {
-                LogPrint(BCLog::CJOIN, "%s CJQUEUE -- %s %s\n", m_wallet->GetDisplayName(), queue.ToString(), queue.fOpen ? strprintf("seen") : strprintf("removed"));
-                if (!queue.fOpen) {
-                    vecCoinJoinQueue.erase(it--);
-                    queue.Relay(connman);
+        {
+            LOCK(cs_vecqueue);
+            // process every queue only once
+            for (std::vector<CCoinJoinQueue>::iterator it = vecCoinJoinQueue.begin(); it != vecCoinJoinQueue.end(); ++it) {
+                if (*it == queue) {
+                    LogPrint(BCLog::CJOIN, "%s CJQUEUE -- %s %s\n", m_wallet->GetDisplayName(), queue.ToString(), queue.fOpen ? strprintf("seen") : strprintf("removed"));
+                    if (!queue.fOpen) {
+                        vecCoinJoinQueue.erase(it--);
+                        queue.Relay(connman);
+                    }
+                    return;
                 }
-                return;
             }
         }
 
@@ -134,6 +136,9 @@ void CCoinJoinClientManager::ProcessMessage(CNode* pfrom, const std::string& str
 
         // if the queue is ready, submit if we can
         if (queue.fReady) {
+            // we might have timed out
+            LOCK(cs_deqsessions);
+            if (deqSessions.empty()) return;
             for (auto& session : deqSessions) {
                 masternode_info_t mnMixing;
                 if (session.GetMixingMasternodeInfo(mnMixing) && mnMixing.addr == infoMn.addr && session.GetState() == POOL_STATE_QUEUE) {
@@ -142,6 +147,7 @@ void CCoinJoinClientManager::ProcessMessage(CNode* pfrom, const std::string& str
                     return;
                 }             }
         } else {
+            LOCK2(cs_deqsessions, cs_vecqueue);
             for (const auto& q : vecCoinJoinQueue) {
                 if (q.masternodeOutpoint == queue.masternodeOutpoint && queue.fOpen) {
                     // no way same mn can send another "not yet ready" queue this soon
@@ -1266,7 +1272,9 @@ void CCoinJoinClientManager::CoinJoin()
     while (portfolio.size() > 2 && (int)deqSessions.size() < MAX_COINJOIN_SESSIONS) {
         deqSessions.emplace_back(m_wallet, fMixOnly);
         deqSessions.back().CoinJoin(portfolio, vecResult);
-        LogPrint(BCLog::CJOIN, "%s CCoinJoinClientManager::CoinJoin -- Added session, queue size: %d\n", m_wallet->GetDisplayName(), GetQueueSize());
+        LogPrint(BCLog::CJOIN, "%s CCoinJoinClientManager::CoinJoin -- Added session, deqSessions.size: %d, queue size: %d\n", m_wallet->GetDisplayName(), deqSessions.size(), GetQueueSize());
+        // session creation successful? if not remove and exit
+        if (deqSessions.back().GetState() == POOL_STATE_IDLE) deqSessions.pop_back();
         if (!IsMixingRequired(portfolio, vecResult, vecResult, fMixOnly)) break;
     }
     // unlock unused coins
@@ -1274,18 +1282,11 @@ void CCoinJoinClientManager::CoinJoin()
         LOCK(m_wallet->cs_wallet);
         m_wallet->UnlockCoin(txin.first.prevout);
     }
+
+    if (deqSessions.empty()) fActive = false;
+
     // LPs can drop out here to be available for the next user
-    if (nLiquidityProvider && fMixOnly) {
-        fActive = false;
-        return;
-    }
-    // clean resulting idle sessions and finish
-    if (nLiquidityProvider) {
-        while (!deqSessions.empty()) {
-            if (deqSessions.front().GetState() == POOL_STATE_IDLE) deqSessions.pop_front();
-        }
-        if (deqSessions.empty()) fActive = false;
-    }
+    if (nLiquidityProvider && fMixOnly) fActive = false;
 }
 
 void CCoinJoinClientManager::AddUsedMasternode(const COutPoint& outpointMn)

@@ -137,9 +137,8 @@ border:1px solid #333;
 
 QComboBox { /* Dropdown Menus */
 border:1px solid #82C3E6;
-padding: 3px 5px 3px 5px;
 background:#fcfcfc;
-min-height:25px;
+min-height:31px;
 color:#818181;
 }
 
@@ -154,7 +153,6 @@ border:0px solid transparent;
 }
 
 QComboBox::drop-down {
-width:25px;
 border:0px;
 }
 
@@ -164,12 +162,9 @@ border-image: url(':/images/green/downArrow') 0 0 0 0 stretch stretch;
 
 QComboBox QListView {
 background:#fff;
-border:1px solid #333;
-padding-right:1px;
-padding-left:1px;
 }
 
-QComboBox QAbstractItemView::item { margin:4px; }
+QComboBox QAbstractItemView::item { margin:0px; }
 
 QComboBox::item {
 color:#818181;
@@ -1552,7 +1547,7 @@ QLabel#transactionSumLabel { /* Example of setObjectName for widgets without nam
 color:#333333;
 font-weight:bold;
 }
- 
+
 QLabel#transactionSum { /* Example of setObjectName for widgets without name */
 color:#333333;
 }

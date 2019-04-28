@@ -106,16 +106,18 @@ void CCoinJoinClientManager::ProcessMessage(CNode* pfrom, const std::string& str
 
         if (queue.IsExpired(nCachedBlockHeight)) return;
 
-        LOCK2(cs_deqsessions, cs_vecqueue);
-        // process every queue only once
-        for (std::vector<CCoinJoinQueue>::iterator it = vecCoinJoinQueue.begin(); it != vecCoinJoinQueue.end(); ++it) {
-            if (*it == queue) {
-                LogPrint(BCLog::CJOIN, "%s CJQUEUE -- %s %s\n", m_wallet->GetDisplayName(), queue.ToString(), queue.fOpen ? strprintf("seen") : strprintf("removed"));
-                if (!queue.fOpen) {
-                    vecCoinJoinQueue.erase(it--);
-                    queue.Relay(connman);
+        {
+            LOCK(cs_vecqueue);
+            // process every queue only once
+            for (std::vector<CCoinJoinQueue>::iterator it = vecCoinJoinQueue.begin(); it != vecCoinJoinQueue.end(); ++it) {
+                if (*it == queue) {
+                    LogPrint(BCLog::CJOIN, "%s CJQUEUE -- %s %s\n", m_wallet->GetDisplayName(), queue.ToString(), queue.fOpen ? strprintf("seen") : strprintf("removed"));
+                    if (!queue.fOpen) {
+                        vecCoinJoinQueue.erase(it--);
+                        queue.Relay(connman);
+                    }
+                    return;
                 }
-                return;
             }
         }
 
@@ -134,6 +136,7 @@ void CCoinJoinClientManager::ProcessMessage(CNode* pfrom, const std::string& str
 
         // if the queue is ready, submit if we can
         if (queue.fReady) {
+            LOCK(cs_deqsessions);
             for (auto& session : deqSessions) {
                 masternode_info_t mnMixing;
                 if (session.GetMixingMasternodeInfo(mnMixing) && mnMixing.addr == infoMn.addr && session.GetState() == POOL_STATE_QUEUE) {
@@ -142,6 +145,7 @@ void CCoinJoinClientManager::ProcessMessage(CNode* pfrom, const std::string& str
                     return;
                 }             }
         } else {
+            LOCK2(cs_deqsessions, cs_vecqueue);
             for (const auto& q : vecCoinJoinQueue) {
                 if (q.masternodeOutpoint == queue.masternodeOutpoint && queue.fOpen) {
                     // no way same mn can send another "not yet ready" queue this soon

@@ -161,7 +161,8 @@ void CCoinJoinClientManager::ProcessMessage(CNode* pfrom, const std::string& str
             vecCoinJoinQueue.emplace_back(queue);
             queue.Relay(connman);
             LogPrint(BCLog::CJOIN, "%s CJQUEUE -- new CoinJoin queue (%s) from masternode %s, vecCoinJoinQueue size: %d\n", m_wallet->GetDisplayName(), queue.ToString(), infoMn.addr.ToString(), GetQueueSize());
-            if (fEnableCoinJoin && !fActive) CoinJoin();
+            // see if we can join unless we are a LP
+            if (!nLiquidityProvider && fEnableCoinJoin && !fActive) CoinJoin();
         }
 
     } else if (

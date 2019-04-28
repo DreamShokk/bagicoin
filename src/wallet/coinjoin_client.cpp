@@ -136,7 +136,9 @@ void CCoinJoinClientManager::ProcessMessage(CNode* pfrom, const std::string& str
 
         // if the queue is ready, submit if we can
         if (queue.fReady) {
+            // we might have timed out
             LOCK(cs_deqsessions);
+            if (deqSessions.empty()) return;
             for (auto& session : deqSessions) {
                 masternode_info_t mnMixing;
                 if (session.GetMixingMasternodeInfo(mnMixing) && mnMixing.addr == infoMn.addr && session.GetState() == POOL_STATE_QUEUE) {
@@ -1270,7 +1272,9 @@ void CCoinJoinClientManager::CoinJoin()
     while (portfolio.size() > 2 && (int)deqSessions.size() < MAX_COINJOIN_SESSIONS) {
         deqSessions.emplace_back(m_wallet, fMixOnly);
         deqSessions.back().CoinJoin(portfolio, vecResult);
-        LogPrint(BCLog::CJOIN, "%s CCoinJoinClientManager::CoinJoin -- Added session, queue size: %d\n", m_wallet->GetDisplayName(), GetQueueSize());
+        LogPrint(BCLog::CJOIN, "%s CCoinJoinClientManager::CoinJoin -- Added session, deqSessions.size: %d, queue size: %d\n", m_wallet->GetDisplayName(), deqSessions.size(), GetQueueSize());
+        // session creation successful? if not remove and exit
+        if (deqSessions.back().GetState() == POOL_STATE_IDLE) deqSessions.pop_back();
         if (!IsMixingRequired(portfolio, vecResult, vecResult, fMixOnly)) break;
     }
     // unlock unused coins
@@ -1278,18 +1282,11 @@ void CCoinJoinClientManager::CoinJoin()
         LOCK(m_wallet->cs_wallet);
         m_wallet->UnlockCoin(txin.first.prevout);
     }
+
+    if (deqSessions.empty()) fActive = false;
+
     // LPs can drop out here to be available for the next user
-    if (nLiquidityProvider && fMixOnly) {
-        fActive = false;
-        return;
-    }
-    // clean resulting idle sessions and finish
-    if (nLiquidityProvider) {
-        while (!deqSessions.empty()) {
-            if (deqSessions.front().GetState() == POOL_STATE_IDLE) deqSessions.pop_front();
-        }
-        if (deqSessions.empty()) fActive = false;
-    }
+    if (nLiquidityProvider && fMixOnly) fActive = false;
 }
 
 void CCoinJoinClientManager::AddUsedMasternode(const COutPoint& outpointMn)

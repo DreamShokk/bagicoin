@@ -2399,7 +2399,7 @@ CAmount CWallet::GetLegacyBalance(const isminefilter& filter, int minDepth) cons
     return balance;
 }
 
-CAmount CWallet::GetLegacyDenomBalance() const
+CAmount CWallet::GetLegacyDenomBalance(std::vector<CAmount>& vecAmounts) const
 {
     LockAnnotation lock(::cs_main); // Temporary, for CheckFinalTx below. Removed in upcoming commit.
     auto locked_chain = chain().lock();
@@ -2417,12 +2417,15 @@ CAmount CWallet::GetLegacyDenomBalance() const
         for (unsigned int i = 0; i < wtx.tx->vout.size(); i++) {
             if (IsMine(wtx.tx->vout[i]) & ISMINE_SPENDABLE) {
                 if (!IsSpent(*locked_chain, wtx.tx->GetHash(), i)) {
-                    balance += CCoinJoin::IsDenominatedAmount(wtx.tx->vout[i].nValue) ? wtx.tx->vout[i].nValue : 0;
+                    if (CCoinJoin::IsDenominatedAmount(wtx.tx->vout[i].nValue)) {
+                        balance += wtx.tx->vout[i].nValue;
+                        vecAmounts.push_back(wtx.tx->vout[i].nValue);
+                    }
                 }
             }
         }
     }
-
+    std::sort(vecAmounts.begin(), vecAmounts.end());
     return balance;
 }
 
@@ -2888,7 +2891,7 @@ struct {
     }
 } ascending;
 
-bool CWallet::SelectJoinCoins(CAmount nValueMin, CAmount nValueMax, std::vector<std::pair<CTxIn, CTxOut> >& cjPairRet, int nCoinJoinDepthMin, int nCoinJoinDepthMax) const
+bool CWallet::SelectJoinCoins(CAmount nValueMin, CAmount nValueMax, std::vector<std::pair<CTxIn, CTxOut> >& cjPairRet, int nMinDepth) const
 {
     cjPairRet.clear();
     CAmount nValueRet = 0;
@@ -2896,21 +2899,17 @@ bool CWallet::SelectJoinCoins(CAmount nValueMin, CAmount nValueMax, std::vector<
 
     auto locked_chain = chain().lock();
     LOCK(cs_wallet);
-    AvailableCoins(*locked_chain, vCoins, true, nullptr, nCoinJoinDepthMin < 0 ? ONLY_NONDENOMINATED : ONLY_DENOMINATED, 1, MAX_MONEY, MAX_MONEY, 0, 1);
+    AvailableCoins(*locked_chain, vCoins, true, nullptr, ONLY_DENOMINATED, 1, MAX_MONEY, MAX_MONEY, 0, nMinDepth);
 
-    //order the array so nondenom are first, then denominations sorted by nValue.
+    //order the array so denominations are sorted by nValue.
     std::sort(vCoins.begin(), vCoins.end(), ascending);
 
     for (const auto& out : vCoins) {
         if (nValueRet >= nValueMax) break;
-        if (out.tx->tx->vout[out.i].nValue == 1000*COIN) continue; //masternode input
         if (nValueRet + out.tx->tx->vout[out.i].nValue <= nValueMax) {
             CTxIn txin = CTxIn(out.tx->tx->GetHash(), out.i);
 
-            int nDepth = nCoinJoinDepthMin ? chain().analyzeCoin(txin.prevout) : 0;
-            if (nDepth >= nCoinJoinDepthMax) continue;
-            if (nDepth < nCoinJoinDepthMin) continue;
-
+            int nDepth = chain().analyzeCoin(txin.prevout);
             CAmount nValueCoin = out.tx->tx->vout[out.i].nValue;
             nValueRet += nValueCoin;
             cjPairRet.emplace_back(std::make_pair(txin, CTxOut(nValueCoin, CScript(), nDepth)));

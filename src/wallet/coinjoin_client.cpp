@@ -652,7 +652,7 @@ void CCoinJoinClientManager::UpdatedSuccessBlock()
 }
 
 // check if we should initiate a mixing process and if so, pass some flags to determine the priorities later
-bool CCoinJoinClientManager::IsMixingRequired(std::vector<std::pair<CTxIn, CTxOut> >& portfolio, std::vector<CAmount>& vecAmounts, bool& fMixOnly)
+bool CCoinJoinClientManager::IsMixingRequired(std::vector<std::pair<CTxIn, CTxOut> >& portfolio, std::vector<CAmount>& vecAmounts, std::vector<CAmount>& vecResult, bool& fMixOnly)
 {
     // first check for portfolio denoms unless we are alredy in mix only mode
     CAmount nTotal = 0;
@@ -660,34 +660,52 @@ bool CCoinJoinClientManager::IsMixingRequired(std::vector<std::pair<CTxIn, CTxOu
         nTotal += amount.second.nValue;
     }
 
+    std::vector<std::pair<CTxIn, CTxOut> > temp(portfolio);
+    int depth = nLiquidityProvider ? MAX_COINJOIN_DEPTH + 1 : nCoinJoinDepth;
+
     if (!fMixOnly) {
         for (auto denom = COINJOIN_LOW_DENOM; denom <= COINJOIN_HIGH_DENOM; denom <<= 1) {
             int64_t count = 0;
+            std::vector<std::pair<CTxIn, CTxOut> > unlock;
             auto threshold = denom == COINJOIN_LOW_DENOM ? COINJOIN_FEE_DENOM_THRESHOLD : COINJOIN_DENOM_THRESHOLD;
             for (const auto& amount : vecAmounts) {
-                if (amount == denom) count++;
-            }
-            for (std::vector<std::pair<CTxIn, CTxOut> >::iterator it = portfolio.begin(); it != portfolio.end(); it++) {
-                if (it->second.nValue > denom) break;
-                if (it->second.nValue < denom) continue;
-                if (it->second.nValue == denom) {
+                if (amount > denom) break;
+                if (amount < denom) continue;
+                if (amount == denom) {
                     count++;
                     nTotal -= denom;
-                    if (!nLiquidityProvider && it->second.nDepth >= nCoinJoinDepth) {
-                        LOCK(m_wallet->cs_wallet);
-                        m_wallet->UnlockCoin(it->first.prevout);
-                        vecAmounts.push_back(it->second.nValue);
-                        portfolio.erase(it--);
+                    // remove up to the finished denom
+                    for (std::vector<std::pair<CTxIn, CTxOut> >::iterator it = temp.begin(); it != temp.end(); it++) {
+                        if (it->second.nValue > denom) break;
+                        if (it->second.nValue == denom) {
+                            vecResult.push_back(denom);
+                            temp.erase(it);
+                            break;
+                        }
                     }
-                    if (count > threshold * COINJOIN_DENOM_WINDOW) return true;
-                }            }
-            if (count < threshold && nTotal > 0) return true;
+                    if (count > threshold * COINJOIN_DENOM_WINDOW) {
+                        for (const auto& out : unlock) {
+                            LOCK(m_wallet->cs_wallet);
+                            m_wallet->UnlockCoin(out.first.prevout);
+                        }
+                        portfolio = temp;
+                        return true;
+                    }
+                }
+            }
+            if (count < threshold && nTotal > 0) {
+                for (const auto& out : unlock) {
+                    LOCK(m_wallet->cs_wallet);
+                    m_wallet->UnlockCoin(out.first.prevout);
+                }
+                portfolio = temp;
+                return true;
+            }
         }
     }
 
     // all in bounds so check if there's something to obscure
     for (std::vector<std::pair<CTxIn, CTxOut> >::iterator it = portfolio.begin(); it != portfolio.end(); it++) {
-        int depth = nLiquidityProvider ? MAX_COINJOIN_DEPTH + 1 : nCoinJoinDepth;
         if (it->second.nDepth < depth) {
             fMixOnly = true;
         } else {
@@ -843,7 +861,7 @@ bool CCoinJoinClientSession::CreateSessionTransaction(std::vector<std::pair<CTxI
             if (nValueRem < denom) break;
             auto count = 0;
             auto threshold = denom == COINJOIN_LOW_DENOM ? COINJOIN_FEE_DENOM_THRESHOLD : COINJOIN_DENOM_THRESHOLD;
-            auto target = std::max((GetRandInt((COINJOIN_DENOM_WINDOW * threshold) - threshold) + threshold), (COINJOIN_DENOM_WINDOW * threshold - 1));
+            auto target = threshold * COINJOIN_DENOM_WINDOW - GetRandInt(threshold);
             for (const auto& value : vecAmounts) {
                 if (nValueRem < value || count >= static_cast<int>(target)) break;
                 if (value < denom) continue;
@@ -987,7 +1005,7 @@ bool CCoinJoinClientSession::AddFeesAndLocktime(std::vector<CAmount>& vecAmounts
 
         // not enough selected? try to add additional inputs
         int n = nFeeNeeded % COINJOIN_LOW_DENOM  == 0 ? nFeeNeeded / COINJOIN_LOW_DENOM : nFeeNeeded / COINJOIN_LOW_DENOM + 1;
-        selected = m_wallet_session->SelectJoinCoins(n * 2 * COINJOIN_LOW_DENOM, n * 2 * COINJOIN_LOW_DENOM, tmp_select, 0, MAX_COINJOIN_DEPTH);
+        selected = m_wallet_session->SelectJoinCoins(n * 2 * COINJOIN_LOW_DENOM, n * 2 * COINJOIN_LOW_DENOM, tmp_select, 1);
         for (std::vector<std::pair<CTxIn, CTxOut> >::iterator it = tmp_select.begin(); it != tmp_select.end(); it++) {
             if (it->second.nValue != COINJOIN_LOW_DENOM) {
                 LogPrint(BCLog::CJOIN, "%s CCoinJoinClientSession::AddFeesAndLocktime --- no inputs available for fees, trying to reduce outputs.\n", m_wallet_session->GetDisplayName());
@@ -1158,8 +1176,10 @@ void CCoinJoinClientManager::CoinJoin()
     // there are funds to denominate and denominated balance does not exceed
     // max amount to mix yet.
 
+    std::vector<CAmount> vecAmounts;
+
     // denoms
-    CAmount nBalanceDenominated = m_wallet->GetLegacyDenomBalance();
+    CAmount nBalanceDenominated = m_wallet->GetLegacyDenomBalance(vecAmounts);
     // excluding denoms
     CAmount nBalanceAnonimizableNonDenom = m_wallet->GetLegacyBalance(ISMINE_SPENDABLE, 0) - nBalanceDenominated;
     // amout to denominate
@@ -1181,8 +1201,6 @@ void CCoinJoinClientManager::CoinJoin()
         fActive = false;
         return;
     }
-
-    std::vector<CAmount> vecAmounts;
 
     if (nBalanceNeedsDenom >= COINJOIN_LOW_DENOM * COINJOIN_FEE_DENOM_THRESHOLD) {
         strAutoCoinJoinResult = _("Creating denominated outputs.");
@@ -1231,13 +1249,15 @@ void CCoinJoinClientManager::CoinJoin()
     bool fMixOnly = false;
 
     // lock the coins we are going to use early
-    if (!m_wallet->SelectJoinCoins(COINJOIN_LOW_DENOM, nBalanceDenominated, portfolio, 0, MAX_COINJOIN_DEPTH)) {
-        LogPrintf("%s CCoinJoinClientManager::CoinJoin -- Can't mix: no compatible inputs found!\n", m_wallet->GetDisplayName());
+    if (!m_wallet->SelectJoinCoins(COINJOIN_LOW_DENOM * COINJOIN_FEE_DENOM_THRESHOLD, nBalanceDenominated, portfolio, 1)) {
+        LogPrintf("%s CCoinJoinClientManager::CoinJoin -- Can't mix: no compatible inputs found, retry at the next block!\n", m_wallet->GetDisplayName());
         fActive = false;
         return;
     }
 
-    if (IsMixingRequired(portfolio, vecAmounts, fMixOnly)) {
+    std::vector<CAmount> vecResult;
+
+    if (IsMixingRequired(portfolio, vecAmounts, vecResult, fMixOnly)) {
         for (const auto& txin : portfolio) {
             LOCK(m_wallet->cs_wallet);
             m_wallet->LockCoin(txin.first.prevout);
@@ -1250,9 +1270,9 @@ void CCoinJoinClientManager::CoinJoin()
 
     while (portfolio.size() > 2 && (int)deqSessions.size() < MAX_COINJOIN_SESSIONS) {
         deqSessions.emplace_back(m_wallet, fMixOnly);
-        deqSessions.back().CoinJoin(portfolio, vecAmounts);
+        deqSessions.back().CoinJoin(portfolio, vecResult);
         LogPrint(BCLog::CJOIN, "%s CCoinJoinClientManager::CoinJoin -- Added session, queue size: %d\n", m_wallet->GetDisplayName(), GetQueueSize());
-        if (!IsMixingRequired(portfolio, vecAmounts, fMixOnly)) break;
+        if (!IsMixingRequired(portfolio, vecResult, vecResult, fMixOnly)) break;
     }
     // unlock unused coins
     for (const auto& txin : portfolio) {
@@ -1432,12 +1452,8 @@ bool CCoinJoinClientManager::CreateDenominated(const CAmount& nValue, std::vecto
     CKeyHolderStorage keyHolderStorageDenom;
     CMutableTransaction mtx;
 
-    std::vector<std::pair<CTxIn, CTxOut> > portfolio;
     auto feetarget = COINJOIN_FEE_DENOM_THRESHOLD * COINJOIN_DENOM_WINDOW - 1;
     auto normtarget = std::max((GetRandInt((COINJOIN_DENOM_WINDOW * COINJOIN_DENOM_THRESHOLD) - COINJOIN_DENOM_THRESHOLD) + COINJOIN_DENOM_THRESHOLD), (COINJOIN_DENOM_WINDOW * COINJOIN_DENOM_THRESHOLD - 1));
-
-    CAmount nBalanceDenominated = m_wallet->GetLegacyDenomBalance();
-    m_wallet->SelectJoinCoins(COINJOIN_LOW_DENOM, nBalanceDenominated, portfolio, 0, MAX_COINJOIN_DEPTH);
 
     // ****** Add outputs for denoms ************ /
 
@@ -1453,28 +1469,23 @@ bool CCoinJoinClientManager::CreateDenominated(const CAmount& nValue, std::vecto
                 if (count >= target) break;
             }
             if (count >= target) continue;
-            for (std::vector<std::pair<CTxIn, CTxOut> >::iterator it = portfolio.begin(); it == portfolio.end(); it++) {
-                if (nValueLeft < denom) break;
-                if (it != portfolio.end() && it->second.nValue == denom) count++;
-                else { // missing denoms
-                    while (nValueLeft >= denom && count < target && mtx.vout.size() < tx_size) {
-                        count++;
-                        std::shared_ptr<CReserveScript> scriptDenom = std::make_shared<CReserveScript>();
-                        keyHolderStorageDenom.AddKey(scriptDenom, m_wallet);
+            // missing denoms
+            while (nValueLeft >= denom && count < target && mtx.vout.size() < tx_size) {
+                count++;
+                std::shared_ptr<CReserveScript> scriptDenom = std::make_shared<CReserveScript>();
+                keyHolderStorageDenom.AddKey(scriptDenom, m_wallet);
 
-                        if (!scriptDenom || scriptDenom->reserveScript.empty()) {
-                            LogPrintf("%s CCoinJoinClientManager::CreateDenominated -- No script available, Keypool exhausted?\n", m_wallet->GetDisplayName());
-                            return false;
-                        }
-
-                        vecAmounts.push_back(denom);
-                        mtx.vout.push_back(CTxOut(denom, scriptDenom->reserveScript));
-
-                        //subtract denomination amount
-                        nValueLeft -= denom;
-                        LogPrint(BCLog::CJOIN, "%s CreateDenominated step 1: mtx: %s, outputs: %u, nValueLeft: %f\n", m_wallet->GetDisplayName(), mtx.GetHash().ToString(), mtx.vout.size(), (float)nValueLeft/COIN);
-                    }
+                if (!scriptDenom || scriptDenom->reserveScript.empty()) {
+                    LogPrintf("%s CCoinJoinClientManager::CreateDenominated -- No script available, Keypool exhausted?\n", m_wallet->GetDisplayName());
+                    return false;
                 }
+
+                vecAmounts.push_back(denom);
+                mtx.vout.push_back(CTxOut(denom, scriptDenom->reserveScript));
+
+                //subtract denomination amount
+                nValueLeft -= denom;
+                LogPrint(BCLog::CJOIN, "%s CreateDenominated step 1: mtx: %s, outputs: %u, nValueLeft: %f\n", m_wallet->GetDisplayName(), mtx.GetHash().ToString(), mtx.vout.size(), (float)nValueLeft/COIN);
             }
         }
 
@@ -1498,6 +1509,8 @@ bool CCoinJoinClientManager::CreateDenominated(const CAmount& nValue, std::vecto
                 LogPrint(BCLog::CJOIN, "%s CreateDenominated step 2: mtx: %s, outputs: %u, nValueLeft: %f\n", m_wallet->GetDisplayName(), mtx.GetHash().ToString(), mtx.vout.size(), (float)nValueLeft/COIN);
             }
         }
+
+        std::sort(vecAmounts.begin(), vecAmounts.end());
         // add entropy
         Shuffle(mtx.vout.begin(), mtx.vout.end(), FastRandomContext());
 

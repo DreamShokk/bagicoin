@@ -317,7 +317,7 @@ std::string CCoinJoin::GetMessageByID(PoolMessage nMessageID)
     case ERR_INVALID_OUT:
         return _("Not compatible with existing transactions.");
     case ERR_FEES:
-        return _("Transaction fees are too high.");
+        return _("Fee error.");
     case ERR_INVALID_INPUT:
         return _("Input is not valid.");
     case ERR_INVALID_SCRIPT:

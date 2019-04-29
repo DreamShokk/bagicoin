@@ -210,11 +210,11 @@ public:
 
     friend bool operator==(const CCoinJoinQueue& a, const CCoinJoinQueue& b)
     {
-        return a.nDenom == b.nDenom && a.masternodeOutpoint == b.masternodeOutpoint && a.nHeight == b.nHeight && a.status == b.status;
+        return a.masternodeOutpoint == b.masternodeOutpoint && a.nHeight == b.nHeight && a.status == b.status;
     }
     friend bool operator!=(const CCoinJoinQueue& a, const CCoinJoinQueue& b)
     {
-        return a.nDenom == b.nDenom && a.masternodeOutpoint == b.masternodeOutpoint && a.nHeight == b.nHeight && a.status != b.status;
+        return a.masternodeOutpoint == b.masternodeOutpoint && a.nHeight == b.nHeight && a.status != b.status;
     }
 };
 

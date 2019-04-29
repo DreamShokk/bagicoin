@@ -111,7 +111,7 @@ void CCoinJoinClientManager::ProcessMessage(CNode* pfrom, const std::string& str
             // process every queue only once
             for (const auto& q :vecCoinJoinQueue) {
                 if (q == queue) {
-                    LogPrint(BCLog::CJOIN, "%s CJQUEUE -- %s seen\n", m_wallet->GetDisplayName(), queue.ToString());
+                    LogPrint(BCLog::CJOIN, "%s CJQUEUE -- %s seen from %s\n", m_wallet->GetDisplayName(), queue.ToString(), pfrom->addr.ToStringIPPort());
                     return;
                 }
             }

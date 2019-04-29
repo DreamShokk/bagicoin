@@ -120,7 +120,6 @@ void CCoinJoinBaseSession::SetNull()
     nSessionDenom = 0;
     vecEntries.clear();
     finalPartiallySignedTransaction = PartiallySignedTransaction();
-    nTimeLastSuccessfulStep = GetTime();
 }
 
 void CCoinJoinBaseManager::SetNull()
@@ -129,18 +128,20 @@ void CCoinJoinBaseManager::SetNull()
     vecCoinJoinQueue.clear();
 }
 
-void CCoinJoinBaseManager::CheckQueue(int nHeight)
+bool CCoinJoinBaseManager::CheckQueue(int nHeight)
 {
-    TRY_LOCK(cs_vecqueue, lockDS);
-    if(!lockDS) return; // it's ok to fail here, we run this quite frequently
+    LOCK(cs_vecqueue);
 
+    bool result;
     // check mixing queue objects for timeouts
     for (std::vector<CCoinJoinQueue>::iterator it = vecCoinJoinQueue.begin(); it!=vecCoinJoinQueue.end(); ++it) {
         if (it!=vecCoinJoinQueue.end() && it->IsExpired(nHeight)) {
+            if (it->masternodeOutpoint == activeMasternode.outpoint) result = true;
             LogPrint(BCLog::CJOIN, "CCoinJoinBase::%s -- Removing expired queue (%s)\n", __func__, it->ToString());
             vecCoinJoinQueue.erase(it--);
         }
     }
+    return result;
 }
 
 bool CCoinJoinBaseManager::GetQueueItem(CCoinJoinQueue& queueRet)
@@ -149,7 +150,7 @@ bool CCoinJoinBaseManager::GetQueueItem(CCoinJoinQueue& queueRet)
 
     for (auto& queue : vecCoinJoinQueue) {
         // only try each queue once
-        if (queue.fTried || !queue.fOpen) continue;
+        if (queue.fTried || !queue.IsOpen()) continue;
         queue.fTried = true;
         queueRet = queue;
         return true;

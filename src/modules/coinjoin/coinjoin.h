@@ -24,8 +24,6 @@ static const CAmount COINJOIN_BASE_DENOM = 102400000;
 static const CAmount COINJOIN_HIGH_DENOM = COINJOIN_BASE_DENOM << COINJOIN_MAX_SHIFT;
 static const CAmount COINJOIN_LOW_DENOM = COINJOIN_BASE_DENOM >> COINJOIN_MAX_SHIFT;
 
-// timeout used by the session
-static const int COINJOIN_QUEUE_TIMEOUT          = 600;
 // time for all participants to sign
 static const int COINJOIN_SIGNING_TIMEOUT        = 30;
 // timeout for nodes to submit their tx
@@ -89,9 +87,14 @@ enum PoolState {
 
 // status update message constants
 enum PoolStatusUpdate {
+    STATUS_CLOSED,
+    STATUS_OPEN,
+    STATUS_READY,
+    STATUS_FULL,
     STATUS_REJECTED,
     STATUS_ACCEPTED
 };
+
 
 // A clients transaction in the mixing pool
 class CCoinJoinEntry
@@ -142,8 +145,7 @@ public:
     CAmount nDenom;
     COutPoint masternodeOutpoint;
     int nHeight;
-    bool fReady; //ready for submit
-    bool fOpen;
+    PoolStatusUpdate status;
     std::vector<unsigned char> vchSig;
     // memory only
     bool fTried;
@@ -152,19 +154,17 @@ public:
         nDenom(0),
         masternodeOutpoint(COutPoint()),
         nHeight(0),
-        fReady(false),
-        fOpen(true),
+        status(STATUS_OPEN),
         vchSig(std::vector<unsigned char>()),
         fTried(false)
     {
     }
 
-    CCoinJoinQueue(CAmount _nDenom, COutPoint _outpoint, int _nHeight, bool _fReady, bool _fOpen) :
+    CCoinJoinQueue(CAmount _nDenom, COutPoint _outpoint, int _nHeight, PoolStatusUpdate _status) :
         nDenom(_nDenom),
         masternodeOutpoint(_outpoint),
         nHeight(_nHeight),
-        fReady(_fReady),
-        fOpen(_fOpen),
+        status(_status),
         vchSig(std::vector<unsigned char>()),
         fTried(false)
     {
@@ -178,8 +178,7 @@ public:
         READWRITE(nDenom);
         READWRITE(masternodeOutpoint);
         READWRITE(nHeight);
-        READWRITE(fReady);
-        READWRITE(fOpen);
+        READWRITE(static_cast<int>(status));
         if (!(s.GetType() & SER_GETHASH)) {
             READWRITE(vchSig);
         }
@@ -200,17 +199,22 @@ public:
     bool Relay(CConnman* connman);
 
     /// Is this queue expired?
-    bool IsExpired(int nHeightIn) { return nHeightIn - nHeight > COINJOIN_DEFAULT_TIMEOUT; }
+    bool IsExpired(int nHeightIn) const { return nHeightIn - nHeight > COINJOIN_DEFAULT_TIMEOUT; }
+    bool IsOpen() const { return status > 0; }
 
     std::string ToString() const
     {
-        return strprintf("nDenom=%d, nHeight=%lld, fReady=%s, fOpen=%s, fTried=%s, masternode=%s",
-            nDenom, nHeight, fReady ? "true" : "false", fOpen ? "true" : "false", fTried ? "true" : "false", masternodeOutpoint.ToStringShort());
+        return strprintf("nDenom=%d, nHeight=%lld, status=%d, fTried=%s, masternode=%s",
+            nDenom, nHeight, status, fTried ? "true" : "false", masternodeOutpoint.ToStringShort());
     }
 
     friend bool operator==(const CCoinJoinQueue& a, const CCoinJoinQueue& b)
     {
-        return a.nDenom == b.nDenom && a.masternodeOutpoint == b.masternodeOutpoint && a.nHeight == b.nHeight && a.fReady == b.fReady;
+        return a.nDenom == b.nDenom && a.masternodeOutpoint == b.masternodeOutpoint && a.nHeight == b.nHeight && a.status == b.status;
+    }
+    friend bool operator!=(const CCoinJoinQueue& a, const CCoinJoinQueue& b)
+    {
+        return a.nDenom == b.nDenom && a.masternodeOutpoint == b.masternodeOutpoint && a.nHeight == b.nHeight && a.status != b.status;
     }
 };
 
@@ -285,8 +289,8 @@ protected:
 
     std::vector<CCoinJoinEntry> vecEntries; // Masternode/clients entries
 
-    PoolState nState;                // should be one of the POOL_STATE_XXX values
-    int64_t nTimeLastSuccessfulStep; // the time when last successful mixing step was performed
+    PoolState nState;               // should be one of the POOL_STATE_XXX values
+    int64_t nTimeStart;      // for accepting entries and signing
 
     int nSessionID; // 0 if no mixing session is active
 
@@ -300,7 +304,7 @@ public:
     CCoinJoinBaseSession() :
         vecEntries(),
         nState(POOL_STATE_IDLE),
-        nTimeLastSuccessfulStep(0),
+        nTimeStart(0),
         nSessionID(0),
         finalPartiallySignedTransaction(),
         nSessionDenom(0)
@@ -325,7 +329,7 @@ protected:
     std::vector<CCoinJoinQueue> vecCoinJoinQueue GUARDED_BY(cs_vecqueue);
 
     void SetNull();
-    void CheckQueue(int nHeight);
+    bool CheckQueue(int nHeight);
 
 public:
     CCoinJoinBaseManager() :

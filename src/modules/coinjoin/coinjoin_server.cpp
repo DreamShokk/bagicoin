@@ -97,6 +97,7 @@ void CCoinJoinServer::ProcessModuleMessage(CNode* pfrom, const std::string& strC
         for (const auto& q :vecCoinJoinQueue) {
             if (q == queue) {
                 LogPrint(BCLog::CJOIN, "CJQUEUE -- %s seen\n", queue.ToString());
+                return;
             }
         }
 
@@ -107,12 +108,14 @@ void CCoinJoinServer::ProcessModuleMessage(CNode* pfrom, const std::string& strC
                 if (!queue.IsOpen()) {
                     vecCoinJoinQueue.erase(it--);
                     queue.Relay(connman);
+                    return;
                 } else {
                     // if not closing, status can only increase
                     if (queue.status > it->status) it->status = queue.status; // track unused queues so we can identify duplicates
+                    else return;
                 }
-                return;
             }
+            break;
         }
 
         if (!queue.IsOpen()) return; // don't process closed queues
@@ -128,14 +131,6 @@ void CCoinJoinServer::ProcessModuleMessage(CNode* pfrom, const std::string& strC
         }
 
         if (queue.status == STATUS_OPEN) {
-            for (const auto& q : vecCoinJoinQueue) {
-                if (q.masternodeOutpoint == queue.masternodeOutpoint) {
-                    // no way same mn can send another "not yet ready" queue this soon
-                    LogPrint(BCLog::CJOIN, "CJQUEUE -- Masternode %s is sending WAY too many queue messages\n", infoMn.addr.ToString());
-                    return;
-                }
-            }
-
             LogPrint(BCLog::CJOIN, "CJQUEUE -- new CoinJoin queue (%s) from masternode %s\n", queue.ToString(), infoMn.addr.ToString());
             vecCoinJoinQueue.push_back(queue);
             queue.Relay(connman);

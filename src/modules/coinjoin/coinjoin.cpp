@@ -316,12 +316,12 @@ std::string CCoinJoin::GetMessageByID(PoolMessage nMessageID)
         return _("Entries are full.");
     case ERR_INVALID_OUT:
         return _("Not compatible with existing transactions.");
-    case ERR_FEES:
-        return _("Fee error.");
+    case ERR_MN_FEES:
+        return _("Missing or high masternode fees.");
     case ERR_INVALID_INPUT:
         return _("Input is not valid.");
-    case ERR_INVALID_SCRIPT:
-        return _("Invalid script detected.");
+    case ERR_FEES:
+        return _("Included fees too high or too low.");
     case ERR_INVALID_TX:
         return _("Transaction not valid.");
     case ERR_MAXIMUM:
@@ -330,10 +330,6 @@ std::string CCoinJoin::GetMessageByID(PoolMessage nMessageID)
         return _("Not in the Masternode list.");
     case ERR_MODE:
         return _("Incompatible mode.");
-    case ERR_NON_STANDARD_PUBKEY:
-        return _("Non-standard public key detected.");
-    case ERR_NOT_A_MN:
-        return _("This is not a Masternode."); // not used
     case ERR_QUEUE_FULL:
         return _("Masternode queue is full.");
     case ERR_RECENT:

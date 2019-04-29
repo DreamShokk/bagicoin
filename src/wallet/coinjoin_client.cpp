@@ -284,6 +284,7 @@ void CCoinJoinClientSession::ProcessMessage(CNode* pfrom, const std::string& str
 
 void CCoinJoinClientManager::ResetPool()
 {
+    LogPrint(BCLog::CJOIN, "%s CCoinJoinClientManager::ResetPool -- resetting.\n", m_wallet->GetDisplayName());
     LOCK(cs_deqsessions);
     nCachedLastSuccessBlock = 0;
     vecMasternodesUsed.clear();
@@ -1018,8 +1019,8 @@ bool CCoinJoinClientSession::AddFeesAndLocktime(std::vector<CAmount>& vecAmounts
         // not enough selected? try to add additional inputs
         int n = nFeeNeeded % COINJOIN_LOW_DENOM  == 0 ? nFeeNeeded / COINJOIN_LOW_DENOM : nFeeNeeded / COINJOIN_LOW_DENOM + 1;
         selected = m_wallet_session->SelectJoinCoins(n * 2 * COINJOIN_LOW_DENOM, n * 2 * COINJOIN_LOW_DENOM, tmp_select, 1);
-        for (std::vector<std::pair<CTxIn, CTxOut> >::iterator it = tmp_select.begin(); it != tmp_select.end(); it++) {
-            if (it->second.nValue != COINJOIN_LOW_DENOM) {
+        for (const auto& out : tmp_select) {
+            if (out.second.nValue != COINJOIN_LOW_DENOM) {
                 LogPrint(BCLog::CJOIN, "%s CCoinJoinClientSession::AddFeesAndLocktime --- no inputs available for fees, trying to reduce outputs.\n", m_wallet_session->GetDisplayName());
                 selected = false;
             }
@@ -1353,10 +1354,10 @@ bool CCoinJoinClientSession::JoinExistingQueue()
             continue;
         }
 
+        SetState(POOL_STATE_CONNECTING);
         infoMixingMasternode = infoMn;
         pendingCJaRequest = CPendingCJaRequest(infoMn.addr, nSessionDenom);
         g_connman.get()->AddPendingMasternode(infoMn.addr);
-        SetState(POOL_STATE_CONNECTING);
         nTimeLastSuccessfulStep = GetTime();
         LogPrintf("%s CCoinJoinClientSession::JoinExistingQueue -- pending connection (from queue): nSessionDenom: %d (%s), addr=%s\n",
                 m_wallet_session->GetDisplayName(),
@@ -1401,10 +1402,10 @@ bool CCoinJoinClientSession::StartNewQueue()
 
         LogPrintf("%s CCoinJoinClientSession::StartNewQueue -- attempt %d connection to Masternode %s\n", m_wallet_session->GetDisplayName(), nTries, infoMn.addr.ToString());
 
+        SetState(POOL_STATE_CONNECTING);
         infoMixingMasternode = infoMn;
         g_connman.get()->AddPendingMasternode(infoMn.addr);
         pendingCJaRequest = CPendingCJaRequest(infoMn.addr, nSessionDenom);
-        SetState(POOL_STATE_CONNECTING);
         nTimeLastSuccessfulStep = GetTime();
         LogPrintf("%s CCoinJoinClientSession::StartNewQueue -- pending connection, nSessionDenom: %d (%s), addr=%s\n",
                   m_wallet_session->GetDisplayName(),

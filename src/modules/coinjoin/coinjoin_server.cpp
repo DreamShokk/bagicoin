@@ -109,6 +109,8 @@ void CCoinJoinServer::ProcessModuleMessage(CNode* pfrom, const std::string& strC
             }
         }
 
+        if (queue.fReady == queue.fOpen) return; // don't process invalid queues
+
         LogPrint(BCLog::CJOIN, "CJQUEUE -- %s new\n", queue.ToString());
 
         masternode_info_t mnInfo;

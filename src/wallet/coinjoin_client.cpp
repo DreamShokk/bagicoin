@@ -121,7 +121,7 @@ void CCoinJoinClientManager::ProcessMessage(CNode* pfrom, const std::string& str
             }
         }
 
-        if (!queue.fReady && !queue.fOpen) return; // don't re-add closed queues
+        if (queue.fReady == queue.fOpen) return; // don't process invalid queues
 
         LogPrint(BCLog::CJOIN, "%s CJQUEUE -- %s new\n", m_wallet->GetDisplayName(), queue.ToString());
 
@@ -135,7 +135,7 @@ void CCoinJoinClientManager::ProcessMessage(CNode* pfrom, const std::string& str
         }
 
         // if the queue is ready, submit if we can
-        if (queue.fReady) {
+        if (queue.fReady && !queue.fOpen) {
             // we might have timed out
             LOCK(cs_deqsessions);
             if (deqSessions.empty()) return;

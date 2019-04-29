@@ -530,8 +530,10 @@ public:
     {
         if (fOff)
             m_wallet->coinjoinClient->fEnableCoinJoin = false;
-        else
+        else {
             m_wallet->coinjoinClient->fEnableCoinJoin = !m_wallet->coinjoinClient->fEnableCoinJoin;
+            if (m_wallet->coinjoinClient->fEnableCoinJoin && !m_wallet->coinjoinClient->fActive && !m_wallet->coinjoinClient->fStartup) m_wallet->coinjoinClient->CoinJoin();
+        }
     }
 
     bool DoAutoBackup(std::string walletIn, std::string& strBackupWarning, std::string& strBackupError) override

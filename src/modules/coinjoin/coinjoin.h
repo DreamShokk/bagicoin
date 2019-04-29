@@ -55,15 +55,13 @@ enum PoolMessage {
     ERR_DENOM,
     ERR_ENTRIES_FULL,
     ERR_INVALID_OUT,
-    ERR_FEES,
+    ERR_MN_FEES,
     ERR_INVALID_INPUT,
-    ERR_INVALID_SCRIPT,
+    ERR_FEES,
     ERR_INVALID_TX,
     ERR_MAXIMUM,
     ERR_MN_LIST,
     ERR_MODE,
-    ERR_NON_STANDARD_PUBKEY,
-    ERR_NOT_A_MN, // not used
     ERR_QUEUE_FULL,
     ERR_RECENT,
     ERR_SESSION,
@@ -126,6 +124,12 @@ public:
         READWRITE(nSessionID);
         READWRITE(psbtx);
     }
+
+    friend bool operator==(const CCoinJoinEntry& a, const CCoinJoinEntry& b)
+    {
+        return a.nSessionID == b.nSessionID && a.psbtx.tx->GetHash() == b.psbtx.tx->GetHash();
+    }
+
 };
 
 

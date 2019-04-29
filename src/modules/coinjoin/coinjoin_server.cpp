@@ -186,7 +186,7 @@ void CCoinJoinServer::ProcessModuleMessage(CNode* pfrom, const std::string& strC
 
         if (nMNfee < nFee) {
             LogPrintf("CJTXIN -- missing masternode fees!\n");
-            PushStatus(pfrom, STATUS_REJECTED, ERR_FEES, connman);
+            PushStatus(pfrom, STATUS_REJECTED, ERR_MN_FEES, connman);
             return;
         }
 
@@ -566,6 +566,15 @@ bool CCoinJoinServer::AddEntry(const CCoinJoinEntry& entryNew, PoolMessage& nMes
         LogPrint(BCLog::CJOIN, "CCoinJoinServer::AddEntry -- entries is full!\n");
         nMessageIDRet = ERR_ENTRIES_FULL;
         return false;
+    }
+
+    LOCK(cs_coinjoin);
+    for (const auto& entry : vecEntries) {
+        if (entry == entryNew) {
+            LogPrint(BCLog::CJOIN, "CCoinJoinServer::AddEntry -- adding entry\n");
+            nMessageIDRet = ERR_ALREADY_HAVE;
+            return false;
+        }
     }
 
     vecEntries.push_back(entryNew);

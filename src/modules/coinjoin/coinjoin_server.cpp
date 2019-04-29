@@ -96,7 +96,7 @@ void CCoinJoinServer::ProcessModuleMessage(CNode* pfrom, const std::string& strC
         // process every queue only once
         for (const auto& q :vecCoinJoinQueue) {
             if (q == queue) {
-                LogPrint(BCLog::CJOIN, "CJQUEUE -- %s seen from &s\n", queue.ToString(), pfrom->addr.ToStringIPPort());
+                LogPrint(BCLog::CJOIN, "CJQUEUE -- %s seen from %s\n", queue.ToString(), pfrom->addr.ToStringIPPort());
                 return;
             }
         }

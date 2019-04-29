@@ -4287,6 +4287,7 @@ UniValue coinjoin(const JSONRPCRequest& request)
                 throw JSONRPCError(RPC_WALLET_UNLOCK_NEEDED, "Error: Please unlock wallet for mixing with walletpassphrase first.");
         }
         pwallet->coinjoinClient->fEnableCoinJoin = true;
+        if (pwallet->coinjoinClient->fEnableCoinJoin && !pwallet->coinjoinClient->fActive && !pwallet->coinjoinClient->fStartup) pwallet->coinjoinClient->CoinJoin();
         return "Mixing was started";
     }
 

@@ -118,20 +118,20 @@ void CCoinJoinClientManager::ProcessMessage(CNode* pfrom, const std::string& str
             // status has changed, update and remove if closed
             for (std::vector<CCoinJoinQueue>::iterator it = vecCoinJoinQueue.begin(); it!=vecCoinJoinQueue.end(); ++it) {
                 if (*it != queue) {
-                    LogPrint(BCLog::CJOIN, "%s CJQUEUE -- %s %s\n", m_wallet->GetDisplayName(), queue.ToString(), queue.IsOpen() ? strprintf("seen") : strprintf("removed"));
+                    LogPrint(BCLog::CJOIN, "%s CJQUEUE -- %s %s\n", m_wallet->GetDisplayName(), queue.ToString(), queue.IsOpen() ? strprintf("updated") : strprintf("removed"));
                     if (!queue.IsOpen()) {
                         vecCoinJoinQueue.erase(it--);
                         queue.Relay(connman);
+                        return;
                     } else {
                         // if not closing, status can only increase
                         if (queue.status > it->status) it->status = queue.status;
+                        else return;
                     }
-                    return;
                 }
+                break;
             }
         }
-
-        if (!queue.IsOpen()) return; // don't process closed queues
 
         LogPrint(BCLog::CJOIN, "%s CJQUEUE -- %s new\n", m_wallet->GetDisplayName(), queue.ToString());
 
@@ -143,8 +143,22 @@ void CCoinJoinClientManager::ProcessMessage(CNode* pfrom, const std::string& str
             return;
         }
 
-        // if the queue is ready, submit if we can
-        if (queue.status > STATUS_OPEN && queue.status < STATUS_REJECTED) {
+        switch (queue.status) {
+        case STATUS_CLOSED:
+            return;
+        case STATUS_OPEN:
+        {
+            LOCK(cs_vecqueue);
+            vecCoinJoinQueue.emplace_back(queue);
+            queue.Relay(connman);
+            LogPrint(BCLog::CJOIN, "%s CJQUEUE -- new CoinJoin queue (%s) from masternode %s, vecCoinJoinQueue size: %d\n", m_wallet->GetDisplayName(), queue.ToString(), infoMn.addr.ToString(), GetQueueSize());
+            // see if we can join unless we are a LP
+            if (!nLiquidityProvider && fEnableCoinJoin && !fActive) CoinJoin();
+        }
+            return;
+        case STATUS_READY:
+        case STATUS_FULL:
+        {
             // we might have timed out
             LOCK(cs_deqsessions);
             if (deqSessions.empty()) return;
@@ -157,28 +171,11 @@ void CCoinJoinClientManager::ProcessMessage(CNode* pfrom, const std::string& str
                 }
             }
         }
-        if (queue.IsOpen()) {
-            LOCK2(cs_deqsessions, cs_vecqueue);
-            for (const auto& q : vecCoinJoinQueue) {
-                if (q.masternodeOutpoint == queue.masternodeOutpoint) {
-                    // no way same mn can send another "not yet ready" queue this soon
-                    LogPrint(BCLog::CJOIN, "%s CJQUEUE -- Masternode %s is sending WAY too many queue messages\n", m_wallet->GetDisplayName(), infoMn.addr.ToString());
-                    return;
-                }
-            }
-            for (const auto& session : deqSessions) {
-                masternode_info_t mnMixing;
-                if (session.GetMixingMasternodeInfo(mnMixing) && mnMixing.outpoint == queue.masternodeOutpoint) {
-                    queue.fTried = true;
-                }
-            }
-            vecCoinJoinQueue.emplace_back(queue);
-            queue.Relay(connman);
-            LogPrint(BCLog::CJOIN, "%s CJQUEUE -- new CoinJoin queue (%s) from masternode %s, vecCoinJoinQueue size: %d\n", m_wallet->GetDisplayName(), queue.ToString(), infoMn.addr.ToString(), GetQueueSize());
-            // see if we can join unless we are a LP
-            if (!nLiquidityProvider && fEnableCoinJoin && !fActive) CoinJoin();
+            return;
+        case STATUS_REJECTED:
+        case STATUS_ACCEPTED:
+            return;
         }
-
     } else if (
         strCommand == NetMsgType::CJSTATUSUPDATE ||
         strCommand == NetMsgType::CJFINALTX ||

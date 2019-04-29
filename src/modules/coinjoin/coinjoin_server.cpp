@@ -275,7 +275,7 @@ void CCoinJoinServer::UpdateQueue(PoolStatusUpdate update)
     // notify the network about the closed queue
     for (std::vector<CCoinJoinQueue>::iterator it = vecCoinJoinQueue.begin(); it!=vecCoinJoinQueue.end(); ++it) {
         if (it!=vecCoinJoinQueue.end() && it->masternodeOutpoint == activeMasternode.outpoint && it->status != update) {
-            LogPrint(BCLog::CJOIN, "CCoinJoinServer::UpdateQueue -- &s: %s new: %d\n", update == STATUS_CLOSED ? strprintf("closing") : strprintf("updating"), it->ToString(), update);
+            LogPrint(BCLog::CJOIN, "CCoinJoinServer::UpdateQueue -- %s: %s new: %d\n", update == STATUS_CLOSED ? strprintf("closing") : strprintf("updating"), it->ToString(), update);
             if (!it->IsExpired(nCachedBlockHeight)) {
                 CCoinJoinQueue queue(*it);
                 queue.status = update;
@@ -785,6 +785,7 @@ void CCoinJoinServer::UpdatedBlockTip(const CBlockIndex *pindexNew) {
     if (!masternodeSync.IsBlockchainSynced())
         return;
 
-    CheckPool(g_connman.get());
+    if (GetState() == POOL_STATE_QUEUE) CheckForCompleteQueue();
+    if (GetState() == POOL_STATE_ACCEPTING_ENTRIES) CheckPool(g_connman.get());
     CheckTimeout(nCachedBlockHeight);
 }

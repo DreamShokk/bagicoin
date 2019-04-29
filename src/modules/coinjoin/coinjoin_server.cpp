@@ -785,6 +785,7 @@ void CCoinJoinServer::UpdatedBlockTip(const CBlockIndex *pindexNew) {
     if (!masternodeSync.IsBlockchainSynced())
         return;
 
-    CheckPool(g_connman.get());
+    if (GetState() == POOL_STATE_QUEUE) CheckForCompleteQueue();
+    if (GetState() == POOL_STATE_ACCEPTING_ENTRIES) CheckPool(g_connman.get());
     CheckTimeout(nCachedBlockHeight);
 }

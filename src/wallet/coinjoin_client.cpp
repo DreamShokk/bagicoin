@@ -218,12 +218,16 @@ void CCoinJoinClientSession::ProcessMessage(CNode* pfrom, const std::string& str
             return;
         }
 
-        LogPrint(BCLog::CJOIN, "%s CJSTATUSUPDATE -- nMsgSessionID %d  nMsgState: %d  nEntriesCount: %d  nMsgStatusUpdate: %d  nMsgMessageID %d (%s)\n",
-                 m_wallet_session->GetDisplayName(), nMsgSessionID, nMsgState, nEntriesCount, nMsgStatusUpdate, nMsgMessageID, CCoinJoin::GetMessageByID(PoolMessage(nMsgMessageID)));
-
-        if (!CheckPoolStateUpdate(PoolState(nMsgState), nMsgEntriesCount, PoolStatusUpdate(nMsgStatusUpdate), PoolMessage(nMsgMessageID), nMsgSessionID)) {
-            LogPrint(BCLog::CJOIN, "%s CJSTATUSUPDATE -- CheckPoolStateUpdate failed\n", m_wallet_session->GetDisplayName());
-        }
+        bool updated = CheckPoolStateUpdate(PoolState(nMsgState), nMsgEntriesCount, PoolStatusUpdate(nMsgStatusUpdate), PoolMessage(nMsgMessageID), nMsgSessionID);
+        LogPrint(BCLog::CJOIN, "%s CJSTATUSUPDATE -- CheckPoolStateUpdate: %s: nMsgSessionID %d  nMsgState: %d  nEntriesCount: %d  nMsgStatusUpdate: %d  nMsgMessageID %d (%s)\n",
+                 m_wallet_session->GetDisplayName(),
+                 updated ? strprintf("updated") : strprintf("no action"),
+                 nMsgSessionID,
+                 nMsgState,
+                 nEntriesCount,
+                 nMsgStatusUpdate,
+                 nMsgMessageID,
+                 CCoinJoin::GetMessageByID(PoolMessage(nMsgMessageID)));
 
     } else if (strCommand == NetMsgType::CJFINALTX) {
         if (pfrom->GetSendVersion() < MIN_COINJOIN_PEER_PROTO_VERSION) {

@@ -59,8 +59,7 @@ private:
     void RelayStatus(PoolStatusUpdate nStatusUpdate, CConnman* connman, PoolMessage nMessageID = MSG_NOERR);
     void RelayCompletedTransaction(PoolMessage nMessageID, CConnman* connman);
 
-    void ClientTask(CConnman* connman);
-    void CloseQueue(bool fAll = false);
+    void UpdateQueue(PoolStatusUpdate update);
     void SetNull();
 
 public:
@@ -72,9 +71,8 @@ public:
 
     void ProcessModuleMessage(CNode* pfrom, const std::string& strCommand, CDataStream& vRecv, CConnman* connman);
     void CheckTimeout(int nHeight);
-    void CheckForCompleteQueue(CConnman* connman);
+    void CheckForCompleteQueue();
     void UpdatedBlockTip(const CBlockIndex *pindexNew);
-    void Controller(CScheduler& scheduler, CConnman* connman);
 };
 
 #endif  //BITCOIN_MODULES_COINJOIN_COINJOINSERVER_H

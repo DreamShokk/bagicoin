@@ -159,6 +159,8 @@ public:
 
     bool ProcessPendingCJaRequest(CConnman* connman);
 
+    void SetError() { nState = POOL_STATE_ERROR; }
+
     void SetNull();
 
     /// Check for process
@@ -171,6 +173,9 @@ class CCoinJoinClientManager : public CCoinJoinBaseManager
 {
 private:
     CWallet* m_wallet;
+
+    std::atomic_bool fStartup;
+    std::atomic_bool fActive;
 
     // Keep track of the used Masternodes
     std::vector<COutPoint> vecMasternodesUsed;
@@ -199,7 +204,6 @@ private:
     bool CheckAutomaticBackup();
 
 public:
-    std::atomic_bool fActive;
     int nCoinJoinDepth;
     int nCoinJoinAmount;
     int nLiquidityProvider;
@@ -211,13 +215,14 @@ public:
 
     explicit CCoinJoinClientManager(CWallet* pwallet) :
         m_wallet(pwallet),
+        fStartup(false),
+        fActive(false),
         vecMasternodesUsed(),
         deqSessions(),
         nCachedLastSuccessBlock(0),
         nMinBlocksToWait(1),
         strAutoCoinJoinResult(),
         nCachedBlockHeight(0),
-        fActive(false),
         nCoinJoinDepth(DEFAULT_COINJOIN_DEPTH),
         nCoinJoinAmount(DEFAULT_COINJOIN_AMOUNT),
         nLiquidityProvider(DEFAULT_COINJOIN_LIQUIDITY),

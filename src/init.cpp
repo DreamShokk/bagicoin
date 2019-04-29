@@ -1879,7 +1879,6 @@ bool AppInitMain(InitInterfaces& interfaces)
     // ********************************************************* Step 11d: schedule modules
 
     activeMasternode.Controller(scheduler, g_connman.get());
-    coinJoinServer.Controller(scheduler, g_connman.get());
     netfulfilledman.Controller(scheduler);
     mnodeman.Controller(scheduler, g_connman.get());
     masternodeSync.Controller(scheduler, g_connman.get());

@@ -39,14 +39,11 @@ void CCoinJoinServer::ProcessModuleMessage(CNode* pfrom, const std::string& strC
         CAmount nDenom;
         vRecv >> nDenom;
 
-        if (IsSessionClosed()) {
-            CloseQueue();
-            if (IsSessionFull()) {
-                // too many users in this session already, reject new ones
-                LogPrintf("CJACCEPT -- queue is already full, trying to start a new one\n");
-                PushStatus(pfrom, STATUS_ACCEPTED, ERR_QUEUE_FULL, connman);
-                return;
-            }
+        if (IsSessionFull()) {
+            // too many users in this session already, reject new ones
+            LogPrintf("CJACCEPT -- queue is already full, trying to start a new one\n");
+            PushStatus(pfrom, STATUS_ACCEPTED, ERR_QUEUE_FULL, connman);
+            return;
         }
 
         LogPrint(BCLog::CJOIN, "CJACCEPT -- nDenom %d\n", FormatMoney(nDenom));
@@ -76,11 +73,10 @@ void CCoinJoinServer::ProcessModuleMessage(CNode* pfrom, const std::string& strC
         if (fResult) {
             LogPrintf("CJACCEPT -- is compatible, please submit!\n");
             PushStatus(pfrom, STATUS_ACCEPTED, nMessageID, connman);
-            return;
+            CheckForCompleteQueue();
         } else {
             LogPrintf("CJACCEPT -- not compatible with existing transactions!\n");
             PushStatus(pfrom, STATUS_REJECTED, nMessageID, connman);
-            return;
         }
 
     } else if (strCommand == NetMsgType::CJQUEUE) {
@@ -96,42 +92,51 @@ void CCoinJoinServer::ProcessModuleMessage(CNode* pfrom, const std::string& strC
 
         if (queue.IsExpired(nCachedBlockHeight)) return;
 
-        // process every queue only once
         LOCK(cs_vecqueue);
+        // process every queue only once
+        for (const auto& q :vecCoinJoinQueue) {
+            if (q == queue) {
+                LogPrint(BCLog::CJOIN, "CJQUEUE -- %s seen\n", queue.ToString());
+            }
+        }
+
+        // status has changed, update and remove if closed
         for (std::vector<CCoinJoinQueue>::iterator it = vecCoinJoinQueue.begin(); it!=vecCoinJoinQueue.end(); ++it) {
-            if (*it == queue) {
-                LogPrint(BCLog::CJOIN, "CJQUEUE -- %s %s\n", queue.ToString(), queue.fOpen ? strprintf("seen") : strprintf("removed"));
-                if (!queue.fOpen) {
+            if (*it != queue) {
+                LogPrint(BCLog::CJOIN, "CJQUEUE -- %s %s\n", queue.ToString(), queue.IsOpen() ? strprintf("updated") : strprintf("removed"));
+                if (!queue.IsOpen()) {
                     vecCoinJoinQueue.erase(it--);
                     queue.Relay(connman);
+                } else {
+                    // if not closing, status can only increase
+                    if (queue.status > it->status) it->status = queue.status; // track unused queues so we can identify duplicates
                 }
                 return;
             }
         }
 
-        if (queue.fReady == queue.fOpen) return; // don't process invalid queues
+        if (!queue.IsOpen()) return; // don't process closed queues
 
         LogPrint(BCLog::CJOIN, "CJQUEUE -- %s new\n", queue.ToString());
 
-        masternode_info_t mnInfo;
-        if (!mnodeman.GetMasternodeInfo(queue.masternodeOutpoint, mnInfo)) return;
-
-        if (!queue.CheckSignature(mnInfo.pubKeyMasternode)) {
+        masternode_info_t infoMn;
+        if (!mnodeman.GetMasternodeInfo(queue.masternodeOutpoint, infoMn) || !queue.CheckSignature(infoMn.pubKeyMasternode)) {
             // we probably have outdated info
             mnodeman.AskForMN(pfrom, queue.masternodeOutpoint, connman);
+            LogPrintf("CJQUEUE -- Masternode for CoinJoin queue (%s) not found, requesting.\n", queue.ToString());
             return;
         }
 
-        if (!queue.fReady && queue.fOpen) {
+        if (queue.status == STATUS_OPEN) {
             for (const auto& q : vecCoinJoinQueue) {
                 if (q.masternodeOutpoint == queue.masternodeOutpoint) {
                     // no way same mn can send another "not yet ready" queue this soon
-                    LogPrint(BCLog::CJOIN, "CJQUEUE -- Masternode %s is sending WAY too many queue messages\n", mnInfo.addr.ToString());
+                    LogPrint(BCLog::CJOIN, "CJQUEUE -- Masternode %s is sending WAY too many queue messages\n", infoMn.addr.ToString());
                     return;
                 }
             }
 
-            LogPrint(BCLog::CJOIN, "CJQUEUE -- new CoinJoin queue (%s) from masternode %s\n", queue.ToString(), mnInfo.addr.ToString());
+            LogPrint(BCLog::CJOIN, "CJQUEUE -- new CoinJoin queue (%s) from masternode %s\n", queue.ToString(), infoMn.addr.ToString());
             vecCoinJoinQueue.push_back(queue);
             queue.Relay(connman);
         }
@@ -246,7 +251,7 @@ bool CCoinJoinServer::CheckSessionMessage(PoolState state, CNode* pfrom, CConnma
     LOCK(cs_vecqueue);
     for (std::vector<CCoinJoinQueue>::iterator it = vecCoinJoinQueue.begin(); it==vecCoinJoinQueue.end(); ++it) {
         if (it!=vecCoinJoinQueue.end() && it->masternodeOutpoint == activeMasternode.outpoint) {
-            if (it->fOpen == it->fReady) { // our queue but already closed
+            if (!it->IsOpen()) { // our queue but already closed
                 LogPrintf("CCoinJoinServer::CheckSessionMessage -- queue not ready or open!\n");
                 PushStatus(pfrom, STATUS_REJECTED, ERR_SESSION, connman);
                 return false;
@@ -269,21 +274,19 @@ bool CCoinJoinServer::CheckSessionMessage(PoolState state, CNode* pfrom, CConnma
     return true;
 }
 
-void CCoinJoinServer::CloseQueue(bool fAll)
+void CCoinJoinServer::UpdateQueue(PoolStatusUpdate update)
 {
     LOCK(cs_vecqueue);
     // notify the network about the closed queue
     for (std::vector<CCoinJoinQueue>::iterator it = vecCoinJoinQueue.begin(); it!=vecCoinJoinQueue.end(); ++it) {
-        if (it!=vecCoinJoinQueue.end() && it->masternodeOutpoint == activeMasternode.outpoint) {
-            LogPrint(BCLog::CJOIN, "CCoinJoinServer::CloseQueue --- closing: %s\n", it->ToString());
+        if (it!=vecCoinJoinQueue.end() && it->masternodeOutpoint == activeMasternode.outpoint && it->status != update) {
+            LogPrint(BCLog::CJOIN, "CCoinJoinServer::UpdateQueue -- updating: %s\n", it->ToString());
             if (!it->IsExpired(nCachedBlockHeight)) {
                 CCoinJoinQueue queue(*it);
-                queue.fOpen = false;
-                queue.Sign();
+                queue.status = update;
                 queue.Relay(g_connman.get());
             }
-            vecCoinJoinQueue.erase(it--);
-            if (!fAll) break;
+            if (update == STATUS_CLOSED) vecCoinJoinQueue.erase(it--);
         }
     }
 }
@@ -292,7 +295,7 @@ void CCoinJoinServer::CloseQueue(bool fAll)
 void CCoinJoinServer::SetNull()
 {
     // MN side
-    CloseQueue(true);
+    UpdateQueue(STATUS_CLOSED);
 
     LOCK(cs_vecqueue);
 
@@ -312,14 +315,14 @@ void CCoinJoinServer::CheckPool(CConnman* connman)
 
     // If entries are full, create finalized transaction
     // wait a while for all to join, otherwise just go ahead
-    bool fReady = false;
-    if (static_cast<unsigned int>(GetEntriesCount()) >= vecDenom.size()) fReady = true;
-    if (GetTime() - nTimeLastSuccessfulStep >= COINJOIN_ACCEPT_TIMEOUT && static_cast<unsigned int>(GetEntriesCount()) >= CCoinJoin::GetMinPoolInputs()) fReady = true;
+    bool fReady = static_cast<unsigned int>(GetEntriesCount()) >= vecDenom.size();
+    if (GetTime() - nTimeStart >= COINJOIN_ACCEPT_TIMEOUT && static_cast<unsigned int>(GetEntriesCount()) >= CCoinJoin::GetMinPoolInputs()) fReady = true;
 
     if (GetState() == POOL_STATE_ACCEPTING_ENTRIES && fReady) {
-        // close our not-ready queue. Note: vecCoinJoinQueue is in chronological order, the ready queue remains
-        CloseQueue();
+        // close our queue
+        UpdateQueue(STATUS_CLOSED);
         LogPrint(BCLog::CJOIN, "CCoinJoinServer::CheckPool -- FINALIZE TRANSACTIONS\n");
+        nTimeStart = GetTime();
         SetState(POOL_STATE_SIGNING);
         CreateFinalTransaction(connman);
         return;
@@ -522,14 +525,13 @@ void CCoinJoinServer::CheckTimeout(int nHeight)
 {
     if (!fMasternodeMode) return;
 
-    CheckQueue(nHeight);
+    if (CheckQueue(nHeight)) {
+        LogPrint(BCLog::CJOIN, "CCoinJoinServer::CheckTimeout -- Queue expired -- resetting\n");
+        SetNull();
+    }
 
-    int nTimeout = (nState == POOL_STATE_SIGNING) ? COINJOIN_SIGNING_TIMEOUT : COINJOIN_QUEUE_TIMEOUT;
-    bool fTimeout = GetTime() - nTimeLastSuccessfulStep >= nTimeout;
-
-    if (nState != POOL_STATE_IDLE && fTimeout) {
-        LogPrint(BCLog::CJOIN, "CCoinJoinServer::CheckTimeout -- %s timed out (%ds) -- resetting\n",
-                (nState == POOL_STATE_SIGNING) ? "Signing" : "Session", nTimeout);
+    if (GetState() == POOL_STATE_SIGNING && GetTime() - nTimeStart >= COINJOIN_SIGNING_TIMEOUT) {
+        LogPrint(BCLog::CJOIN, "CCoinJoinServer::CheckTimeout -- Signing timed out (%ds) -- resetting\n", COINJOIN_SIGNING_TIMEOUT);
         // BanAbusive(connman);
         SetNull();
     }
@@ -540,18 +542,19 @@ void CCoinJoinServer::CheckTimeout(int nHeight)
     After receiving multiple cja messages, the queue will switch to "accepting entries"
     which is the active state right before merging the transaction
 */
-void CCoinJoinServer::CheckForCompleteQueue(CConnman* connman)
+void CCoinJoinServer::CheckForCompleteQueue()
 {
     if (!fMasternodeMode) return;
 
-    if (nState == POOL_STATE_QUEUE && IsSessionReady()) {
+    if (GetState() == POOL_STATE_QUEUE && IsSessionReady()) {
+        nTimeStart = GetTime();
         SetState(POOL_STATE_ACCEPTING_ENTRIES);
-        CCoinJoinQueue queue(nSessionDenom, activeMasternode.outpoint, nCachedBlockHeight, true, false);
-        LogPrint(BCLog::CJOIN, "CCoinJoinServer::CheckForCompleteQueue -- queue is ready, signing and relaying (%s)\n", queue.ToString());
-        queue.Sign();
-        LOCK(cs_vecqueue);
-        vecCoinJoinQueue.push_back(queue);
-        queue.Relay(connman);
+        UpdateQueue(IsSessionFull() ? STATUS_FULL : STATUS_READY);
+        LogPrint(BCLog::CJOIN, "CCoinJoinServer::CheckForCompleteQueue -- queue is ready, updating and relaying...\n");
+        return;
+    }
+    if (GetState() == POOL_STATE_ACCEPTING_ENTRIES && IsSessionFull()) {
+        UpdateQueue(STATUS_FULL);
     }
 }
 
@@ -581,7 +584,6 @@ bool CCoinJoinServer::AddEntry(const CCoinJoinEntry& entryNew, PoolMessage& nMes
 
     LogPrint(BCLog::CJOIN, "CCoinJoinServer::AddEntry -- adding entry\n");
     nMessageIDRet = MSG_ENTRIES_ADDED;
-    nTimeLastSuccessfulStep = GetTime();
 
     return true;
 }
@@ -614,9 +616,9 @@ bool CCoinJoinServer::CreateNewSession(const CAmount& nDenom, PoolMessage& nMess
     LOCK(cs_coinjoin);
 
     // new session can only be started in idle mode
-    if (nState != POOL_STATE_IDLE) {
+    if (GetState() != POOL_STATE_IDLE) {
         nMessageIDRet = ERR_MODE;
-        LogPrintf("CCoinJoinServer::CreateNewSession -- incompatible mode: nState=%d\n", nState);
+        LogPrintf("CCoinJoinServer::CreateNewSession -- incompatible mode: nState=%d\n", GetStateString());
         return false;
     }
 
@@ -632,11 +634,10 @@ bool CCoinJoinServer::CreateNewSession(const CAmount& nDenom, PoolMessage& nMess
     nSessionDenom = nDenom;
 
     SetState(POOL_STATE_QUEUE);
-    nTimeLastSuccessfulStep = GetTime();
 
     if (!fUnitTest) {
         //broadcast that I'm accepting entries, only if it's the first entry through
-        CCoinJoinQueue queue(nDenom, activeMasternode.outpoint, nCachedBlockHeight, false, true);
+        CCoinJoinQueue queue(nDenom, activeMasternode.outpoint, nCachedBlockHeight, STATUS_OPEN);
         LogPrint(BCLog::CJOIN, "CCoinJoinServer::CreateNewSession -- signing and relaying new queue: %s\n", queue.ToString());
         queue.Sign();
         LOCK(cs_vecqueue);
@@ -681,7 +682,6 @@ bool CCoinJoinServer::AddUserToExistingSession(const CAmount& nDenom, PoolMessag
 
     nMessageIDRet = MSG_NOERR;
     nSessionDenom |= nDenom;
-    nTimeLastSuccessfulStep = GetTime();
     vecDenom.push_back(nSessionDenom);
 
     LogPrintf("CCoinJoinServer::AddUserToExistingSession -- new user accepted, nSessionID: %d  nSessionDenom: %d (%s)  vecDenom.size(): %d\n",
@@ -792,22 +792,4 @@ void CCoinJoinServer::UpdatedBlockTip(const CBlockIndex *pindexNew) {
 
     CheckPool(g_connman.get());
     CheckTimeout(nCachedBlockHeight);
-}
-
-void CCoinJoinServer::ClientTask(CConnman* connman)
-{
-    if (fLiteMode) return; // disable all specific functionality
-    if (!fMasternodeMode) return; // only run on masternodes
-
-    if (!masternodeSync.IsBlockchainSynced() || ShutdownRequested())
-        return;
-
-    CheckForCompleteQueue(connman);
-}
-
-void CCoinJoinServer::Controller(CScheduler& scheduler, CConnman* connman)
-{
-    if (!fLiteMode) {
-        scheduler.scheduleEvery(std::bind(&CCoinJoinServer::ClientTask, this, connman), 1000);
-    }
 }

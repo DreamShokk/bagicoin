@@ -93,7 +93,7 @@ border: 1px solid #82C3E6;
 font-size:11px;
 min-height:25px;
 outline:0;
-padding:3px;
+padding:4px;
 background-color:#fcfcfc;
 }
 
@@ -137,8 +137,10 @@ border:1px solid #333;
 
 QComboBox { /* Dropdown Menus */
 border:1px solid #82C3E6;
+margin-right: 5px;
+padding: 4px 25px 4px 5px;
 background:#fcfcfc;
-min-height:31px;
+min-height:25px;
 color:#818181;
 }
 
@@ -162,9 +164,13 @@ border-image: url(':/images/green/downArrow') 0 0 0 0 stretch stretch;
 
 QComboBox QListView {
 background:#fff;
+padding-right:1px;
+padding-left:1px;
 }
 
-QComboBox QAbstractItemView::item { margin:0px; }
+QComboBox QAbstractItemView::item {
+margin:4px;
+}
 
 QComboBox::item {
 color:#818181;

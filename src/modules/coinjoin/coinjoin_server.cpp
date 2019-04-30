@@ -242,8 +242,8 @@ void CCoinJoinServer::UpdateQueue(PoolStatusUpdate update)
             for (std::vector<CCoinJoinEntry>::iterator it = vecEntries.begin(); it != vecEntries.end(); ++it) {
                 if (!activeQueue.Push(it->addr, connman)) {
                     // no such node? maybe this client disconnected or our own connection went down
-                    LogPrintf("CCoinJoinServer::%s -- client(s) disconnected, removing entry: %s nSessionID: %d  nSessionDenom: %d (%s)\n",
-                              __func__, it->addr.ToStringIPPort(), nSessionID, nSessionDenom, CCoinJoin::GetDenominationsToString(nSessionDenom));
+                    LogPrintf("CCoinJoinServer::%s -- client(s) disconnected, removing entry: %s nSessionID: %d  nSessionDenom: %d (%s, size: %d)\n",
+                              __func__, it->addr.ToStringIPPort(), nSessionID, nSessionDenom, CCoinJoin::GetDenominationsToString(nSessionDenom), vecEntries.size());
                     vecEntries.erase(it--);
                 }
             }
@@ -375,7 +375,6 @@ void CCoinJoinServer::CommitFinalTransaction(CConnman* connman)
     CMutableTransaction mtxFinal;
     if (!FinalizeAndExtractPSBT(finalPartiallySignedTransaction, mtxFinal)) {
         LogPrintf("CCoinJoinServer::CommitFinalTransaction -- FinalizeAndExtractPSBT() error: Transaction not final\n");
-        SetNull();
         // not much we can do in this case, just notify clients
         RelayCompletedTransaction(ERR_INVALID_TX, connman);
         SetNull();
@@ -395,7 +394,6 @@ void CCoinJoinServer::CommitFinalTransaction(CConnman* connman)
         if (!AcceptToMemoryPool(mempool, validationState, finalTransaction, nullptr, nullptr, false, maxTxFee, false))
         {
             LogPrintf("CCoinJoinServer::CommitFinalTransaction -- AcceptToMemoryPool() error: Transaction not valid\n");
-            SetNull();
             // not much we can do in this case, just notify clients
             RelayCompletedTransaction(ERR_INVALID_TX, connman);
             SetNull();
@@ -497,12 +495,12 @@ void CCoinJoinServer::CheckTimeout(int nHeight)
     if (!fMasternodeMode) return;
 
     if (CheckQueue(nHeight)) {
-        LogPrint(BCLog::CJOIN, "CCoinJoinServer::CheckTimeout -- Queue expired -- resetting\n");
+        LogPrintf("CCoinJoinServer::CheckTimeout -- Queue expired -- resetting\n");
         SetNull();
     }
 
     if (GetState() == POOL_STATE_SIGNING && GetTime() - nTimeStart >= COINJOIN_SIGNING_TIMEOUT) {
-        LogPrint(BCLog::CJOIN, "CCoinJoinServer::CheckTimeout -- Signing timed out (%ds) -- resetting\n", COINJOIN_SIGNING_TIMEOUT);
+        LogPrintf("CCoinJoinServer::CheckTimeout -- Signing timed out (%ds) -- resetting\n", COINJOIN_SIGNING_TIMEOUT);
         // BanAbusive(connman);
         SetNull();
     }
@@ -707,8 +705,8 @@ void CCoinJoinServer::RelayStatus(PoolStatusUpdate nStatusUpdate, CConnman* conn
         });
         if (!fOk) {
             // no such node? maybe this client disconnected or our own connection went down
-            LogPrintf("CCoinJoinServer::%s -- client(s) disconnected, removing entry: %s nSessionID: %d  nSessionDenom: %d (%s)\n",
-                    __func__, it->addr.ToStringIPPort(), nSessionID, nSessionDenom, CCoinJoin::GetDenominationsToString(nSessionDenom));
+            LogPrintf("CCoinJoinServer::%s -- client(s) disconnected, removing entry: %s nSessionID: %d  nSessionDenom: %d (%s), size: %d\n",
+                    __func__, it->addr.ToStringIPPort(), nSessionID, nSessionDenom, CCoinJoin::GetDenominationsToString(nSessionDenom), vecEntries.size());
             vecEntries.erase(it--);
         }
     }

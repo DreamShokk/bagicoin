@@ -236,6 +236,7 @@ void CCoinJoinServer::UpdateQueue(PoolStatusUpdate update)
         LogPrint(BCLog::CJOIN, "CCoinJoinServer::UpdateQueue -- %s: %s new: %d\n", update == STATUS_CLOSED ? strprintf("closing") : strprintf("updating"), activeQueue.ToString(), update);
         CConnman* connman = g_connman.get();
         activeQueue.status = update;
+        activeQueue.Sign();
         if (update > 1) {
             // status updates should be relayed to mixing participants only
             for (std::vector<CCoinJoinEntry>::iterator it = vecEntries.begin(); it != vecEntries.end(); ++it) {

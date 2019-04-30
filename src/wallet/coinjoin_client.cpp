@@ -85,6 +85,13 @@ void CCoinJoinClientManager::ProcessMessage(CNode* pfrom, const std::string& str
     if (fLiteMode) return; // ignore all CoinJoin related functionality
     if (!masternodeSync.IsBlockchainSynced()) return;
 
+    if (pfrom->GetSendVersion() < MIN_COINJOIN_PEER_PROTO_VERSION) {
+        LogPrint(BCLog::CJOIN, "%s CCoinJoinClientManager::ProcessMessage -- peer=%d using obsolete version %i\n", m_wallet->GetDisplayName(), pfrom->GetId(), pfrom->GetSendVersion());
+        connman->PushMessage(pfrom, CNetMsgMaker(pfrom->GetSendVersion()).Make(NetMsgType::REJECT, strCommand, REJECT_OBSOLETE,
+                           strprintf("Version must be %d or greater", MIN_COINJOIN_PEER_PROTO_VERSION)));
+        return;
+    }
+
     if (!CheckDiskSpace()) {
         ResetPool();
         fEnableCoinJoin = false;
@@ -94,32 +101,24 @@ void CCoinJoinClientManager::ProcessMessage(CNode* pfrom, const std::string& str
     }
 
     if (strCommand == NetMsgType::CJQUEUE) {
-        if (pfrom->GetSendVersion() < MIN_COINJOIN_PEER_PROTO_VERSION) {
-            LogPrint(BCLog::CJOIN, "%s CJQUEUE -- peer=%d using obsolete version %i\n", m_wallet->GetDisplayName(), pfrom->GetId(), pfrom->GetSendVersion());
-            connman->PushMessage(pfrom, CNetMsgMaker(pfrom->GetSendVersion()).Make(NetMsgType::REJECT, strCommand, REJECT_OBSOLETE,
-                               strprintf("Version must be %d or greater", MIN_COINJOIN_PEER_PROTO_VERSION)));
-            return;
-        }
 
         CCoinJoinQueue queue;
         vRecv >> queue;
 
         if (queue.IsExpired(nCachedBlockHeight)) return;
 
+        LogPrint(BCLog::CJOIN, "%s CJQUEUE -- %s new from %s\n", m_wallet->GetDisplayName(), queue.ToString(), pfrom->addr.ToStringIPPort());
+
         {
             LOCK(cs_vecqueue);
             // process every queue only once
-            for (const auto& q :vecCoinJoinQueue) {
-                if (q == queue) {
-                    LogPrint(BCLog::CJOIN, "%s CJQUEUE -- %s seen from %s\n", m_wallet->GetDisplayName(), queue.ToString(), pfrom->addr.ToStringIPPort());
-                    return;
-                }
-            }
-
             // status has changed, update and remove if closed
             for (std::vector<CCoinJoinQueue>::iterator it = vecCoinJoinQueue.begin(); it!=vecCoinJoinQueue.end(); ++it) {
-                if (*it != queue) {
-                    LogPrint(BCLog::CJOIN, "%s CJQUEUE -- %s %s\n", m_wallet->GetDisplayName(), queue.ToString(), queue.IsOpen() ? strprintf("updated") : strprintf("removed"));
+                if (*it == queue) {
+                    LogPrint(BCLog::CJOIN, "%s CJQUEUE -- %s seen from %s\n", m_wallet->GetDisplayName(), queue.ToString(), pfrom->addr.ToStringIPPort());
+                    return;
+                } else if (*it != queue) {
+                    LogPrint(BCLog::CJOIN, "%s CJQUEUE -- %s %s from %s\n", m_wallet->GetDisplayName(), queue.ToString(), queue.IsOpen() ? strprintf("updated") : strprintf("removed"), pfrom->addr.ToStringIPPort());
                     if (!queue.IsOpen()) {
                         vecCoinJoinQueue.erase(it--);
                         queue.Relay(connman);
@@ -133,8 +132,6 @@ void CCoinJoinClientManager::ProcessMessage(CNode* pfrom, const std::string& str
                 break;
             }
         }
-
-        LogPrint(BCLog::CJOIN, "%s CJQUEUE -- %s new\n", m_wallet->GetDisplayName(), queue.ToString());
 
         masternode_info_t infoMn;
         if (!mnodeman.GetMasternodeInfo(queue.masternodeOutpoint, infoMn) || !queue.CheckSignature(infoMn.pubKeyMasternode)) {
@@ -198,13 +195,6 @@ void CCoinJoinClientSession::ProcessMessage(CNode* pfrom, const std::string& str
 
     if (strCommand == NetMsgType::CJSTATUSUPDATE) {
 
-        if (pfrom->GetSendVersion() < MIN_COINJOIN_PEER_PROTO_VERSION) {
-            LogPrint(BCLog::CJOIN, "%s CJSTATUSUPDATE -- peer=%d using obsolete version %i\n", m_wallet_session->GetDisplayName(), pfrom->GetId(), pfrom->GetSendVersion());
-            connman->PushMessage(pfrom, CNetMsgMaker(pfrom->GetSendVersion()).Make(NetMsgType::REJECT, strCommand, REJECT_OBSOLETE,
-                               strprintf("Version must be %d or greater", MIN_COINJOIN_PEER_PROTO_VERSION)));
-            return;
-        }
-
         int nMsgSessionID;
         int nMsgState;
         int nMsgEntriesCount;
@@ -239,12 +229,6 @@ void CCoinJoinClientSession::ProcessMessage(CNode* pfrom, const std::string& str
                  CCoinJoin::GetMessageByID(PoolMessage(nMsgMessageID)));
 
     } else if (strCommand == NetMsgType::CJFINALTX) {
-        if (pfrom->GetSendVersion() < MIN_COINJOIN_PEER_PROTO_VERSION) {
-            LogPrint(BCLog::CJOIN, "%s CJFINALTX -- peer=%d using obsolete version %i\n", m_wallet_session->GetDisplayName(), pfrom->GetId(), pfrom->GetSendVersion());
-            connman->PushMessage(pfrom, CNetMsgMaker(pfrom->GetSendVersion()).Make(NetMsgType::REJECT, strCommand, REJECT_OBSOLETE,
-                               strprintf("Version must be %d or greater", MIN_COINJOIN_PEER_PROTO_VERSION)));
-            return;
-        }
 
         CCoinJoinBroadcastTx psbtxFinal;
         vRecv >> psbtxFinal;
@@ -264,12 +248,6 @@ void CCoinJoinClientSession::ProcessMessage(CNode* pfrom, const std::string& str
         SignFinalTransaction(psbtxFinal.psbtx, pfrom);
 
     } else if (strCommand == NetMsgType::CJCOMPLETE) {
-        if (pfrom->GetSendVersion() < MIN_COINJOIN_PEER_PROTO_VERSION) {
-            LogPrint(BCLog::CJOIN, "%s CJCOMPLETE -- peer=%d using obsolete version %i\n", m_wallet_session->GetDisplayName(), pfrom->GetId(), pfrom->GetSendVersion());
-            connman->PushMessage(pfrom, CNetMsgMaker(pfrom->GetSendVersion()).Make(NetMsgType::REJECT, strCommand, REJECT_OBSOLETE,
-                               strprintf("Version must be %d or greater", MIN_COINJOIN_PEER_PROTO_VERSION)));
-            return;
-        }
 
         int nMsgSessionID;
         int nMsgMessageID;

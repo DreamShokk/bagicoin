@@ -28,21 +28,22 @@ void CCoinJoinServer::ProcessModuleMessage(CNode* pfrom, const std::string& strC
     if (fLiteMode) return; // ignore all CoinJoin related functionality
     if (!masternodeSync.IsBlockchainSynced()) return;
 
+    if (pfrom->GetSendVersion() < MIN_COINJOIN_PEER_PROTO_VERSION) {
+        LogPrint(BCLog::CJOIN, "CCoinJoinServer::ProcessModuleMessage -- peer=%d using obsolete version %i\n", pfrom->GetId(), pfrom->GetSendVersion());
+        connman->PushMessage(pfrom, CNetMsgMaker(pfrom->GetSendVersion()).Make(NetMsgType::REJECT, strCommand, REJECT_OBSOLETE,
+                           strprintf("Version must be %d or greater", MIN_COINJOIN_PEER_PROTO_VERSION)));
+        return;
+    }
+
     if (strCommand == NetMsgType::CJACCEPT) {
-        if (pfrom->GetSendVersion() < MIN_COINJOIN_PEER_PROTO_VERSION) {
-            LogPrint(BCLog::CJOIN, "CJACCEPT -- peer=%d using obsolete version %i\n", pfrom->GetId(), pfrom->GetSendVersion());
-            connman->PushMessage(pfrom, CNetMsgMaker(pfrom->GetSendVersion()).Make(NetMsgType::REJECT, strCommand, REJECT_OBSOLETE,
-                               strprintf("Version must be %d or greater", MIN_COINJOIN_PEER_PROTO_VERSION)));
-            PushStatus(pfrom, STATUS_REJECTED, ERR_VERSION, connman);
-            return;
-        }
+
         CAmount nDenom;
         vRecv >> nDenom;
 
         if (IsSessionFull()) {
             // too many users in this session already, reject new ones
-            LogPrintf("CJACCEPT -- queue is already full, trying to start a new one\n");
-            PushStatus(pfrom, STATUS_ACCEPTED, ERR_QUEUE_FULL, connman);
+            LogPrintf("CJACCEPT -- queue is already full!\n");
+            PushStatus(pfrom, STATUS_REJECTED, ERR_QUEUE_FULL, connman);
             return;
         }
 
@@ -73,6 +74,7 @@ void CCoinJoinServer::ProcessModuleMessage(CNode* pfrom, const std::string& strC
         if (fResult) {
             LogPrintf("CJACCEPT -- is compatible, please submit!\n");
             PushStatus(pfrom, STATUS_ACCEPTED, nMessageID, connman);
+            if (activeQueue.status > STATUS_OPEN) activeQueue.Push(pfrom->addr, connman);
             CheckForCompleteQueue();
         } else {
             LogPrintf("CJACCEPT -- not compatible with existing transactions!\n");
@@ -80,12 +82,6 @@ void CCoinJoinServer::ProcessModuleMessage(CNode* pfrom, const std::string& strC
         }
 
     } else if (strCommand == NetMsgType::CJQUEUE) {
-        if (pfrom->GetSendVersion() < MIN_COINJOIN_PEER_PROTO_VERSION) {
-            LogPrint(BCLog::CJOIN, "CJQUEUE -- peer=%d using obsolete version %i\n", pfrom->GetId(), pfrom->GetSendVersion());
-            connman->PushMessage(pfrom, CNetMsgMaker(pfrom->GetSendVersion()).Make(NetMsgType::REJECT, strCommand, REJECT_OBSOLETE,
-                               strprintf("Version must be %d or greater", MIN_COINJOIN_PEER_PROTO_VERSION)));
-            return;
-        }
 
         CCoinJoinQueue queue;
         vRecv >> queue;
@@ -94,16 +90,12 @@ void CCoinJoinServer::ProcessModuleMessage(CNode* pfrom, const std::string& strC
 
         LOCK(cs_vecqueue);
         // process every queue only once
-        for (const auto& q :vecCoinJoinQueue) {
-            if (q == queue) {
-                LogPrint(BCLog::CJOIN, "CJQUEUE -- %s seen from %s\n", queue.ToString(), pfrom->addr.ToStringIPPort());
-                return;
-            }
-        }
-
         // status has changed, update and remove if closed
         for (std::vector<CCoinJoinQueue>::iterator it = vecCoinJoinQueue.begin(); it!=vecCoinJoinQueue.end(); ++it) {
-            if (*it != queue) {
+            if (*it == queue) {
+                LogPrint(BCLog::CJOIN, "CJQUEUE -- %s seen from %s\n", queue.ToString(), pfrom->addr.ToStringIPPort());
+                return;
+            } else if (*it != queue) {
                 LogPrint(BCLog::CJOIN, "CJQUEUE -- %s %s\n", queue.ToString(), queue.IsOpen() ? strprintf("updated") : strprintf("removed"));
                 if (!queue.IsOpen()) {
                     vecCoinJoinQueue.erase(it--);
@@ -120,8 +112,6 @@ void CCoinJoinServer::ProcessModuleMessage(CNode* pfrom, const std::string& strC
 
         if (!queue.IsOpen()) return; // don't process closed queues
 
-        LogPrint(BCLog::CJOIN, "CJQUEUE -- %s new\n", queue.ToString());
-
         masternode_info_t infoMn;
         if (!mnodeman.GetMasternodeInfo(queue.masternodeOutpoint, infoMn) || !queue.CheckSignature(infoMn.pubKeyMasternode)) {
             // we probably have outdated info
@@ -137,15 +127,8 @@ void CCoinJoinServer::ProcessModuleMessage(CNode* pfrom, const std::string& strC
         }
 
     } else if (strCommand == NetMsgType::CJTXIN) {
-        if (pfrom->GetSendVersion() < MIN_COINJOIN_PEER_PROTO_VERSION) {
-            LogPrint(BCLog::CJOIN, "CJTXIN -- peer=%d using obsolete version %i\n", pfrom->GetId(), pfrom->GetSendVersion());
-            connman->PushMessage(pfrom, CNetMsgMaker(pfrom->GetSendVersion()).Make(NetMsgType::REJECT, strCommand, REJECT_OBSOLETE,
-                               strprintf("Version must be %d or greater", MIN_COINJOIN_PEER_PROTO_VERSION)));
-            PushStatus(pfrom, STATUS_REJECTED, ERR_VERSION, connman);
-            return;
-        }
 
-        if (!CheckSessionMessage(POOL_STATE_ACCEPTING_ENTRIES, pfrom, connman)) return;
+        if (!CheckSessionMessage(pfrom, connman)) return;
 
         CCoinJoinEntry entry;
         vRecv >> entry;
@@ -200,14 +183,7 @@ void CCoinJoinServer::ProcessModuleMessage(CNode* pfrom, const std::string& strC
 
     } else if (strCommand == NetMsgType::CJSIGNFINALTX) {
 
-        if (pfrom->GetSendVersion() < MIN_COINJOIN_PEER_PROTO_VERSION) {
-            LogPrint(BCLog::CJOIN, "DSSIGNFINALTX -- peer=%d using obsolete version %i\n", pfrom->GetId(), pfrom->GetSendVersion());
-            connman->PushMessage(pfrom, CNetMsgMaker(pfrom->GetSendVersion()).Make(NetMsgType::REJECT, strCommand, REJECT_OBSOLETE,
-                               strprintf("Version must be %d or greater", MIN_COINJOIN_PEER_PROTO_VERSION)));
-            return;
-        }
-
-        if (!CheckSessionMessage(POOL_STATE_SIGNING, pfrom, connman)) return;
+        if (!CheckSessionMessage(pfrom, connman)) return;
 
         PartiallySignedTransaction ptx(deserialize, vRecv);
 
@@ -235,29 +211,13 @@ void CCoinJoinServer::ProcessModuleMessage(CNode* pfrom, const std::string& strC
     }
 }
 
-bool CCoinJoinServer::CheckSessionMessage(PoolState state, CNode* pfrom, CConnman* connman) {
-    // right state?
-    if (GetState() != state) { // our queue but already closed
-        LogPrintf("CCoinJoinServer::CheckSessionMessage -- incorrect pool state!\n");
+bool CCoinJoinServer::CheckSessionMessage(CNode* pfrom, CConnman* connman) {
+
+    // make sure it's really our session
+    if (activeQueue.status < STATUS_READY || activeQueue.status > STATUS_FULL) { // our queue but already closed
+        LogPrintf("CCoinJoinServer::CheckSessionMessage -- queue not ready or open!\n");
         PushStatus(pfrom, STATUS_REJECTED, ERR_SESSION, connman);
         return false;
-    }
-    // make sure it's really our session
-    LOCK(cs_vecqueue);
-    for (std::vector<CCoinJoinQueue>::iterator it = vecCoinJoinQueue.begin(); it==vecCoinJoinQueue.end(); ++it) {
-        if (it!=vecCoinJoinQueue.end() && it->masternodeOutpoint == activeMasternode.outpoint) {
-            if (!it->IsOpen()) { // our queue but already closed
-                LogPrintf("CCoinJoinServer::CheckSessionMessage -- queue not ready or open!\n");
-                PushStatus(pfrom, STATUS_REJECTED, ERR_SESSION, connman);
-                return false;
-            }
-            break;
-        }  // queue already removed
-        if (it == vecCoinJoinQueue.end()) {
-            LogPrintf("CCoinJoinServer::CheckSessionMessage -- queue removed!\n");
-            PushStatus(pfrom, STATUS_REJECTED, ERR_SESSION, connman);
-            return false;
-        }
     }
 
     //do we have enough users in the current session?
@@ -271,29 +231,37 @@ bool CCoinJoinServer::CheckSessionMessage(PoolState state, CNode* pfrom, CConnma
 
 void CCoinJoinServer::UpdateQueue(PoolStatusUpdate update)
 {
-    LOCK(cs_vecqueue);
-    // notify the network about the closed queue
-    for (std::vector<CCoinJoinQueue>::iterator it = vecCoinJoinQueue.begin(); it!=vecCoinJoinQueue.end(); ++it) {
-        if (it!=vecCoinJoinQueue.end() && it->masternodeOutpoint == activeMasternode.outpoint && it->status != update) {
-            LogPrint(BCLog::CJOIN, "CCoinJoinServer::UpdateQueue -- %s: %s new: %d\n", update == STATUS_CLOSED ? strprintf("closing") : strprintf("updating"), it->ToString(), update);
-            if (!it->IsExpired(nCachedBlockHeight)) {
-                CCoinJoinQueue queue(*it);
-                queue.status = update;
-                queue.Relay(g_connman.get());
+    if (activeQueue.IsExpired(nCachedBlockHeight)) return;
+    if (activeQueue.status != update) {
+        LogPrint(BCLog::CJOIN, "CCoinJoinServer::UpdateQueue -- %s: %s new: %d\n", update == STATUS_CLOSED ? strprintf("closing") : strprintf("updating"), activeQueue.ToString(), update);
+        CConnman* connman = g_connman.get();
+        activeQueue.status = update;
+        if (update > 1) {
+            // status updates should be relayed to mixing participants only
+            for (std::vector<CCoinJoinEntry>::iterator it = vecEntries.begin(); it != vecEntries.end(); ++it) {
+                if (!activeQueue.Push(it->addr, connman)) {
+                    // no such node? maybe this client disconnected or our own connection went down
+                    LogPrintf("CCoinJoinServer::%s -- client(s) disconnected, removing entry: %s nSessionID: %d  nSessionDenom: %d (%s)\n",
+                              __func__, it->addr.ToStringIPPort(), nSessionID, nSessionDenom, CCoinJoin::GetDenominationsToString(nSessionDenom));
+                    vecEntries.erase(it--);
+                }
             }
-            if (update == STATUS_CLOSED) vecCoinJoinQueue.erase(it--);
-        }
+            if (vecEntries.empty()) {
+                // all clients disconnected, there is probably some issues with our own connection
+                // do not ban anyone, just reset the pool
+                SetNull();
+            }
+        } else activeQueue.Relay(connman);
     }
 }
-
 
 void CCoinJoinServer::SetNull()
 {
     // MN side
     UpdateQueue(STATUS_CLOSED);
+    activeQueue = CCoinJoinQueue();
 
     LOCK(cs_vecqueue);
-
     vecDenom.clear();
     CCoinJoinBaseSession::SetNull();
     CCoinJoinBaseManager::SetNull();
@@ -322,6 +290,11 @@ void CCoinJoinServer::CheckPool(CConnman* connman)
         CreateFinalTransaction(connman);
         return;
     }
+
+    if (GetState() == POOL_STATE_ACCEPTING_ENTRIES && IsSessionFull()) {
+        UpdateQueue(STATUS_FULL);
+    }
+
 }
 
 void CCoinJoinServer::CreateFinalTransaction(CConnman* connman)
@@ -404,6 +377,7 @@ void CCoinJoinServer::CommitFinalTransaction(CConnman* connman)
         SetNull();
         // not much we can do in this case, just notify clients
         RelayCompletedTransaction(ERR_INVALID_TX, connman);
+        SetNull();
         return;
     }
 
@@ -423,6 +397,7 @@ void CCoinJoinServer::CommitFinalTransaction(CConnman* connman)
             SetNull();
             // not much we can do in this case, just notify clients
             RelayCompletedTransaction(ERR_INVALID_TX, connman);
+            SetNull();
             return;
         }
     }
@@ -548,9 +523,6 @@ void CCoinJoinServer::CheckForCompleteQueue()
         LogPrint(BCLog::CJOIN, "CCoinJoinServer::CheckForCompleteQueue -- queue is ready, updating and relaying...\n");
         return;
     }
-    if (GetState() == POOL_STATE_ACCEPTING_ENTRIES && IsSessionFull()) {
-        UpdateQueue(STATUS_FULL);
-    }
 }
 
 //
@@ -635,6 +607,7 @@ bool CCoinJoinServer::CreateNewSession(const CAmount& nDenom, PoolMessage& nMess
         CCoinJoinQueue queue(nDenom, activeMasternode.outpoint, nCachedBlockHeight, STATUS_OPEN);
         LogPrint(BCLog::CJOIN, "CCoinJoinServer::CreateNewSession -- signing and relaying new queue: %s\n", queue.ToString());
         queue.Sign();
+        activeQueue = queue;
         LOCK(cs_vecqueue);
         vecCoinJoinQueue.push_back(queue);
         queue.Relay(connman);

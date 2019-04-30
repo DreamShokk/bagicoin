@@ -19,6 +19,7 @@ class CCoinJoinServer : public CCoinJoinBaseSession, public CCoinJoinBaseManager
 {
 private:
     std::vector<CAmount> vecDenom;
+    CCoinJoinQueue activeQueue;
 
     bool fUnitTest;
 
@@ -35,7 +36,7 @@ private:
     void CheckPool(CConnman* connman);
 
     /// Check Session
-    bool CheckSessionMessage(PoolState state, CNode* pnode, CConnman* connman);
+    bool CheckSessionMessage(CNode* pnode, CConnman* connman);
 
     void CreateFinalTransaction(CConnman* connman);
     void CommitFinalTransaction(CConnman* connman);
@@ -65,6 +66,7 @@ private:
 public:
     CCoinJoinServer() :
         vecDenom(),
+        activeQueue(),
         fUnitTest(false),
         nCachedBlockHeight(0)
         { SetNull(); }

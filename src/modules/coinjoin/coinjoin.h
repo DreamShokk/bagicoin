@@ -16,6 +16,7 @@
 
 class CCoinJoin;
 class CConnman;
+class CNode;
 
 // denominations
 static const unsigned char COINJOIN_MAX_SHIFT = 0x0b;
@@ -197,6 +198,7 @@ public:
     bool CheckSignature(const CPubKey& pubKeyMasternode) const;
 
     bool Relay(CConnman* connman);
+    bool Push(const CService pto, CConnman* connman);
 
     /// Is this queue expired?
     bool IsExpired(int nHeightIn) const { return nHeightIn - nHeight > COINJOIN_DEFAULT_TIMEOUT; }

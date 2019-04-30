@@ -54,7 +54,7 @@ bool CCoinJoinQueue::CheckSignature(const CPubKey& pubKeyMasternode) const
 
     if (!CHashSigner::VerifyHash(hash, pubKeyMasternode, vchSig, strError)) {
         // we don't care about queues with old signature format
-        LogPrintf("CDarksendQueue::CheckSignature -- VerifyHash() failed, error: %s\n", strError);
+        LogPrintf("CCoinJoinQueue::CheckSignature -- VerifyHash() failed, error: %s\n", strError);
         return false;
     }
 
@@ -69,6 +69,17 @@ bool CCoinJoinQueue::Relay(CConnman* connman)
             connman->PushMessage(pnode, msgMaker.Make(NetMsgType::CJQUEUE, (*this)));
     });
     return true;
+}
+
+bool CCoinJoinQueue::Push(const CService pto, CConnman* connman)
+{
+    bool fOK = connman->ForNode(pto, [&connman, this](CNode* pnode) {
+        CNetMsgMaker msgMaker(pnode->GetSendVersion());
+        if (pnode->nVersion >= MIN_COINJOIN_PEER_PROTO_VERSION)
+            connman->PushMessage(pnode, msgMaker.Make(NetMsgType::CJQUEUE, (*this)));
+            return true;
+    });
+    return fOK;
 }
 
 uint256 CCoinJoinBroadcastTx::GetSignatureHash() const

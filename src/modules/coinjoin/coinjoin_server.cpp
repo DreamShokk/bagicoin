@@ -284,7 +284,7 @@ void CCoinJoinServer::CheckPool(CConnman* connman)
 
     if (GetState() == POOL_STATE_ACCEPTING_ENTRIES && fReady) {
         // close our queue
-        UpdateQueue(STATUS_CLOSED);
+        UpdateQueue(STATUS_READY);
         LogPrint(BCLog::CJOIN, "CCoinJoinServer::CheckPool -- FINALIZE TRANSACTIONS\n");
         nTimeStart = GetTime();
         SetState(POOL_STATE_SIGNING);

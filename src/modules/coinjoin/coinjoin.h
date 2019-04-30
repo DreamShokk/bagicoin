@@ -176,11 +176,12 @@ public:
     template <typename Stream, typename Operation>
     inline void SerializationOp(Stream& s, Operation ser_action)
     {
-        int status = static_cast<int>(status);
+        int _status = static_cast<int>(status);
         READWRITE(nDenom);
         READWRITE(masternodeOutpoint);
         READWRITE(nHeight);
-        READWRITE(status);
+        READWRITE(_status);
+        if (ser_action.ForRead()) status = static_cast<PoolStatusUpdate>(_status);
         if (!(s.GetType() & SER_GETHASH)) {
             READWRITE(vchSig);
         }

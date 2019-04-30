@@ -107,7 +107,8 @@ void CCoinJoinClientManager::ProcessMessage(CNode* pfrom, const std::string& str
 
         if (queue.IsExpired(nCachedBlockHeight)) return;
 
-        LogPrint(BCLog::CJOIN, "%s CJQUEUE -- %s new from %s\n", m_wallet->GetDisplayName(), queue.ToString(), pfrom->addr.ToStringIPPort());
+        // enable for network analysis only!!!
+        // LogPrint(BCLog::CJOIN, "%s CJQUEUE -- %s new from %s\n", m_wallet->GetDisplayName(), queue.ToString(), pfrom->addr.ToStringIPPort());
 
         {
             LOCK(cs_vecqueue);

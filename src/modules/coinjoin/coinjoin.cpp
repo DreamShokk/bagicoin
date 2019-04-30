@@ -34,12 +34,12 @@ bool CCoinJoinQueue::Sign()
     uint256 hash = GetSignatureHash();
 
     if (!CHashSigner::SignHash(hash, activeMasternode.keyMasternode, vchSig)) {
-        LogPrintf("CDarksendQueue::Sign -- SignHash() failed\n");
+        LogPrintf("CCoinJoinQueue::Sign -- SignHash() failed\n");
         return false;
     }
 
     if (!CHashSigner::VerifyHash(hash, activeMasternode.pubKeyMasternode, vchSig, strError)) {
-        LogPrintf("CDarksendQueue::Sign -- VerifyHash() failed, error: %s\n", strError);
+        LogPrintf("CCoinJoinQueue::Sign -- VerifyHash() failed, error: %s\n", strError);
         return false;
     }
 

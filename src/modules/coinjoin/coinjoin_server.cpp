@@ -107,7 +107,6 @@ void CCoinJoinServer::ProcessModuleMessage(CNode* pfrom, const std::string& strC
                     else return;
                 }
             }
-            break;
         }
 
         if (!queue.IsOpen()) return; // don't process closed queues

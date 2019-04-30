@@ -129,7 +129,6 @@ void CCoinJoinClientManager::ProcessMessage(CNode* pfrom, const std::string& str
                         else return;
                     }
                 }
-                break;
             }
         }
 

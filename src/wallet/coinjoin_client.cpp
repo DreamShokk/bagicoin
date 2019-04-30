@@ -467,7 +467,7 @@ void CCoinJoinClientManager::CheckResult(int nHeight)
                 break;
             }
         }
-        if (session.GetState() < POOL_STATE_SIGNING && !found) session.SetError();
+        if (!found) session.SetError();
         if (session.PoolStateManager()) {
             strAutoCoinJoinResult = _("Session timed out.");
         }

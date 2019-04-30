@@ -155,7 +155,7 @@ public:
         nDenom(0),
         masternodeOutpoint(COutPoint()),
         nHeight(0),
-        status(STATUS_OPEN),
+        status(STATUS_CLOSED),
         vchSig(std::vector<unsigned char>()),
         fTried(false)
     {

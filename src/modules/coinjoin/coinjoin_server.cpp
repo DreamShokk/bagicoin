@@ -231,6 +231,7 @@ bool CCoinJoinServer::CheckSessionMessage(CNode* pfrom, CConnman* connman) {
 
 void CCoinJoinServer::UpdateQueue(PoolStatusUpdate update)
 {
+    if (activeQueue == CCoinJoinQueue()) return;
     if (activeQueue.IsExpired(nCachedBlockHeight)) return;
     if (activeQueue.status != update) {
         LogPrint(BCLog::CJOIN, "CCoinJoinServer::UpdateQueue -- %s: %s new: %d\n", update == STATUS_CLOSED ? strprintf("closing") : strprintf("updating"), activeQueue.ToString(), update);

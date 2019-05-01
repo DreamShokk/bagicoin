@@ -87,29 +87,7 @@ void CCoinJoinServer::ProcessModuleMessage(CNode* pfrom, const std::string& strC
         vRecv >> queue;
 
         if (queue.IsExpired(nCachedBlockHeight)) return;
-
-        LOCK(cs_vecqueue);
-        // process every queue only once
-        // status has changed, update and remove if closed
-        for (std::vector<CCoinJoinQueue>::iterator it = vecCoinJoinQueue.begin(); it!=vecCoinJoinQueue.end(); ++it) {
-            if (*it == queue) {
-                LogPrint(BCLog::CJOIN, "CJQUEUE -- %s seen from %s\n", queue.ToString(), pfrom->addr.ToStringIPPort());
-                return;
-            } else if (*it != queue) {
-                LogPrint(BCLog::CJOIN, "CJQUEUE -- %s %s\n", queue.ToString(), queue.IsOpen() ? strprintf("updated") : strprintf("removed"));
-                if (!queue.IsOpen()) {
-                    vecCoinJoinQueue.erase(it--);
-                    queue.Relay(connman);
-                    return;
-                } else {
-                    // if not closing, status can only increase
-                    if (queue.status > it->status) it->status = queue.status; // track unused queues so we can identify duplicates
-                    else return;
-                }
-            }
-        }
-
-        if (!queue.IsOpen()) return; // don't process closed queues
+        if (queue.nHeight > nCachedBlockHeight + 1) return;
 
         masternode_info_t infoMn;
         if (!mnodeman.GetMasternodeInfo(queue.masternodeOutpoint, infoMn) || !queue.CheckSignature(infoMn.pubKeyMasternode)) {
@@ -119,7 +97,25 @@ void CCoinJoinServer::ProcessModuleMessage(CNode* pfrom, const std::string& strC
             return;
         }
 
-        if (queue.status == STATUS_OPEN) {
+        LOCK(cs_vecqueue);
+        // process every queue only once
+        // status has changed, update and remove if closed
+        for (std::vector<CCoinJoinQueue>::iterator it = vecCoinJoinQueue.begin(); it!=vecCoinJoinQueue.end(); ++it) {
+            if (*it == queue) {
+                LogPrint(BCLog::CJOIN, "CJQUEUE -- %s seen from %s\n", queue.ToString(), pfrom->addr.ToStringIPPort());
+                return;
+            } else if (*it != queue) {
+                LogPrint(BCLog::CJOIN, "CJQUEUE -- %s %s\n", queue.ToString(), queue.IsOpen() ? strprintf("updated") : strprintf("closed"));
+                if (queue.status > it->status) it->status = queue.status; // track unused queues so we can identify duplicates
+                if (queue.nHeight > it->nHeight) it->nHeight = queue.nHeight; // track unused queues so we can identify duplicates
+            } else if (it->masternodeOutpoint == queue.masternodeOutpoint) {
+                // refuse to create another queue this often
+                LogPrint(BCLog::CJOIN, "CJQUEUE -- last request is still in queue, return.\n");
+                return;
+            }
+        }
+
+        if (queue.status <= STATUS_OPEN) {
             LogPrint(BCLog::CJOIN, "CJQUEUE -- new CoinJoin queue (%s) from masternode %s\n", queue.ToString(), infoMn.addr.ToString());
             vecCoinJoinQueue.push_back(queue);
             queue.Relay(connman);
@@ -235,6 +231,7 @@ void CCoinJoinServer::UpdateQueue(PoolStatusUpdate update)
     if (activeQueue.status != update) {
         LogPrint(BCLog::CJOIN, "CCoinJoinServer::UpdateQueue -- %s: %s new: %d\n", update == STATUS_CLOSED ? strprintf("closing") : strprintf("updating"), activeQueue.ToString(), update);
         CConnman* connman = g_connman.get();
+        activeQueue.nHeight = nCachedBlockHeight;
         activeQueue.status = update;
         activeQueue.Sign();
         if (update > 1) {

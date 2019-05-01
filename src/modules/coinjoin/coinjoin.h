@@ -30,7 +30,7 @@ static const int COINJOIN_SIGNING_TIMEOUT        = 30;
 // timeout for nodes to submit their tx
 static const int COINJOIN_ACCEPT_TIMEOUT         = 60;
 // timeout for queues in blocks
-static const int COINJOIN_DEFAULT_TIMEOUT        = 10;
+static const int COINJOIN_DEFAULT_TIMEOUT        = 3;
 
 //! minimum peer version accepted by mixing pool
 static const int MIN_COINJOIN_PEER_PROTO_VERSION            = 70017;
@@ -214,11 +214,11 @@ public:
 
     friend bool operator==(const CCoinJoinQueue& a, const CCoinJoinQueue& b)
     {
-        return a.masternodeOutpoint == b.masternodeOutpoint && a.nHeight == b.nHeight && a.status == b.status;
+        return a.masternodeOutpoint == b.masternodeOutpoint && a.status == b.status;
     }
     friend bool operator!=(const CCoinJoinQueue& a, const CCoinJoinQueue& b)
     {
-        return a.masternodeOutpoint == b.masternodeOutpoint && a.nHeight == b.nHeight && a.status != b.status;
+        return a.masternodeOutpoint == b.masternodeOutpoint && a.status != b.status;
     }
 };
 
@@ -306,11 +306,11 @@ public:
     CAmount nSessionDenom; //Users must submit at least one denom matching this
 
     CCoinJoinBaseSession() :
-        vecEntries(),
+        vecEntries(0),
         nState(POOL_STATE_IDLE),
         nTimeStart(0),
         nSessionID(0),
-        finalPartiallySignedTransaction(),
+        finalPartiallySignedTransaction(PartiallySignedTransaction()),
         nSessionDenom(0)
     {
     }
@@ -337,7 +337,7 @@ protected:
 
 public:
     CCoinJoinBaseManager() :
-        vecCoinJoinQueue() {}
+        vecCoinJoinQueue(0) {}
 
     int GetQueueSize() const {
         LOCK(cs_vecqueue);

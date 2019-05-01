@@ -106,32 +106,10 @@ void CCoinJoinClientManager::ProcessMessage(CNode* pfrom, const std::string& str
         vRecv >> queue;
 
         if (queue.IsExpired(nCachedBlockHeight)) return;
+        if (queue.nHeight > nCachedBlockHeight + 1) return;
 
         // enable for network analysis only!!!
         // LogPrint(BCLog::CJOIN, "%s CJQUEUE -- %s new from %s\n", m_wallet->GetDisplayName(), queue.ToString(), pfrom->addr.ToStringIPPort());
-
-        {
-            LOCK(cs_vecqueue);
-            // process every queue only once
-            // status has changed, update and remove if closed
-            for (std::vector<CCoinJoinQueue>::iterator it = vecCoinJoinQueue.begin(); it!=vecCoinJoinQueue.end(); ++it) {
-                if (*it == queue) {
-                    LogPrint(BCLog::CJOIN, "%s CJQUEUE -- %s seen from %s\n", m_wallet->GetDisplayName(), queue.ToString(), pfrom->addr.ToStringIPPort());
-                    return;
-                } else if (*it != queue) {
-                    LogPrint(BCLog::CJOIN, "%s CJQUEUE -- %s %s from %s\n", m_wallet->GetDisplayName(), queue.ToString(), queue.IsOpen() ? strprintf("updated") : strprintf("removed"), pfrom->addr.ToStringIPPort());
-                    if (!queue.IsOpen()) {
-                        vecCoinJoinQueue.erase(it--);
-                        queue.Relay(connman);
-                        return;
-                    } else {
-                        // if not closing, status can only increase
-                        if (queue.status > it->status) it->status = queue.status;
-                        else return;
-                    }
-                }
-            }
-        }
 
         masternode_info_t infoMn;
         if (!mnodeman.GetMasternodeInfo(queue.masternodeOutpoint, infoMn) || !queue.CheckSignature(infoMn.pubKeyMasternode)) {
@@ -141,15 +119,44 @@ void CCoinJoinClientManager::ProcessMessage(CNode* pfrom, const std::string& str
             return;
         }
 
+        {
+            LOCK(cs_vecqueue);
+            // process every queue only once
+            // status has changed, update and remove if closed
+            for (std::vector<CCoinJoinQueue>::iterator it = vecCoinJoinQueue.begin(); it!=vecCoinJoinQueue.end(); ++it) {
+                if (*it == queue) {
+                    LogPrint(BCLog::CJOIN, "%s CJQUEUE -- seen CoinJoin queue (%s) from masternode %s, vecCoinJoinQueue size: %d from %s\n",
+                             m_wallet->GetDisplayName(), queue.ToString(), infoMn.addr.ToString(), GetQueueSize(), pfrom->addr.ToStringIPPort());
+                    return;
+                } else if (*it != queue) {
+                    LogPrint(BCLog::CJOIN, "%s CJQUEUE -- updated CoinJoin queue (%s) from masternode %s, vecCoinJoinQueue size: %d from %s\n",
+                             m_wallet->GetDisplayName(), queue.ToString(), infoMn.addr.ToString(), GetQueueSize(), pfrom->addr.ToStringIPPort());
+                    if (queue.status > it->status) it->status = queue.status;
+                } else if (it->masternodeOutpoint == queue.masternodeOutpoint) {
+                    // refuse to create another queue this often
+                    LogPrint(BCLog::CJOIN, "%s CJQUEUE -- last request is still in queue, return.\n", m_wallet->GetDisplayName());
+                    return;
+                }
+            }
+        }
+
+
         switch (queue.status) {
         case STATUS_CLOSED:
+        {
+            LOCK(cs_vecqueue);
+            queue.Relay(connman);
+            LogPrint(BCLog::CJOIN, "%s CJQUEUE -- closed CoinJoin queue (%s) from masternode %s, vecCoinJoinQueue size: %d from %s\n",
+                     m_wallet->GetDisplayName(), queue.ToString(), infoMn.addr.ToString(), GetQueueSize(), pfrom->addr.ToStringIPPort());
+        }
             return;
         case STATUS_OPEN:
         {
             LOCK(cs_vecqueue);
             vecCoinJoinQueue.emplace_back(queue);
             queue.Relay(connman);
-            LogPrint(BCLog::CJOIN, "%s CJQUEUE -- new CoinJoin queue (%s) from masternode %s, vecCoinJoinQueue size: %d\n", m_wallet->GetDisplayName(), queue.ToString(), infoMn.addr.ToString(), GetQueueSize());
+            LogPrint(BCLog::CJOIN, "%s CJQUEUE -- new CoinJoin queue (%s) from masternode %s, vecCoinJoinQueue size: %d from %s\n",
+                     m_wallet->GetDisplayName(), queue.ToString(), infoMn.addr.ToString(), GetQueueSize(), pfrom->addr.ToStringIPPort());
             // see if we can join unless we are a LP
             if (!nLiquidityProvider && fEnableCoinJoin && !fActive) CoinJoin();
         }

@@ -130,18 +130,18 @@ private:
     void UnlockCoins();
 
 public:
-    explicit CCoinJoinClientSession(CWallet* pwallet, bool fMixingOnly) :
+    explicit CCoinJoinClientSession(CWallet* pwallet, bool _fMixingOnly) :
         m_wallet_session(pwallet),
         mtxSession(CMutableTransaction()),
         nEntriesCount(0),
         fLastEntryAccepted(false),
-        vecOutPointLocked(),
-        strLastMessage(),
-        strAutoCoinJoinResult(),
+        vecOutPointLocked(0),
+        strLastMessage(0),
+        strAutoCoinJoinResult(0),
         infoMixingMasternode(),
-        pendingCJaRequest(),
+        pendingCJaRequest(CPendingCJaRequest()),
         keyHolderStorage(),
-        fMixingOnly(fMixingOnly)
+        fMixingOnly(_fMixingOnly)
     {
     }
 
@@ -214,11 +214,11 @@ public:
 
     explicit CCoinJoinClientManager(CWallet* pwallet) :
         m_wallet(pwallet),
-        vecMasternodesUsed(),
+        vecMasternodesUsed(0),
         deqSessions(),
         nCachedLastSuccessBlock(0),
         nMinBlocksToWait(1),
-        strAutoCoinJoinResult(),
+        strAutoCoinJoinResult(0),
         nCachedBlockHeight(0),
         fStartup(false),
         fActive(false),
@@ -226,7 +226,7 @@ public:
         nCoinJoinAmount(DEFAULT_COINJOIN_AMOUNT),
         nLiquidityProvider(DEFAULT_COINJOIN_LIQUIDITY),
         fEnableCoinJoin(false),
-        vecOutPointLocked(),
+        vecOutPointLocked(0),
         nCachedNumBlocks(std::numeric_limits<int>::max()),
         fCreateAutoBackups(true)
     {

@@ -139,7 +139,7 @@ void CCoinJoinBaseManager::SetNull()
     vecCoinJoinQueue.clear();
 }
 
-bool CCoinJoinBaseManager::CheckQueue(int nHeight)
+void CCoinJoinBaseManager::CheckQueue(int nHeight)
 {
     LOCK(cs_vecqueue);
 

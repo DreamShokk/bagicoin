@@ -74,6 +74,7 @@ void CCoinJoinServer::ProcessModuleMessage(CNode* pfrom, const std::string& strC
         if (fResult) {
             LogPrintf("CJACCEPT -- is compatible, please submit!\n");
             PushStatus(pfrom, STATUS_ACCEPTED, nMessageID, connman);
+            vecDenom.push_back(std::make_pair(pfrom->addr, nDenom));
             if (activeQueue.status > STATUS_OPEN) activeQueue.Push(pfrom->addr, connman);
             CheckForCompleteQueue();
         } else {
@@ -236,15 +237,15 @@ void CCoinJoinServer::UpdateQueue(PoolStatusUpdate update)
         activeQueue.Sign();
         if (update > 1) {
             // status updates should be relayed to mixing participants only
-            for (std::vector<CCoinJoinEntry>::iterator it = vecEntries.begin(); it != vecEntries.end(); ++it) {
-                if (!activeQueue.Push(it->addr, connman)) {
+            for (std::vector<std::pair<CService, CAmount> >::iterator it = vecDenom.begin(); it != vecDenom.end(); ++it) {
+                if (!activeQueue.Push(it->first, connman)) {
                     // no such node? maybe this client disconnected or our own connection went down
                     LogPrintf("CCoinJoinServer::%s -- client(s) disconnected, removing entry: %s nSessionID: %d  nSessionDenom: %d (%s, size: %d)\n",
-                              __func__, it->addr.ToStringIPPort(), nSessionID, nSessionDenom, CCoinJoin::GetDenominationsToString(nSessionDenom), vecEntries.size());
-                    vecEntries.erase(it--);
+                              __func__, it->first.ToStringIPPort(), nSessionID, nSessionDenom, CCoinJoin::GetDenominationsToString(nSessionDenom), vecDenom.size());
+                    vecDenom.erase(it--);
                 }
             }
-            if (vecEntries.empty()) {
+            if (vecDenom.empty()) {
                 // all clients disconnected, there is probably some issues with our own connection
                 // do not ban anyone, just reset the pool
                 SetNull();
@@ -609,7 +610,6 @@ bool CCoinJoinServer::CreateNewSession(const CAmount& nDenom, PoolMessage& nMess
         queue.Relay(connman);
     }
 
-    vecDenom.push_back(nSessionDenom);
     LogPrintf("CCoinJoinServer::CreateNewSession -- new session created, nSessionID: %d  nSessionDenom: %d (%s)  vecDenom.size(): %d\n",
             nSessionID, nSessionDenom, CCoinJoin::GetDenominationsToString(nSessionDenom), vecDenom.size());
 
@@ -646,7 +646,6 @@ bool CCoinJoinServer::AddUserToExistingSession(const CAmount& nDenom, PoolMessag
 
     nMessageIDRet = MSG_NOERR;
     nSessionDenom |= nDenom;
-    vecDenom.push_back(nSessionDenom);
 
     LogPrintf("CCoinJoinServer::AddUserToExistingSession -- new user accepted, nSessionID: %d  nSessionDenom: %d (%s)  vecDenom.size(): %d\n",
             nSessionID, nSessionDenom, CCoinJoin::GetDenominationsToString(nSessionDenom), vecDenom.size());

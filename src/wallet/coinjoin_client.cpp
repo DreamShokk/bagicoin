@@ -148,7 +148,7 @@ void CCoinJoinClientManager::ProcessMessage(CNode* pfrom, const std::string& str
             LOCK(cs_vecqueue);
             vecCoinJoinQueue.emplace_back(queue);
             queue.Relay(connman);
-            LogPrint(BCLog::CJOIN, "%s CJQUEUE -- new CoinJoin queue (%s) from masternode %s, vecCoinJoinQueue size: %d from %s\n",
+            LogPrint(BCLog::CJOIN, "%s CJQUEUE -- %s CoinJoin queue (%s) from masternode %s, vecCoinJoinQueue size: %d from %s\n",
                      m_wallet->GetDisplayName(), queue.status == STATUS_CLOSED ? strprintf("closed") : strprintf("new"), queue.ToString(),
                      infoMn.addr.ToString(), GetQueueSize(), pfrom->addr.ToStringIPPort());
             // see if we can join unless we are a LP

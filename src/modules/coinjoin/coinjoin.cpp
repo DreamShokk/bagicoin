@@ -143,16 +143,13 @@ bool CCoinJoinBaseManager::CheckQueue(int nHeight)
 {
     LOCK(cs_vecqueue);
 
-    bool result = false;
     // check mixing queue objects for timeouts
     for (std::vector<CCoinJoinQueue>::iterator it = vecCoinJoinQueue.begin(); it!=vecCoinJoinQueue.end(); ++it) {
         if (it!=vecCoinJoinQueue.end() && it->IsExpired(nHeight)) {
-            if (it->masternodeOutpoint == activeMasternode.outpoint) result = true;
             LogPrint(BCLog::CJOIN, "CCoinJoinBase::%s -- Removing expired queue (%s)\n", __func__, it->ToString());
             vecCoinJoinQueue.erase(it--);
         }
     }
-    return result;
 }
 
 bool CCoinJoinBaseManager::GetQueueItem(CCoinJoinQueue& queueRet)

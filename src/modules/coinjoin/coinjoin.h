@@ -333,7 +333,7 @@ protected:
     std::vector<CCoinJoinQueue> vecCoinJoinQueue GUARDED_BY(cs_vecqueue);
 
     void SetNull();
-    bool CheckQueue(int nHeight);
+    void CheckQueue(int nHeight);
 
 public:
     CCoinJoinBaseManager() :

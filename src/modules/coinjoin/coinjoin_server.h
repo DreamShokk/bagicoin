@@ -18,7 +18,7 @@ extern CCoinJoinServer coinJoinServer;
 class CCoinJoinServer : public CCoinJoinBaseSession, public CCoinJoinBaseManager
 {
 private:
-    std::vector<CAmount> vecDenom;
+    std::vector<std::pair<CService, CAmount> > vecDenom;
     CCoinJoinQueue activeQueue;
 
     bool fUnitTest;

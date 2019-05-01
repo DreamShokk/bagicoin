@@ -1331,8 +1331,6 @@ bool CCoinJoinClientSession::JoinExistingQueue()
 
         if (infoMn.nProtocolVersion < MIN_COINJOIN_PEER_PROTO_VERSION) continue;
 
-        if (m_wallet_session->coinjoinClient->nLiquidityProvider && !queue.IsJoinable()) continue;
-
         if (!CCoinJoin::IsInDenomRange(queue.nDenom)) {
             // incompatible denom
             LogPrint(BCLog::CJOIN, "%s CCoinJoinClientSession::JoinExistingQueue -- found invalid queue: %s\n", m_wallet_session->GetDisplayName(), queue.ToString());

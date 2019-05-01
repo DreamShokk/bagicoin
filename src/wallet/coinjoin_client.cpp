@@ -152,8 +152,8 @@ void CCoinJoinClientManager::ProcessMessage(CNode* pfrom, const std::string& str
                      m_wallet->GetDisplayName(), queue.status == STATUS_CLOSED ? strprintf("closed") : strprintf("new"), queue.ToString(),
                      infoMn.addr.ToString(), GetQueueSize(), pfrom->addr.ToStringIPPort());
             // see if we can join unless we are a LP
-            if (!nLiquidityProvider && fEnableCoinJoin && !fActive) CoinJoin();
         }
+            if (!nLiquidityProvider && fEnableCoinJoin && !fActive) CoinJoin();
             return;
         case STATUS_READY:
         case STATUS_FULL:
@@ -1210,13 +1210,10 @@ void CCoinJoinClientManager::CoinJoin()
     }
 
     //if we are am LP and there aren't any queues active, we're done
-    {
-        LOCK(cs_vecqueue);
-        if (nLiquidityProvider && !GetQueueSize()) {
-            fActive = false;
-            fStartup = false;
-            return;
-        }
+    if (nLiquidityProvider && !GetQueueSize()) {
+        fActive = false;
+        fStartup = false;
+        return;
     }
 
     // anything there to work on?

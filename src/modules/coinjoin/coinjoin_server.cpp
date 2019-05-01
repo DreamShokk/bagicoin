@@ -492,7 +492,8 @@ void CCoinJoinServer::CheckTimeout(int nHeight)
 {
     if (!fMasternodeMode) return;
 
-    if (CheckQueue(nHeight)) {
+    CheckQueue(nHeight);
+    if (activeQueue.IsExpired(nCachedBlockHeight)) {
         LogPrintf("CCoinJoinServer::CheckTimeout -- Queue expired -- resetting\n");
         SetNull();
     }

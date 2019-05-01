@@ -218,7 +218,7 @@ public:
         deqSessions(),
         nCachedLastSuccessBlock(0),
         nMinBlocksToWait(1),
-        strAutoCoinJoinResult(0),
+        strAutoCoinJoinResult(),
         nCachedBlockHeight(0),
         fStartup(false),
         fActive(false),

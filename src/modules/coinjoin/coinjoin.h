@@ -204,7 +204,6 @@ public:
 
     /// Is this queue expired?
     bool IsExpired(int nHeightIn) const { return nHeightIn - nHeight > COINJOIN_DEFAULT_TIMEOUT; }
-    bool IsJoinable(int nHeightIn) const { return nHeightIn - nHeight > COINJOIN_DEFAULT_TIMEOUT -1; }
     bool IsOpen() const { return status > 0; }
 
     std::string ToString() const

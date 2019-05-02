@@ -425,6 +425,7 @@ crypto_libchaincoin_crypto_c11_a_SOURCES = \
   crypto/shavite512.cpp \
   crypto/shavite512.h \
   crypto/simd512.cpp \
+  crypto/simd512.h \
   crypto/skein512.cpp \
   crypto/skein512.h
   

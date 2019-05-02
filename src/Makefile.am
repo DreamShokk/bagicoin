@@ -114,6 +114,8 @@ BITCOIN_CORE_H = \
   blockencodings.h \
   blockfilter.h \
   cachedb.h \
+  cachemap.h \
+  cachemultimap.h \
   chain.h \
   chainparams.h \
   chainparamsbase.h \
@@ -268,6 +270,8 @@ libchaincoin_server_a_SOURCES = \
   blockfilter.cpp \
   chain.cpp \
   cachedb.cpp \
+  cachemap.h \
+  cachemultimap.h \
   checkpoints.cpp \
   consensus/tx_verify.cpp \
   httprpc.cpp \

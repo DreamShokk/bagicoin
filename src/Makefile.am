@@ -155,6 +155,7 @@ BITCOIN_CORE_H = \
   logging.h \
   memusage.h \
   merkleblock.h \
+  messagesigner.h \
   miner.h \
   modules/masternode/activemasternode.h \
   modules/masternode/masternode.h \

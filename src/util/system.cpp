@@ -32,6 +32,7 @@
 #endif // __linux__
 
 #include <algorithm>
+#include <array>
 #include <fcntl.h>
 #include <sched.h>
 #include <sys/resource.h>

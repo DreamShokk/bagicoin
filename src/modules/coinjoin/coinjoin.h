@@ -30,7 +30,7 @@ static const int COINJOIN_SIGNING_TIMEOUT        = 30;
 // timeout for nodes to submit their tx
 static const int COINJOIN_ACCEPT_TIMEOUT         = 60;
 // timeout for queues in blocks
-static const int COINJOIN_DEFAULT_TIMEOUT        = 3;
+static const int COINJOIN_DEFAULT_TIMEOUT        = 4;
 
 //! minimum peer version accepted by mixing pool
 static const int MIN_COINJOIN_PEER_PROTO_VERSION            = 70017;

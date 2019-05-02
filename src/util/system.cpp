@@ -32,7 +32,6 @@
 #endif // __linux__
 
 #include <algorithm>
-#include <array>
 #include <fcntl.h>
 #include <sched.h>
 #include <sys/resource.h>
@@ -1258,7 +1257,8 @@ std::string IntVersionToString(uint32_t nVersion)
         throw std::bad_cast();
     if(nVersion == 0)
         throw std::bad_cast();
-    std::array<std::string, 3> tokens;
+    std::vector<std::string> tokens;
+    tokens.reserve(3);
     for(unsigned idx = 0; idx < 3; idx++)
     {
         unsigned shift = (2 - idx) * 8;

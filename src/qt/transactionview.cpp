@@ -91,9 +91,9 @@ TransactionView::TransactionView(const PlatformStyle *platformStyle, QWidget *pa
                                         TransactionFilterProxy::TYPE(TransactionRecord::RecvFromOther));
     typeWidget->addItem(tr("Sent to"), TransactionFilterProxy::TYPE(TransactionRecord::SendToAddress) |
                                   TransactionFilterProxy::TYPE(TransactionRecord::SendToOther));
-    typeWidget->addItem(tr("CoinJoin"), TransactionFilterProxy::TYPE(TransactionRecord::CoinJoin));
-    typeWidget->addItem(tr("CoinJoin Create Denominations"), TransactionFilterProxy::TYPE(TransactionRecord::CoinJoinCreateDenominations));
-    typeWidget->addItem(tr("CoinJoin Denominate"), TransactionFilterProxy::TYPE(TransactionRecord::CoinJoinDenominate));
+    typeWidget->addItem(tr("CoinJoin!"), TransactionFilterProxy::TYPE(TransactionRecord::CoinJoin));
+    typeWidget->addItem(tr("CJ! Create Denoms"), TransactionFilterProxy::TYPE(TransactionRecord::CoinJoinCreateDenominations));
+    typeWidget->addItem(tr("CoinJoin! Mix"), TransactionFilterProxy::TYPE(TransactionRecord::CoinJoinDenominate));
     typeWidget->addItem(tr("To yourself"), TransactionFilterProxy::TYPE(TransactionRecord::SendToSelf));
     typeWidget->addItem(tr("Mined"), TransactionFilterProxy::TYPE(TransactionRecord::Generated));
     typeWidget->addItem(tr("Other"), TransactionFilterProxy::TYPE(TransactionRecord::Other));

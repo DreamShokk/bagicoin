@@ -93,38 +93,21 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const interface
             if(fAllToMe > mine) fAllToMe = mine;
         }
 
-        if (nNet == 0 && fAllFromMe && fAllToMe)
-        {
-            // Private Send Denominate is currently the only zero-fee case allowed
-            parts.append(TransactionRecord(hash, nTime, TransactionRecord::CoinJoinDenominate, "",
-                             -nDebit, nCredit));
-            parts.last().involvesWatchAddress = involvesWatchAddress;   // maybe pass to TransactionRecord as constructor argument
-        }
-
-        else if (fAllFromMe && fAllToMe)
+        if (fAllFromMe && fAllToMe)
         {
             // Payment to self
-
-            TransactionRecord sub(hash, nTime);
-            // Payment to self by default
-            sub.type = TransactionRecord::SendToSelf;
-            sub.address = "";
+            bool fCoinJoin = false;
 
             for (unsigned int nOut = 0; nOut < wtx.tx->vout.size(); nOut++)
             {
                 const CTxOut& txout = wtx.tx->vout[nOut];
-                TransactionRecord sub(hash, nTime);
-                sub.idx = nOut;
-                sub.involvesWatchAddress = involvesWatchAddress;
-
-                if(CCoinJoin::IsDenominatedAmount(txout.nValue)) sub.type = TransactionRecord::CoinJoinCreateDenominations;
+                if(CCoinJoin::IsDenominatedAmount(txout.nValue)) fCoinJoin = true;
             }
 
             CAmount nChange = wtx.change;
 
-            sub.debit = -(nDebit - nChange);
-            sub.credit = nCredit - nChange;
-            parts.append(sub);
+            parts.append(TransactionRecord(hash, nTime, fCoinJoin ? TransactionRecord::CoinJoinCreateDenominations : TransactionRecord::SendToSelf, "",
+                            -(nDebit - nChange), nCredit - nChange));
             parts.last().involvesWatchAddress = involvesWatchAddress;   // maybe pass to TransactionRecord as constructor argument
         }
 
@@ -182,9 +165,17 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const interface
         else
         {
             //
-            // Mixed debit transaction, can't break down payees
+            // Mixed debit transaction, can't break down payees, check for CoinJoin
             //
-            parts.append(TransactionRecord(hash, nTime, TransactionRecord::Other, "", nNet, 0));
+            bool fCoinJoin = true;
+
+            for (unsigned int nOut = 0; nOut < wtx.tx->vout.size(); nOut++)
+            {
+                const CTxOut& txout = wtx.tx->vout[nOut];
+                if(!CCoinJoin::IsDenominatedAmount(txout.nValue)) fCoinJoin = false;
+            }
+
+            parts.append(TransactionRecord(hash, nTime, fCoinJoin ? TransactionRecord::CoinJoinDenominate : TransactionRecord::Other, "", nNet, 0));
             parts.last().involvesWatchAddress = involvesWatchAddress;
         }
     }

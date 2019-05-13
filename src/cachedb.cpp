@@ -8,6 +8,7 @@
 #include <addrman.h>
 #include <chainparams.h>
 #include <clientversion.h>
+#include <modules/coinjoin/coinjoin_analyzer.h>
 #include <modules/platform/funding.h>
 #include <hash.h>
 #include <netfulfilledman.h>
@@ -208,4 +209,19 @@ bool CNetFulDB::Write(const CNetFulfilledRequestManager& netfulfilled)
 bool CNetFulDB::Read(CNetFulfilledRequestManager& netfulfilled)
 {
     return DeserializeFileDB(pathNetfulfilled, netfulfilled);
+}
+
+CCoinJoinDB::CCoinJoinDB()
+{
+    pathCoinJoin = GetDataDir() / "coinjoin.dat";
+}
+
+bool CCoinJoinDB::Write(const CAnalyzer& coinjoin)
+{
+    return SerializeFileDB("coinjoin", pathCoinJoin, coinjoin);
+}
+
+bool CCoinJoinDB::Read(CAnalyzer& coinjoin)
+{
+    return DeserializeFileDB(pathCoinJoin, coinjoin);
 }

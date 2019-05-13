@@ -588,7 +588,7 @@
         <x>0</x>
         <y>0</y>
         <width>824</width>
-        <height>122</height>
+        <height>131</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0,1">
@@ -1192,26 +1192,33 @@
       </spacer>
      </item>
      <item>
+      <widget class="QCheckBox" name="checkUseCoinJoin">
+       <property name="minimumSize">
+        <size>
+         <width>95</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>CoinJoin Level:</string>
+       </property>
+       <property name="checked">
+        <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QSpinBox" name="spinCoinJoinLevel">
+       <property name="maximum">
+        <number>3</number>
+       </property>
+      </widget>
+     </item>
+     <item>
       <layout class="QHBoxLayout" name="horizontalLayout_2">
        <property name="spacing">
         <number>3</number>
        </property>
-       <item>
-        <widget class="QCheckBox" name="checkUseCoinJoin">
-         <property name="minimumSize">
-          <size>
-           <width>95</width>
-           <height>0</height>
-          </size>
-         </property>
-         <property name="text">
-          <string>CoinJoin</string>
-         </property>
-         <property name="checked">
-          <bool>false</bool>
-         </property>
-        </widget>
-       </item>
        <item>
         <spacer name="horizontalSpacer_7">
          <property name="orientation">

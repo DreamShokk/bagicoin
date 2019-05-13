@@ -157,6 +157,9 @@ BITCOIN_CORE_H = \
   merkleblock.h \
   messagesigner.h \
   miner.h \
+  modules/coinjoin/coinjoin.h \
+  modules/coinjoin/coinjoin_analyzer.h \
+  modules/coinjoin/coinjoin_server.h \
   modules/masternode/activemasternode.h \
   modules/masternode/masternode.h \
   modules/masternode/masternode_payments.h \
@@ -170,8 +173,6 @@ BITCOIN_CORE_H = \
   modules/platform/funding_validators.h \
   modules/platform/funding_vote.h \
   modules/platform/funding_votedb.h \
-  modules/coinjoin/coinjoin.h \
-  modules/coinjoin/coinjoin_server.h \
   net.h \
   net_processing.h \
   netaddress.h \
@@ -271,8 +272,6 @@ libchaincoin_server_a_SOURCES = \
   blockfilter.cpp \
   chain.cpp \
   cachedb.cpp \
-  cachemap.h \
-  cachemultimap.h \
   checkpoints.cpp \
   consensus/tx_verify.cpp \
   httprpc.cpp \
@@ -287,7 +286,10 @@ libchaincoin_server_a_SOURCES = \
   dbwrapper.cpp \
   merkleblock.cpp \
   messagesigner.cpp \
-  miner.cpp \
+  miner.cpp \  
+  modules/coinjoin/coinjoin.cpp \
+  modules/coinjoin/coinjoin_analyzer.cpp \
+  modules/coinjoin/coinjoin_server.cpp \
   modules/masternode/activemasternode.cpp \
   modules/masternode/masternode.cpp \
   modules/masternode/masternode_payments.cpp \
@@ -300,8 +302,6 @@ libchaincoin_server_a_SOURCES = \
   modules/platform/funding_validators.cpp \
   modules/platform/funding_vote.cpp \
   modules/platform/funding_votedb.cpp \
-  modules/coinjoin/coinjoin.cpp \
-  modules/coinjoin/coinjoin_server.cpp \
   net.cpp \
   netfulfilledman.cpp \
   net_processing.cpp \

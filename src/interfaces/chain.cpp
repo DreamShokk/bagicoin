@@ -6,6 +6,7 @@
 
 #include <chain.h>
 #include <chainparams.h>
+#include <modules/coinjoin/coinjoin_analyzer.h>
 #include <primitives/block.h>
 #include <sync.h>
 #include <txmempool.h>
@@ -187,7 +188,7 @@ public:
     }
     int analyzeCoin(const COutPoint& outpoint) override
     {
-        return AnalyzeCoin(outpoint);
+        return ::g_analyzer->AnalyzeCoin(outpoint);
     }
 };
 

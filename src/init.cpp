@@ -58,6 +58,7 @@
 #include <netfulfilledman.h>
 
 #include <modules/masternode/activemasternode.h>
+#include <modules/coinjoin/coinjoin_analyzer.h>
 #include <modules/masternode/masternode_payments.h>
 #include <modules/masternode/masternode_sync.h>
 #include <modules/masternode/masternode_man.h>
@@ -94,6 +95,8 @@ static const bool DEFAULT_STOPAFTERBLOCKIMPORT = false;
 
 // Dump addresses to banlist.dat every 15 minutes (900s)
 static constexpr int DUMP_BANS_INTERVAL = 60 * 15;
+// Clean coinjoin cache every 60 minutes (3600s)
+static constexpr int CJ_CLEAN_INTERVAL = 60 * 60;
 
 std::unique_ptr<CConnman> g_connman;
 std::unique_ptr<PeerLogicValidation> peerLogic;
@@ -250,6 +253,9 @@ void Shutdown(InitInterfaces& interfaces)
         govdb.Write(governance);
         CNetFulDB netfuldb;
         netfuldb.Write(netfulfilledman);
+        g_analyzer->WriteCache();
+        CCoinJoinDB coinjoindb;
+        coinjoindb.Write(*g_analyzer);
     }
 
     StopTorControl();
@@ -265,6 +271,7 @@ void Shutdown(InitInterfaces& interfaces)
     g_connman.reset();
     g_banman.reset();
     g_txindex.reset();
+    g_analyzer.reset();
 
     if (g_is_mempool_loaded && gArgs.GetArg("-persistmempool", DEFAULT_PERSIST_MEMPOOL)) {
         DumpMempool();
@@ -1834,6 +1841,7 @@ bool AppInitMain(InitInterfaces& interfaces)
     // LOAD SERIALIZED DAT FILES INTO DATA CACHES FOR INTERNAL USE
 
     if (!fLiteMode) {
+        g_analyzer = MakeUnique<CAnalyzer>();
         uiInterface.InitMessage(_("Loading masternode cache..."));
         CMNCacheDB mncachedb;
         if(!mncachedb.Read(mnodeman)) {
@@ -1866,6 +1874,13 @@ bool AppInitMain(InitInterfaces& interfaces)
             netfuldb.Write(netfulfilledman);
         }
         netfulfilledman.CheckAndRemove();
+        uiInterface.InitMessage(_("Loading CoinJoin! cache..."));
+        CCoinJoinDB coinjoindb;
+        if(!coinjoindb.Read(*g_analyzer)) {
+            LogPrintf("Invalid or missing coinjoin.dat; recreating\n");
+            coinjoindb.Write(*g_analyzer);
+        }
+        g_analyzer->ReadCache();
     }
 
 
@@ -1981,6 +1996,10 @@ bool AppInitMain(InitInterfaces& interfaces)
     scheduler.scheduleEvery([]{
         g_banman->DumpBanlist();
     }, DUMP_BANS_INTERVAL * 1000);
+
+    scheduler.scheduleEvery([]{
+        g_analyzer->Flush();
+    }, CJ_CLEAN_INTERVAL * 1000);
 
     return true;
 }

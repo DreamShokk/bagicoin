@@ -18,6 +18,7 @@
 #include <modules/masternode/masternode_man.h>
 #include <modules/platform/funding.h>
 #include <modules/coinjoin/coinjoin.h>
+#include <modules/coinjoin/coinjoin_analyzer.h>
 #include <net.h>
 #include <net_processing.h>
 #include <netaddress.h>
@@ -444,7 +445,7 @@ public:
     }
     int analyzeCoin(const COutPoint& outpoint) override
     {
-        return AnalyzeCoin(outpoint);
+        return ::g_analyzer->AnalyzeCoin(outpoint);
     }
     std::string getWalletDir() override
     {

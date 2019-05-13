@@ -284,12 +284,6 @@ CAmount GetMasternodePayment(int nHeight, CAmount blockValue);
 /** Guess verification progress (as a fraction between 0.0=genesis and 1.0=current tip). */
 double GuessVerificationProgress(const ChainTxData& data, const CBlockIndex* pindex);
 
-/** Return the average CoinJoin depth of an outpoint. */
-int AnalyzeCoin(const COutPoint& outpoint);
-
-/** Recursively calculate the depth of obscuring a single outpoint. */
-bool FindRoot(const COutPoint& outpoint, std::vector<int>& vRoots, int nDepth = 1);
-
 /** Calculate the amount of disk space the block & undo files currently use */
 uint64_t CalculateCurrentUsage();
 

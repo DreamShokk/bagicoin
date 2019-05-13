@@ -14,6 +14,7 @@
 
 class CSubNet;
 class CAddrMan;
+class CAnalyzer;
 class CMasternodeMan;
 class CGovernanceManager;
 class CNetFulfilledRequestManager;
@@ -153,6 +154,17 @@ public:
     CNetFulDB();
     bool Write(const CNetFulfilledRequestManager& netfulfilled);
     bool Read(CNetFulfilledRequestManager& netfulfilled);
+};
+
+/** Access to the CoinJoin! database (coinjoin.dat) */
+class CCoinJoinDB
+{
+private:
+    fs::path pathCoinJoin;
+public:
+    CCoinJoinDB();
+    bool Write(const CAnalyzer& coinjoin);
+    bool Read(CAnalyzer& coinjoin);
 };
 
 #endif // BITCOIN_CACHEDB_H

@@ -137,7 +137,7 @@ bool CAnalyzer::FindRoot(const COutPoint& outpoint, std::vector<int>& vRoots, in
 
 void CAnalyzer::Flush()
 {
-    LOCK2(cs, cs_main);
+    LOCK2(cs_main, cs);
     for (m_cache::iterator it = mDenomTx.begin(); it != mDenomTx.end(); ++it) {
         const Coin& coin = AccessByTxid(*pcoinsTip, it->first);
         if (coin.IsSpent()) {

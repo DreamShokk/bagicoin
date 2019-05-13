@@ -193,7 +193,7 @@ private:
     bool CreateDenominated(const CAmount& nValue, std::vector<CAmount>& vecAmounts);
 
     /// Check if mixing is needed
-    bool IsMixingRequired(std::vector<std::pair<CTxIn, CTxOut> >& portfolio, std::vector<CAmount>& vecAmounts, std::vector<CAmount>& vecResult, bool& fMixOnly);
+    bool IsMixingRequired(std::vector<std::pair<CTxIn, CTxOut> >& portfolio, std::vector<CAmount>& vecAmounts, bool& fMixOnly);
 
     bool WaitForAnotherBlock();
 

@@ -655,10 +655,11 @@ void CCoinJoinClientManager::UpdatedSuccessBlock()
 }
 
 // check if we should initiate a mixing process and if so, pass some flags to determine the priorities later
-bool CCoinJoinClientManager::IsMixingRequired(std::vector<std::pair<CTxIn, CTxOut> >& portfolio, std::vector<CAmount>& vecAmounts, std::vector<CAmount>& vecResult, bool& fMixOnly)
+bool CCoinJoinClientManager::IsMixingRequired(std::vector<std::pair<CTxIn, CTxOut> >& portfolio, std::vector<CAmount>& vecAmounts, bool& fMixOnly)
 {
     // first check for portfolio denoms unless we are alredy in mix only mode
     CAmount nTotal = std::accumulate(vecAmounts.begin(), vecAmounts.end(), CAmount(0));
+    std::sort(vecAmounts.begin(), vecAmounts.end());
 
     std::vector<std::pair<CTxIn, CTxOut> > temp(portfolio);
     int depth = nLiquidityProvider ? MAX_COINJOIN_DEPTH + 1 : nCoinJoinDepth;
@@ -668,6 +669,7 @@ bool CCoinJoinClientManager::IsMixingRequired(std::vector<std::pair<CTxIn, CTxOu
             int64_t count = 0;
             std::vector<std::pair<CTxIn, CTxOut> > unlock;
             auto threshold = denom == COINJOIN_LOW_DENOM ? COINJOIN_FEE_DENOM_THRESHOLD : COINJOIN_DENOM_THRESHOLD;
+            auto tempAmounts(vecAmounts);
             for (const auto& amount : vecAmounts) {
                 if (amount > denom) break;
                 if (amount < denom) continue;
@@ -680,17 +682,17 @@ bool CCoinJoinClientManager::IsMixingRequired(std::vector<std::pair<CTxIn, CTxOu
                         if (it->second.nValue == denom) {
                             unlock.push_back(*it);
                             temp.erase(it);
+                            tempAmounts.push_back(amount);
                             break;
                         }
                     }
-                    if (count <= threshold * COINJOIN_DENOM_WINDOW) {
-                        vecResult.push_back(denom);
-                    } else {
+                    if (count > threshold * COINJOIN_DENOM_WINDOW) {
                         for (const auto& out : unlock) {
                             LOCK(m_wallet->cs_wallet);
                             m_wallet->UnlockCoin(out.first.prevout);
                         }
                         portfolio = temp;
+                        vecAmounts = tempAmounts;
                         return true;
                     }
                 }
@@ -701,6 +703,7 @@ bool CCoinJoinClientManager::IsMixingRequired(std::vector<std::pair<CTxIn, CTxOu
                     m_wallet->UnlockCoin(out.first.prevout);
                 }
                 portfolio = temp;
+                vecAmounts = tempAmounts;
                 return true;
             }
         }
@@ -1255,10 +1258,9 @@ void CCoinJoinClientManager::CoinJoin()
         return;
     }
 
-    std::vector<CAmount> vecResult;
-    bool fMixOnly = false;
+     bool fMixOnly = false;
 
-    if (IsMixingRequired(portfolio, vecAmounts, vecResult, fMixOnly)) {
+    if (IsMixingRequired(portfolio, vecAmounts, fMixOnly)) {
         for (const auto& txin : portfolio) {
             LOCK(m_wallet->cs_wallet);
             m_wallet->LockCoin(txin.first.prevout);
@@ -1273,11 +1275,11 @@ void CCoinJoinClientManager::CoinJoin()
     LOCK(cs_deqsessions);
     while (portfolio.size() > 2 && (int)deqSessions.size() < MAX_COINJOIN_SESSIONS) {
         deqSessions.emplace_back(m_wallet, fMixOnly);
-        deqSessions.back().CoinJoin(portfolio, vecResult);
+        deqSessions.back().CoinJoin(portfolio, vecAmounts);
         LogPrint(BCLog::CJOIN, "%s CCoinJoinClientManager::CoinJoin -- Added session, deqSessions.size: %d, queue size: %d\n", m_wallet->GetDisplayName(), deqSessions.size(), GetQueueSize());
         // session creation successful? if not remove and exit
         if (deqSessions.back().GetState() == POOL_STATE_IDLE) deqSessions.pop_back();
-        if (!IsMixingRequired(portfolio, vecResult, vecResult, fMixOnly)) break;
+        if (!IsMixingRequired(portfolio, vecAmounts, fMixOnly)) break;
     }
     // unlock unused coins
     for (const auto& txin : portfolio) {

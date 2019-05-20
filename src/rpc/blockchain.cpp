@@ -1354,14 +1354,13 @@ UniValue getblockchaininfo(const JSONRPCRequest& request)
     }
 
     const Consensus::Params& consensusParams = Params().GetConsensus();
-    UniValue softforks(UniValue::VARR);
-    UniValue bip9_softforks(UniValue::VOBJ);
-    softforks.push_back(SoftForkDesc("bip34", 2, tip, consensusParams));
-    softforks.push_back(SoftForkDesc("bip66", 3, tip, consensusParams));
-    softforks.push_back(SoftForkDesc("bip65", 4, tip, consensusParams));
-    for (int pos = Consensus::DEPLOYMENT_CSV; pos != Consensus::MAX_VERSION_BITS_DEPLOYMENTS; ++pos) {
-        BIP9SoftForkDescPushBack(bip9_softforks, consensusParams, static_cast<Consensus::DeploymentPos>(pos));
-    }
+    UniValue softforks(UniValue::VOBJ);
+    BuriedForkDescPushBack(softforks, "bip34", consensusParams.BIP34Height);
+    BuriedForkDescPushBack(softforks, "bip66", consensusParams.BIP66Height);
+    BuriedForkDescPushBack(softforks, "bip65", consensusParams.BIP65Height);
+    BuriedForkDescPushBack(softforks, "csv", consensusParams.CSVHeight);
+    BIP9SoftForkDescPushBack(softforks, "segwit", consensusParams, Consensus::DEPLOYMENT_SEGWIT);
+    BIP9SoftForkDescPushBack(softforks, "testdummy", consensusParams, Consensus::DEPLOYMENT_TESTDUMMY);
     obj.pushKV("softforks",             softforks);
     obj.pushKV("bip9_softforks", bip9_softforks);
 

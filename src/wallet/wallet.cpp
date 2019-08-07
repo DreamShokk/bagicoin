@@ -3101,9 +3101,9 @@ OutputType CWallet::TransactionChangeType(OutputType change_type, const std::vec
 }
 
 bool CWallet::CreateTransaction(interfaces::Chain::Lock& locked_chain, const std::vector<CRecipient>& vecSend, CTransactionRef& tx, CReserveKey& reservekey, CAmount& nFeeRet,
-                         int& nChangePosInOut, std::string& strFailReason, const CCoinControl& coin_control, bool sign, AvailableCoinsType _nCoinType, bool fCoinJoin)
+                         int& nChangePosInOut, std::string& strFailReason, const CCoinControl& coin_control, bool sign, AvailableCoinsType _nCoinType, int nCoinJoin)
 {
-    AvailableCoinsType nCoinType = fCoinJoin ? ONLY_DENOMINATED : _nCoinType;
+    AvailableCoinsType nCoinType = nCoinJoin > 0 ? ONLY_DENOMINATED : _nCoinType;
     CAmount nValue = 0;
     int nChangePosRequest = nChangePosInOut;
     unsigned int nSubtractFeeFromAmount = 0;
@@ -3140,7 +3140,7 @@ bool CWallet::CreateTransaction(interfaces::Chain::Lock& locked_chain, const std
             std::vector<COutput> vAvailableCoins;
             AvailableCoins(*locked_chain, vAvailableCoins, true, &coin_control, nCoinType);
             CoinSelectionParams coin_selection_params; // Parameters for coin selection, init with dummy
-            if (fCoinJoin)
+            if (nCoinJoin > 0)
                 coin_selection_params.use_private = true;
 
             // Create change script that will be used if we need change
@@ -3491,7 +3491,7 @@ bool CWallet::CreateTransaction(interfaces::Chain::Lock& locked_chain, const std
 /**
  * Call after CreateTransaction unless you want to abort
  */
-bool CWallet::CommitTransaction(CTransactionRef tx, mapValue_t mapValue, std::vector<std::pair<std::string, std::string>> orderForm, CReserveKey& reservekey, CConnman* connman, CValidationState& state, bool fCoinJoin)
+bool CWallet::CommitTransaction(CTransactionRef tx, mapValue_t mapValue, std::vector<std::pair<std::string, std::string>> orderForm, CReserveKey& reservekey, CConnman* connman, CValidationState& state, int nCoinJoin)
 {
     {
         auto locked_chain = chain().lock();
@@ -3502,7 +3502,7 @@ bool CWallet::CommitTransaction(CTransactionRef tx, mapValue_t mapValue, std::ve
         wtxNew.vOrderForm = std::move(orderForm);
         wtxNew.fTimeReceivedIsTxTime = true;
         wtxNew.fFromMe = true;
-        if (fCoinJoin)
+        if (nCoinJoin > 0)
             wtxNew.mapValue["CJ"] = "1";
 
         WalletLogPrintf("CommitTransaction:\n%s", wtxNew.tx->ToString()); /* Continued */

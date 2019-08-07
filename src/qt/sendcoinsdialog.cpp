@@ -92,21 +92,21 @@ SendCoinsDialog::SendCoinsDialog(const PlatformStyle *_platformStyle, QWidget *p
 
     // Chaincoin specific
     QSettings settings;
-    if (!settings.contains("bUseDarkSend"))
-        settings.setValue("bUseDarkSend", false);
+    if (!settings.contains("bCoinJoinLevel"))
+        settings.setValue("bCoinJoinLevel", 0);
 
-    bool fUseCoinJoin = settings.value("bUseDarkSend").toBool();
+    int nUseCoinJoin = settings.value("bCoinJoinLevel").toInt();
     if(fLiteMode) {
-        ui->checkUseCoinJoin->setChecked(false);
-        ui->checkUseCoinJoin->setVisible(false);
+        ui->spinCoinJoinLevel->setValue(0);
+        ui->spinCoinJoinLevel->setVisible(false);
         CoinControlDialog::coinControl()->fUseCoinJoin = false;
     }
     else{
-        ui->checkUseCoinJoin->setChecked(fUseCoinJoin);
-        CoinControlDialog::coinControl()->fUseCoinJoin = fUseCoinJoin;
+        ui->spinCoinJoinLevel->setValue(nUseCoinJoin);
+        CoinControlDialog::coinControl()->fUseCoinJoin = nUseCoinJoin ? true : false;
     }
 
-    connect(ui->checkUseCoinJoin, &QCheckBox::stateChanged, this, &SendCoinsDialog::updateDisplayUnit);
+    connect(ui->spinCoinJoinLevel, QOverload<const QString &>::of(&QSpinBox::valueChanged), this, &SendCoinsDialog::updateDisplayUnit);
 
     // Coin Control: clipboard actions
     QAction *clipboardQuantityAction = new QAction(tr("Copy quantity"), this);
@@ -245,7 +245,7 @@ void SendCoinsDialog::on_sendButton_clicked()
             if(entry->validate(model->node()))
             {
                 recipients.append(entry->getValue());
-                recipients[i].fCoinJoin = (ui->checkUseCoinJoin->checkState() == Qt::Checked);
+                recipients[i].fCoinJoin = (ui->spinCoinJoinLevel->value() > 0);
             }
             else
             {
@@ -262,7 +262,7 @@ void SendCoinsDialog::on_sendButton_clicked()
     QString strFunds = tr("using") + " <b>" + tr("anonymous funds") + "</b>";
     QString strFee = "";
 
-    if(ui->checkUseCoinJoin->checkState() == Qt::Checked) {
+    if(ui->spinCoinJoinLevel->value() > 0) {
         strFunds = tr("using") + " <b>" + tr("anonymous funds") + "</b>";
         QString strNearestAmount(
             BitcoinUnits::formatWithUnit(
@@ -910,8 +910,6 @@ void SendCoinsDialog::coinControlUpdateLabels()
                 CoinControlDialog::fSubtractFeeFromAmount = true;
         }
     }
-
-    ui->checkUseCoinJoin->setChecked(CoinControlDialog::coinControl()->fUseCoinJoin);
 
     if (CoinControlDialog::coinControl()->HasSelected())
     {

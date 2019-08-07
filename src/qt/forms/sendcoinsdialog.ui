@@ -1192,23 +1192,17 @@
       </spacer>
      </item>
      <item>
-      <widget class="QCheckBox" name="checkUseCoinJoin">
-       <property name="minimumSize">
-        <size>
-         <width>95</width>
-         <height>0</height>
-        </size>
-       </property>
+      <widget class="QLabel" name="label_2">
        <property name="text">
         <string>CoinJoin Level:</string>
-       </property>
-       <property name="checked">
-        <bool>false</bool>
        </property>
       </widget>
      </item>
      <item>
       <widget class="QSpinBox" name="spinCoinJoinLevel">
+       <property name="specialValueText">
+        <string/>
+       </property>
        <property name="maximum">
         <number>3</number>
        </property>

@@ -313,7 +313,7 @@ static UniValue setlabel(const JSONRPCRequest& request)
 }
 
 
-static CTransactionRef SendMoney(interfaces::Chain::Lock& locked_chain, CWallet * const pwallet, const CTxDestination &address, CAmount nValue, bool fSubtractFeeFromAmount, const CCoinControl& coin_control, mapValue_t mapValue, bool fUseCoinJoin = false)
+static CTransactionRef SendMoney(interfaces::Chain::Lock& locked_chain, CWallet * const pwallet, const CTxDestination &address, CAmount nValue, bool fSubtractFeeFromAmount, const CCoinControl& coin_control, mapValue_t mapValue, int nUseCoinJoin = 0)
 {
     CAmount curBalance = pwallet->GetBalance();
 
@@ -340,13 +340,13 @@ static CTransactionRef SendMoney(interfaces::Chain::Lock& locked_chain, CWallet 
     CRecipient recipient = {scriptPubKey, nValue, fSubtractFeeFromAmount};
     vecSend.push_back(recipient);
     CTransactionRef tx;
-    if (!pwallet->CreateTransaction(locked_chain, vecSend, tx, reservekey, nFeeRequired, nChangePosRet, strError, coin_control, true, fUseCoinJoin ? ONLY_DENOMINATED : ALL_COINS)) {
+    if (!pwallet->CreateTransaction(locked_chain, vecSend, tx, reservekey, nFeeRequired, nChangePosRet, strError, coin_control, true, nUseCoinJoin ? ONLY_DENOMINATED : ALL_COINS)) {
         if (!fSubtractFeeFromAmount && nValue + nFeeRequired > curBalance)
             strError = strprintf("Error: This transaction requires a transaction fee of at least %s because of its amount, complexity, or use of recently received funds!", FormatMoney(nFeeRequired));
         throw JSONRPCError(RPC_WALLET_ERROR, strError);
     }
     CValidationState state;
-    if (!pwallet->CommitTransaction(tx, std::move(mapValue), {} /* orderForm */, reservekey, g_connman.get(), state, fUseCoinJoin)) {
+    if (!pwallet->CommitTransaction(tx, std::move(mapValue), {} /* orderForm */, reservekey, g_connman.get(), state, nUseCoinJoin)) {
         strError = strprintf("Error: The transaction was rejected! Reason given: %s", FormatStateMessage(state));
         throw JSONRPCError(RPC_WALLET_ERROR, strError);
     }
@@ -379,10 +379,11 @@ static UniValue sendtoaddress(const JSONRPCRequest& request)
             "                             The recipient will receive less bitcoins than you enter in the amount field."},
                     {"replaceable", RPCArg::Type::BOOL, /* default */ "fallback to wallet's default", "Allow this transaction to be replaced by a transaction with higher fees via BIP 125"},
                     {"conf_target", RPCArg::Type::NUM, /* default */ "fallback to wallet's default", "Confirmation target (in blocks)"},
-                    {"estimate_mode", RPCArg::Type::STR, /* default */ "UNSET", "The fee estimate mode, must be one of:\n"
+                    {"estimate_mode", RPCArg::Type::STR, /* default */ "UNSET", "The fee estimate mode, must be one of:\n",
             "       \"UNSET\"\n"
             "       \"ECONOMICAL\"\n"
             "       \"CONSERVATIVE\""},
+                    {"cj_level", RPCArg::Type::NUM, /* default */ "coinjoin level", "CoinJoin! level"},
                 },
                 RPCResult{
             "\"txid\"                  (string) The transaction id.\n"
@@ -438,13 +439,13 @@ static UniValue sendtoaddress(const JSONRPCRequest& request)
         }
     }
 
-    bool fUseCoinJoin = false;
+    int nUseCoinJoin = 0;
     if (request.params.size() > 8)
-        fUseCoinJoin = request.params[8].get_bool();
+        nUseCoinJoin = request.params[8].get_int();
 
     EnsureWalletIsUnlocked(pwallet);
 
-    CTransactionRef tx = SendMoney(*locked_chain, pwallet, dest, nAmount, fSubtractFeeFromAmount, coin_control, std::move(mapValue), fUseCoinJoin);
+    CTransactionRef tx = SendMoney(*locked_chain, pwallet, dest, nAmount, fSubtractFeeFromAmount, coin_control, std::move(mapValue), nUseCoinJoin);
     return tx->GetHash().GetHex();
 }
 
@@ -844,7 +845,7 @@ static UniValue sendmany(const JSONRPCRequest& request)
             "       \"UNSET\"\n"
             "       \"ECONOMICAL\"\n"
             "       \"CONSERVATIVE\""},
-                    {"use_ps", RPCArg::Type::BOOL, RPCArg::Optional::OMITTED, "Use only anomymized inputs"},
+                    {"cj_level", RPCArg::Type::NUM, RPCArg::Optional::OMITTED, "CoinJoin! level"},
                 },
                  RPCResult{
             "\"txid\"                   (string) The transaction id for the send. Only 1 transaction is created regardless of \n"
@@ -952,17 +953,17 @@ static UniValue sendmany(const JSONRPCRequest& request)
     CAmount nFeeRequired = 0;
     int nChangePosRet = -1;
     std::string strFailReason;
-    bool fUseCoinJoin = false;
+    bool nUseCoinJoin = 0;
     if (request.params.size() > 8)
-        fUseCoinJoin = request.params[8].get_bool();
+        nUseCoinJoin = request.params[8].get_int();
 
     CTransactionRef tx;
     bool fCreated = pwallet->CreateTransaction(*locked_chain, vecSend, tx, keyChange, nFeeRequired, nChangePosRet, strFailReason,
-                                               coin_control, true, fUseCoinJoin ? ONLY_DENOMINATED : ALL_COINS);
+                                               coin_control, true, nUseCoinJoin ? ONLY_DENOMINATED : ALL_COINS);
     if (!fCreated)
         throw JSONRPCError(RPC_WALLET_INSUFFICIENT_FUNDS, strFailReason);
     CValidationState state;
-    if (!pwallet->CommitTransaction(tx, std::move(mapValue), {} /* orderForm */, keyChange, g_connman.get(), state, fUseCoinJoin)) {
+    if (!pwallet->CommitTransaction(tx, std::move(mapValue), {} /* orderForm */, keyChange, g_connman.get(), state, nUseCoinJoin ? true : false)) {
         strFailReason = strprintf("Transaction commit failed:: %s", FormatStateMessage(state));
         throw JSONRPCError(RPC_WALLET_ERROR, strFailReason);
     }

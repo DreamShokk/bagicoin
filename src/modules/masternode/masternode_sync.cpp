@@ -367,15 +367,10 @@ void CMasternodeSync::ProcessTick(CConnman* connman)
 
 void CMasternodeSync::SendGovernanceSyncRequest(CNode* pnode, CConnman* connman)
 {
-    if (pnode->nVersion >= GOVERNANCE_FILTER_PROTO_VERSION) {
-        CBloomFilter filter;
-        filter.clear();
+    CBloomFilter filter;
+    filter.clear();
 
-        connman->PushMessage(pnode, CNetMsgMaker(pnode->GetSendVersion()).Make(NetMsgType::MNGOVERNANCESYNC, uint256(), filter));
-    }
-    else {
-        connman->PushMessage(pnode, CNetMsgMaker(pnode->GetSendVersion()).Make(NetMsgType::MNGOVERNANCESYNC, uint256()));
-    }
+    connman->PushMessage(pnode, CNetMsgMaker(pnode->GetSendVersion()).Make(NetMsgType::MNGOVERNANCESYNC, uint256(), filter));
 }
 
 void CMasternodeSync::UpdatedBlockTip(const CBlockIndex *pindexNew, bool fInitialDownload, CConnman* connman)

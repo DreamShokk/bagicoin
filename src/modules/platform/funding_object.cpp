@@ -368,8 +368,7 @@ void CGovernanceObject::GetData(UniValue& objResult)
 {
     UniValue o(UniValue::VOBJ);
     std::string s = GetDataAsPlainString();
-    o.read(s);
-    objResult = o;
+    objResult = o.read(s);
 }
 
 /**

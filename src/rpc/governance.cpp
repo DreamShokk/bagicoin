@@ -228,10 +228,7 @@ UniValue gobject(const JSONRPCRequest& request)
         if(request.params.size() != 4)
             throw JSONRPCError(RPC_INVALID_PARAMETER, "Correct usage is 'gobject vote-conf <governance-hash> [funding|valid|delete] [yes|no|abstain]'");
 
-        uint256 hash;
-        std::string strVote;
-
-        hash = ParseHashV(request.params[1], "Object hash");
+        uint256 hash = ParseHashV(request.params[1], "Object hash");
         std::string strVoteSignal = request.params[2].get_str();
         std::string strVoteOutcome = request.params[3].get_str();
 
@@ -251,9 +248,6 @@ UniValue gobject(const JSONRPCRequest& request)
         int nFailed = 0;
 
         UniValue resultsObj(UniValue::VOBJ);
-
-        std::vector<unsigned char> vchMasterNodeSignature;
-        std::string strMasterNodeSignMessage;
 
         UniValue statusObj(UniValue::VOBJ);
         UniValue returnObj(UniValue::VOBJ);

@@ -107,21 +107,15 @@ void CGovernanceManager::ProcessModuleMessage(CNode* pfrom, const std::string& s
         if (!masternodeSync.IsSynced()) return;
 
         uint256 nProp;
-        CBloomFilter filter;
 
         vRecv >> nProp;
-
-        if(pfrom->nVersion >= GOVERNANCE_FILTER_PROTO_VERSION) {
-            vRecv >> filter;
-            filter.UpdateEmptyFull();
-        }
-        else {
-            filter.clear();
-        }
 
         if(nProp == uint256()) {
             SyncAll(pfrom, connman);
         } else {
+            CBloomFilter filter;
+            vRecv >> filter;
+            filter.UpdateEmptyFull();
             SyncSingleObjAndItsVotes(pfrom, nProp, filter, connman);
         }
         LogPrint(BCLog::GOV, "MNGOVERNANCESYNC -- syncing governance objects to our peer at %s\n", pfrom->addr.ToString());
@@ -999,11 +993,6 @@ void CGovernanceManager::RequestGovernanceObject(CNode* pfrom, const uint256& nH
     LogPrint(BCLog::GOV, "CGovernanceObject::RequestGovernanceObject -- hash = %s (peer=%d)\n", nHash.ToString(), pfrom->GetId());
 
     CNetMsgMaker msgMaker(pfrom->GetSendVersion());
-
-    if(pfrom->nVersion < GOVERNANCE_FILTER_PROTO_VERSION) {
-        connman->PushMessage(pfrom, msgMaker.Make(NetMsgType::MNGOVERNANCESYNC, nHash));
-        return;
-    }
 
     CBloomFilter filter;
     filter.clear();

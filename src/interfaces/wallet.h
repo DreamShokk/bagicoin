@@ -332,7 +332,7 @@ public:
     virtual bool commit(WalletValueMap value_map,
         WalletOrderForm order_form,
         std::string& reject_reason,
-        bool fCoinJoin) = 0;
+        int nCoinJoin) = 0;
 };
 
 //! Information about one wallet address.

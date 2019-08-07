@@ -53,12 +53,12 @@ public:
     bool commit(WalletValueMap value_map,
         WalletOrderForm order_form,
         std::string& reject_reason,
-        bool fCoinJoin) override
+        int nCoinJoin) override
     {
         auto locked_chain = m_wallet.chain().lock();
         LOCK(m_wallet.cs_wallet);
         CValidationState state;
-        if (!m_wallet.CommitTransaction(m_tx, std::move(value_map), std::move(order_form), m_key, g_connman.get(), state, fCoinJoin)) {
+        if (!m_wallet.CommitTransaction(m_tx, std::move(value_map), std::move(order_form), m_key, g_connman.get(), state, nCoinJoin)) {
             reject_reason = state.GetRejectReason();
             return false;
         }

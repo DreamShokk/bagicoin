@@ -2,8 +2,6 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-//#define ENABLE_CHAINCOIN_DEBUG
-
 #include <consensus/validation.h>
 #include <core_io.h>
 #include <modules/platform/funding.h>
@@ -144,11 +142,6 @@ UniValue gobject(const JSONRPCRequest& request)
 
         bool fMnFound = mnodeman.Has(activeMasternode.outpoint);
 
-        DBG( std::cout << "gobject: submit activeMasternode.pubKeyMasternode = " << activeMasternode.pubKeyMasternode.GetHash().ToString()
-             << ", outpoint = " << activeMasternode.outpoint.ToStringShort()
-             << ", params.size() = " << request.params.size()
-             << ", fMnFound = " << fMnFound << std::endl; );
-
         // ASSEMBLE NEW GOVERNANCE OBJECT FROM USER PARAMETERS
 
         uint256 txidFee;
@@ -172,12 +165,6 @@ UniValue gobject(const JSONRPCRequest& request)
         std::string strDataHex = request.params[4].get_str();
 
         CGovernanceObject govobj(hashParent, nRevision, nTime, txidFee, strDataHex);
-
-        DBG( std::cout << "gobject: submit "
-             << " GetDataAsPlainString = " << govobj.GetDataAsPlainString()
-             << ", hash = " << govobj.GetHash().GetHex()
-             << ", txidFee = " << txidFee.GetHex()
-             << std::endl; );
 
         if(govobj.GetObjectType() == GOVERNANCE_OBJECT_PROPOSAL) {
             CProposalValidator validator(strDataHex);

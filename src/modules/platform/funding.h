@@ -5,8 +5,6 @@
 #ifndef BITCOIN_MODULES_PLATFORM_FUNDING_H
 #define BITCOIN_MODULES_PLATFORM_FUNDING_H
 
-//#define ENABLE_CHAINCOIN_DEBUG
-
 #include <bloom.h>
 #include <cachemap.h>
 #include <cachemultimap.h>

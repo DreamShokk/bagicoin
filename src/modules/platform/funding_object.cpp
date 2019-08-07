@@ -241,8 +241,6 @@ uint256 CGovernanceObject::GetHash() const
     ss << vchSig;
     // fee_tx is left out on purpose
 
-    DBG( printf("CGovernanceObject::GetHash %i %li %s\n", nRevision, nTime, GetDataAsHexString().c_str()); );
-
     return ss.GetHash();
 }
 
@@ -339,11 +337,6 @@ void CGovernanceObject::LoadData()
         // ATTEMPT TO LOAD JSON STRING FROM VCHDATA
         UniValue objResult(UniValue::VOBJ);
         GetData(objResult);
-
-        DBG( std::cout << "CGovernanceObject::LoadData GetDataAsPlainString = "
-             << GetDataAsPlainString()
-             << std::endl; );
-
         UniValue obj = GetJSONObject();
         nObjectType = obj["type"].get_int();
     }
@@ -351,7 +344,6 @@ void CGovernanceObject::LoadData()
         std::string strException;
         fUnparsable = true;
         strException = strprintf("CGovernanceObject::LoadData Error parsing JSON, e.what() = %s", e.what());
-        DBG( std::cout << strException << std::endl; );
         LogPrintf("%s\n", strException);
         return;
     }
@@ -359,7 +351,6 @@ void CGovernanceObject::LoadData()
         fUnparsable = true;
         std::string strException;
         strException = "CGovernanceObject::LoadData Unknown Error parsing JSON";
-        DBG( std::cout << strException << std::endl; );
         LogPrintf("%s\n", strException);
         return;
     }
@@ -530,21 +521,9 @@ bool CGovernanceObject::IsCollateralValid(std::string& strError, bool& fMissingC
     CScript findScript;
     findScript << OP_RETURN << ToByteVector(nExpectedHash);
 
-    DBG( std::cout << "IsCollateralValid: txCollateral->vout.size() = " << txCollateral->vout.size() << std::endl; );
-
-    DBG( std::cout << "IsCollateralValid: findScript = " << ScriptToAsmStr( findScript, false ) << std::endl; );
-
-    DBG( std::cout << "IsCollateralValid: nMinFee = " << nMinFee << std::endl; );
-
-
     bool foundOpReturn = false;
     for (const auto& output : txCollateral->vout) {
-        DBG( std::cout << "IsCollateralValid txout : " << output.ToString()
-             << ", output.nValue = " << output.nValue
-             << ", output.scriptPubKey = " << ScriptToAsmStr( output.scriptPubKey, false )
-             << std::endl; );
         if (output.scriptPubKey == findScript && output.nValue >= nMinFee) {
-            DBG( std::cout << "IsCollateralValid foundOpReturn = true" << std::endl; );
             foundOpReturn = true;
             if (!output.scriptPubKey.IsUnspendable()) {
                 strError = strprintf("Invalid Script %s", txCollateral->ToString());
@@ -552,10 +531,6 @@ bool CGovernanceObject::IsCollateralValid(std::string& strError, bool& fMissingC
                 return false;
             }
         }
-        else  {
-            DBG( std::cout << "IsCollateralValid No match, continuing" << std::endl; );
-        }
-
     }
 
     if (!foundOpReturn){

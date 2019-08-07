@@ -286,8 +286,6 @@ void CGovernanceManager::CheckOrphanVotes(CGovernanceObject& govobj, CGovernance
 
 void CGovernanceManager::AddGovernanceObject(CGovernanceObject& govobj, CConnman* connman, CNode* pfrom)
 {
-    DBG( std::cout << "CGovernanceManager::AddGovernanceObject START" << std::endl; );
-
     uint256 nHash = govobj.GetHash();
     std::string strHash = nHash.ToString();
 
@@ -318,13 +316,7 @@ void CGovernanceManager::AddGovernanceObject(CGovernanceObject& govobj, CConnman
 
     // SHOULD WE ADD THIS OBJECT TO ANY OTHER MANANGERS?
 
-    DBG( std::cout << "CGovernanceManager::AddGovernanceObject Before trigger block, GetDataAsPlainString = "
-              << govobj.GetDataAsPlainString()
-              << ", nObjectType = " << govobj.nObjectType
-              << std::endl; );
-
     if (govobj.nObjectType == GOVERNANCE_OBJECT_TRIGGER) {
-        DBG( std::cout << "CGovernanceManager::AddGovernanceObject Before AddNewTrigger" << std::endl; );
         if (!triggerman.AddNewTrigger(nHash)) {
             LogPrint(BCLog::GOV, "CGovernanceManager::AddGovernanceObject -- undo adding invalid trigger object: hash = %s\n", nHash.ToString());
             CGovernanceObject& objref = objpair.first->second;
@@ -334,7 +326,6 @@ void CGovernanceManager::AddGovernanceObject(CGovernanceObject& govobj, CConnman
             }
             return;
         }
-        DBG( std::cout << "CGovernanceManager::AddGovernanceObject After AddNewTrigger" << std::endl; );
     }
 
     LogPrintf("CGovernanceManager::AddGovernanceObject -- %s new, received from %s\n", strHash, pfrom? pfrom->GetAddrName() : "not found");
@@ -353,8 +344,6 @@ void CGovernanceManager::AddGovernanceObject(CGovernanceObject& govobj, CConnman
     // SEND NOTIFICATION TO SCRIPT/ZMQ
     GetMainSignals().NotifyGovernanceObject(govobj);
     uiInterface.NotifyProposalChanged(govobj.GetHash(), CT_NEW);
-
-    DBG( std::cout << "CGovernanceManager::AddGovernanceObject END" << std::endl; );
 }
 
 void CGovernanceManager::UpdateCachesAndClean()
@@ -379,7 +368,7 @@ void CGovernanceManager::UpdateCachesAndClean()
     // Clean up any expired or invalid triggers
     triggerman.CleanAndRemove();
 
-    std::map<uint256, CGovernanceObject>::iterator it = mapObjects.begin();
+    auto it = mapObjects.begin();
     int64_t nNow = GetAdjustedTime();
 
     while(it != mapObjects.end())
@@ -740,7 +729,7 @@ void CGovernanceManager::MasternodeRateUpdate(const CGovernanceObject& govobj)
         return;
 
     const COutPoint& masternodeOutpoint = govobj.GetMasternodeOutpoint();
-    std::map<COutPoint, last_object_rec>::iterator it  = mapLastMasternodeObject.find(masternodeOutpoint);
+    auto it  = mapLastMasternodeObject.find(masternodeOutpoint);
 
     if(it == mapLastMasternodeObject.end())
         it = mapLastMasternodeObject.insert(std::map<COutPoint, last_object_rec>::value_type(masternodeOutpoint, last_object_rec(true))).first;
@@ -903,7 +892,7 @@ void CGovernanceManager::CheckMasternodeOrphanObjects(CConnman* connman)
     LOCK2(cs_main, cs);
     int64_t nNow = GetAdjustedTime();
     ScopedLockBool guard(cs, fRateChecksEnabled, false);
-    std::map<uint256, object_info_pair_t>::iterator it = mapMasternodeOrphanObjects.begin();
+    auto it = mapMasternodeOrphanObjects.begin();
     while(it != mapMasternodeOrphanObjects.end()) {
         object_info_pair_t& pair = it->second;
         CGovernanceObject& govobj = pair.first;
@@ -940,7 +929,7 @@ void CGovernanceManager::CheckPostponedObjects(CConnman* connman)
     LOCK2(cs_main, cs);
 
     // Check postponed proposals
-    for(std::map<uint256, CGovernanceObject>::iterator it = mapPostponedObjects.begin(); it != mapPostponedObjects.end();) {
+    for(auto it = mapPostponedObjects.begin(); it != mapPostponedObjects.end();) {
 
         const uint256& nHash = it->first;
         CGovernanceObject& govobj = it->second;
@@ -971,7 +960,7 @@ void CGovernanceManager::CheckPostponedObjects(CConnman* connman)
     int64_t nNow = GetAdjustedTime();
     int64_t nSuperblockCycleSeconds = Params().GetConsensus().nSuperblockCycle * Params().GetConsensus().nPowTargetSpacing;
 
-    for(std::set<uint256>::iterator it = setAdditionalRelayObjects.begin(); it != setAdditionalRelayObjects.end();) {
+    for(auto it = setAdditionalRelayObjects.begin(); it != setAdditionalRelayObjects.end();) {
 
         const auto& itObject = mapObjects.find(*it);
         if(itObject != mapObjects.end()) {

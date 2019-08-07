@@ -37,17 +37,6 @@
 
 #include <boost/thread/condition_variable.hpp> // for boost::thread_interrupted
 
-// Debugging macros
-
-// Uncomment the following line to enable debugging messages
-// or enable on a per file basis prior to inclusion of util.h
-//#define ENABLE_CHAINCOIN_DEBUG
-#ifdef ENABLE_CHAINCOIN_DEBUG
-#define DBG( x ) x
-#else
-#define DBG( x ) 
-#endif
-
 //Chaincoin only features
 
 extern bool fMasternodeMode;

@@ -5,8 +5,6 @@
 #ifndef BITCOIN_MODULES_PLATFORM_FUNDING_OBJECT_H
 #define BITCOIN_MODULES_PLATFORM_FUNDING_OBJECT_H
 
-//#define ENABLE_CHAINCOIN_DEBUG
-
 #include <cachemultimap.h>
 #include <logging.h>
 #include <modules/platform/funding_exceptions.h>

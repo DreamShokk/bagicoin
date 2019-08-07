@@ -4,8 +4,6 @@
 #ifndef BITCOIN_MODULES_PLATFORM_FUNDING_CLASSES_H
 #define BITCOIN_MODULES_PLATFORM_FUNDING_CLASSES_H
 
-//#define ENABLE_CHAINCOIN_DEBUG
-
 #include <modules/platform/funding.h>
 #include <key.h>
 #include <key_io.h>

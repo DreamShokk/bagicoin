@@ -914,17 +914,7 @@ void CMasternodePayments::RequestLowDataPaymentBlocks(CNode* pnode, CConnman* co
             // so just move to the next block
             continue;
         }
-        // DEBUG
-        DBG (
-            // Let's see why this failed
-            for (const auto& payee : mnBlockPayees.second.vecPayees) {
-                CTxDestination address;
-                ExtractDestination(payee.GetPayee(), address);
-                printf("payee %s votes %d\n", EncodeDestination(address), payee.GetVoteCount());
-            }
-            printf("block %d votes total %d\n", nBlockHeight, nTotalVotes);
-        )
-        // END DEBUG
+
         // Low data block found, let's try to sync it
         uint256 hash;
         if (mnodeman.HasBlockHash(hash, nBlockHeight)) {

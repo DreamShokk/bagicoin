@@ -286,7 +286,7 @@ libchaincoin_server_a_SOURCES = \
   dbwrapper.cpp \
   merkleblock.cpp \
   messagesigner.cpp \
-  miner.cpp \  
+  miner.cpp \
   modules/coinjoin/coinjoin.cpp \
   modules/coinjoin/coinjoin_analyzer.cpp \
   modules/coinjoin/coinjoin_server.cpp \

@@ -542,8 +542,6 @@ bool CSuperblock::IsValid(const CTransactionRef& txNew, int nBlockHeight, CAmoun
         return false;
     }
 
-    std::string strPayeesPossible = "";
-
     // CONFIGURE SUPERBLOCK OUTPUTS
 
     int nOutputs = txNew->vout.size();

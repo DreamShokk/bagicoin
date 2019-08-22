@@ -303,14 +303,14 @@ UniValue CGovernanceObject::GetJSONObject()
     }
 
     UniValue objResult(UniValue::VOBJ);
-    GetData(objResult);
+    objResult.read(GetDataAsPlainString());
 
     if (objResult.isObject()) {
         obj = objResult;
     } else {
         std::vector<UniValue> arr1 = objResult.getValues();
-        std::vector<UniValue> arr2 = arr1.at( 0 ).getValues();
-        obj = arr2.at( 1 );
+        std::vector<UniValue> arr2 = arr1.at(0).getValues();
+        obj = arr2.at(1);
     }
 
     return obj;
@@ -326,17 +326,12 @@ UniValue CGovernanceObject::GetJSONObject()
 
 void CGovernanceObject::LoadData()
 {
-    // todo : 12.1 - resolved
-    //return;
-
     if (vchData.empty()) {
         return;
     }
 
     try  {
         // ATTEMPT TO LOAD JSON STRING FROM VCHDATA
-        UniValue objResult(UniValue::VOBJ);
-        GetData(objResult);
         UniValue obj = GetJSONObject();
         nObjectType = obj["type"].get_int();
     }
@@ -354,21 +349,6 @@ void CGovernanceObject::LoadData()
         LogPrintf("%s\n", strException);
         return;
     }
-}
-
-/**
-*   GetData - Example usage:
-*   --------------------------------------------------------
-*
-*   Decode governance object data into UniValue(VOBJ)
-*
-*/
-
-void CGovernanceObject::GetData(UniValue& objResult)
-{
-    UniValue o(UniValue::VOBJ);
-    std::string s = GetDataAsPlainString();
-    objResult = o.read(s);
 }
 
 /**
@@ -503,12 +483,6 @@ bool CGovernanceObject::IsCollateralValid(std::string& strError, bool& fMissingC
         return false;
     }
 
-    if (nBlockHash == uint256()) {
-        strError = strprintf("Collateral tx %s is not mined yet", txCollateral->ToString());
-        LogPrintf("CGovernanceObject::IsCollateralValid -- %s\n", strError);
-        return false;
-    }
-
     if (txCollateral->vout.size() < 1) {
         strError = strprintf("tx vout size less than 1 | %d", txCollateral->vout.size());
         LogPrintf("CGovernanceObject::IsCollateralValid -- %s\n", strError);
@@ -554,6 +528,8 @@ bool CGovernanceObject::IsCollateralValid(std::string& strError, bool& fMissingC
         if (nConfirmationsIn >= GOVERNANCE_MIN_RELAY_FEE_CONFIRMATIONS) {
             fMissingConfirmations = true;
             strError += ", pre-accepted -- waiting for required confirmations";
+            LogPrintf ("CGovernanceObject::IsCollateralValid -- %s\n", strError);
+            return true;
         } else {
             strError += ", rejected -- try again later";
         }

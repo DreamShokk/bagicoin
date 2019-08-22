@@ -338,6 +338,8 @@ void BitcoinGUI::createActions()
     backupWalletAction->setStatusTip(tr("Backup wallet to another location"));
     changePassphraseAction = new QAction(QIcon(":/icons/" + theme + "/key"), tr("&Change Passphrase..."), this);
     changePassphraseAction->setStatusTip(tr("Change the passphrase used for wallet encryption"));
+    proposalGeneratorAction = new QAction(QIcon(":/icons/" + theme + "/sign"), tr("New Proposal..."), this);
+    proposalGeneratorAction->setStatusTip(tr("Create a proposal and submit it to the network"));
     signMessageAction = new QAction(QIcon(":/icons/" + theme + "/sign"), tr("Sign &message..."), this);
     signMessageAction->setStatusTip(tr("Sign messages with your Chaincoin addresses to prove you own them"));
     verifyMessageAction = new QAction(QIcon(":/icons/" + theme + "/verify"), tr("&Verify message..."), this);
@@ -404,6 +406,8 @@ void BitcoinGUI::createActions()
         connect(encryptWalletAction, &QAction::triggered, walletFrame, &WalletFrame::encryptWallet);
         connect(backupWalletAction, &QAction::triggered, walletFrame, &WalletFrame::backupWallet);
         connect(changePassphraseAction, &QAction::triggered, walletFrame, &WalletFrame::changePassphrase);
+        connect(proposalGeneratorAction, &QAction::triggered, [this]{ showNormalIfMinimized(); });
+        connect(proposalGeneratorAction, &QAction::triggered, [this]{ gotoProposalGenerator(); });
         connect(signMessageAction, &QAction::triggered, [this]{ showNormalIfMinimized(); });
         connect(signMessageAction, &QAction::triggered, [this]{ gotoSignMessageTab(); });
         connect(verifyMessageAction, &QAction::triggered, [this]{ showNormalIfMinimized(); });
@@ -475,6 +479,8 @@ void BitcoinGUI::createMenuBar()
         file->addAction(backupWalletAction);
         file->addAction(signMessageAction);
         file->addAction(verifyMessageAction);
+        file->addSeparator();
+        file->addAction(proposalGeneratorAction);
         file->addSeparator();
     }
     file->addAction(quitAction);
@@ -756,6 +762,7 @@ void BitcoinGUI::setWalletActionsEnabled(bool enabled)
     encryptWalletAction->setEnabled(enabled);
     backupWalletAction->setEnabled(enabled);
     changePassphraseAction->setEnabled(enabled);
+    proposalGeneratorAction->setEnabled(enabled);
     signMessageAction->setEnabled(enabled);
     verifyMessageAction->setEnabled(enabled);
     usedSendingAddressesAction->setEnabled(enabled);
@@ -807,6 +814,8 @@ void BitcoinGUI::createTrayIconMenu()
         trayIconMenu->addAction(verifyMessageAction);
         trayIconMenu->addSeparator();
         trayIconMenu->addAction(showBackupsAction);
+        trayIconMenu->addSeparator();
+        trayIconMenu->addAction(proposalGeneratorAction);
     }
     trayIconMenu->addAction(optionsAction);
     trayIconMenu->addAction(openRPCConsoleAction);
@@ -947,6 +956,11 @@ void BitcoinGUI::gotoProposalPage()
         proposalAction->setChecked(true);
         if (walletFrame) walletFrame->gotoProposalPage();
     }
+}
+
+void BitcoinGUI::gotoProposalGenerator(QString addr)
+{
+    if (walletFrame) walletFrame->gotoProposalGenerator(addr);
 }
 
 void BitcoinGUI::gotoSignMessageTab(QString addr)

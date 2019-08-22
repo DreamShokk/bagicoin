@@ -141,7 +141,7 @@ WalletModel::SendCoinsReturn WalletModel::prepareTransaction(WalletModelTransact
 {
     CAmount total = 0;
     bool fSubtractFeeFromAmount = false;
-    bool fCoinJoin = false;
+    int nCoinJoin = 0;
     QList<SendCoinsRecipient> recipients = transaction.getRecipients();
     std::vector<CRecipient> vecSend;
 
@@ -157,7 +157,7 @@ WalletModel::SendCoinsReturn WalletModel::prepareTransaction(WalletModelTransact
     for (const SendCoinsRecipient &rcp : recipients)
     {
         if (rcp.fCoinJoin)
-            fCoinJoin = true;
+            nCoinJoin = 1;
 
         if (rcp.fSubtractFeeFromAmount)
             fSubtractFeeFromAmount = true;
@@ -223,7 +223,7 @@ WalletModel::SendCoinsReturn WalletModel::prepareTransaction(WalletModelTransact
         std::string strFailReason;
 
         auto& newTx = transaction.getWtx();
-        newTx = m_wallet->createTransaction(vecSend, coinControl, true /* sign */, nChangePosRet, nFeeRequired, strFailReason, fCoinJoin);
+        newTx = m_wallet->createTransaction(vecSend, coinControl, true /* sign */, nChangePosRet, nFeeRequired, strFailReason, nCoinJoin);
         transaction.setTransactionFee(nFeeRequired);
         if (fSubtractFeeFromAmount && newTx)
             transaction.reassignAmounts(nChangePosRet);
@@ -231,6 +231,57 @@ WalletModel::SendCoinsReturn WalletModel::prepareTransaction(WalletModelTransact
         if(!newTx)
         {
             if(!fSubtractFeeFromAmount && (total + nFeeRequired) > nBalance)
+            {
+                return SendCoinsReturn(AmountWithFeeExceedsBalance);
+            }
+            Q_EMIT message(tr("Send Coins"), QString::fromStdString(strFailReason),
+                         CClientUIInterface::MSG_ERROR);
+            return TransactionCreationFailed;
+        }
+
+        // reject absurdly high fee. (This can never happen because the
+        // wallet caps the fee at maxTxFee. This merely serves as a
+        // belt-and-suspenders check)
+        if (nFeeRequired > m_node.getMaxTxFee())
+            return AbsurdFee;
+    }
+
+    return SendCoinsReturn(OK);
+}
+
+WalletModel::SendCoinsReturn WalletModel::prepareCollateral(WalletModelTransaction &transaction, const CCoinControl& coinControl, const uint256& hash, const CAmount& amount)
+{
+    bool fSubtractFeeFromAmount = false;
+    int nCoinJoin = 0;
+
+    CScript scriptChange;
+    scriptChange << OP_RETURN << ToByteVector(hash);
+
+    std::vector<CRecipient> vecSend;
+    vecSend.push_back((CRecipient){scriptChange, amount, false});
+
+
+    CAmount nBalance = m_wallet->getAvailableBalance(coinControl);
+
+    if(amount > nBalance)
+    {
+        return AmountExceedsBalance;
+    }
+
+    {
+        CAmount nFeeRequired = 0;
+        int nChangePosRet = -1;
+        std::string strFailReason;
+
+        auto& newTx = transaction.getWtx();
+        newTx = m_wallet->createTransaction(vecSend, coinControl, true /* sign */, nChangePosRet, nFeeRequired, strFailReason, nCoinJoin);
+        transaction.setTransactionFee(nFeeRequired);
+        if (fSubtractFeeFromAmount && newTx)
+            transaction.reassignAmounts(nChangePosRet);
+
+        if(!newTx)
+        {
+            if(!fSubtractFeeFromAmount && (amount + nFeeRequired) > nBalance)
             {
                 return SendCoinsReturn(AmountWithFeeExceedsBalance);
             }
@@ -277,18 +328,18 @@ WalletModel::SendCoinsReturn WalletModel::sendCoins(WalletModelTransaction &tran
         }
 
         auto& newTx = transaction.getWtx();
-        bool fCoinJoin = true;
+        int nCoinJoin = 3;
         // CoinJoin is executed per-tx
         for (const SendCoinsRecipient &rcp : transaction.getRecipients())
         {
             if (!rcp.fCoinJoin)
             {
-                fCoinJoin = false;
+                nCoinJoin = 0;
                 continue;
             }
         }
         std::string rejectReason;
-        if (!newTx->commit({} /* mapValue */, std::move(vOrderForm), rejectReason, fCoinJoin))
+        if (!newTx->commit({} /* mapValue */, std::move(vOrderForm), rejectReason, nCoinJoin))
             return SendCoinsReturn(TransactionCommitFailed, QString::fromStdString(rejectReason));
 
         CDataStream ssTx(SER_NETWORK, PROTOCOL_VERSION);

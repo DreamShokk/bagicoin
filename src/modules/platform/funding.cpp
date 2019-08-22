@@ -934,7 +934,7 @@ void CGovernanceManager::CheckPostponedObjects(CConnman* connman)
         bool fMissingConfirmations;
         if (govobj.IsCollateralValid(strError, fMissingConfirmations))
         {
-            if(govobj.IsValidLocally(strError, false))
+            if(govobj.IsValidLocally(strError, false) && !fMissingConfirmations)
                 AddGovernanceObject(govobj, connman);
             else
                 LogPrintf("CGovernanceManager::CheckPostponedObjects -- %s invalid\n", nHash.ToString());

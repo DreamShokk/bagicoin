@@ -12,6 +12,7 @@
 #include <qt/optionsmodel.h>
 #include <qt/overviewpage.h>
 #include <qt/platformstyle.h>
+#include <qt/proposaldialog.h>
 #include <qt/receivecoinsdialog.h>
 #include <qt/sendcoinsdialog.h>
 #include <qt/signverifymessagedialog.h>
@@ -235,6 +236,14 @@ void WalletView::gotoReceiveCoinsPage()
     setCurrentWidget(receiveCoinsPage);
 }
 
+void WalletView::gotoSendCoinsPage(QString addr)
+{
+    setCurrentWidget(sendCoinsPage);
+
+    if (!addr.isEmpty())
+        sendCoinsPage->setAddress(addr);
+}
+
 void WalletView::gotoProposalPage()
 {
     QSettings settings;
@@ -243,12 +252,22 @@ void WalletView::gotoProposalPage()
     }
 }
 
-void WalletView::gotoSendCoinsPage(QString addr)
+void WalletView::gotoProposalGenerator(QString addr)
 {
-    setCurrentWidget(sendCoinsPage);
+    ProposalDialog *proposalDialog = new ProposalDialog(platformStyle, this);
+    proposalDialog->setAttribute(Qt::WA_DeleteOnClose);
+    proposalDialog->setClientModel(clientModel);
+    proposalDialog->setModel(walletModel);
+
+    // Pass through messages from proposalDialog
+    connect(proposalDialog, &ProposalDialog::message, this, &WalletView::message);
+
+    // Highlight transaction after send
+    connect(proposalDialog, &ProposalDialog::coinsSent, transactionView, static_cast<void (TransactionView::*)(const uint256&)>(&TransactionView::focusTransaction));
 
     if (!addr.isEmpty())
-        sendCoinsPage->setAddress(addr);
+        proposalDialog->setAddress(addr);
+    proposalDialog->show();
 }
 
 void WalletView::gotoSignMessageTab(QString addr)

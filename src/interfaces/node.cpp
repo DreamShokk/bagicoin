@@ -17,6 +17,7 @@
 #include <modules/masternode/masternode_config.h>
 #include <modules/masternode/masternode_man.h>
 #include <modules/platform/funding.h>
+#include <modules/platform/funding_validators.h>
 #include <modules/coinjoin/coinjoin.h>
 #include <modules/coinjoin/coinjoin_analyzer.h>
 #include <net.h>
@@ -424,7 +425,7 @@ public:
     }
     Proposal getProposal(const uint256& hash) override
     {
-        LOCK(governance.cs);
+        LOCK(::governance.cs);
         CGovernanceObject* pGovObj = ::governance.FindGovernanceObject(hash);
         return MakeProposal(*pGovObj);
     }
@@ -438,6 +439,39 @@ public:
             result.emplace_back(MakeProposal(*pGovObj));
         }
         return result;
+    }
+    uint256 validateProposal(const std::string& data, const uint256 hash, CAmount& amount, std::string& error) override
+    {
+        const std::vector<unsigned char> dataHex(data.c_str(), data.c_str() + data.size() + 1);
+        const std::string dataHexStr(HexStr(dataHex));
+        int nRevision = 1;
+
+        CProposalValidator validator(dataHexStr);
+
+        if(!validator.Validate()) {
+            error = validator.GetErrorMessages();
+            return uint256();
+        }
+
+        CGovernanceObject govobj(uint256(), nRevision, GetTime(), hash, dataHexStr);
+
+        if(hash == uint256()) {
+            if (!govobj.IsValidLocally(error, false)) return uint256();
+        }  else {
+            bool fMissingMasternode;
+            bool fMissingConfirmations;
+            LOCK(::cs_main);
+            if(!govobj.IsValidLocally(error, fMissingMasternode, fMissingConfirmations, true) && !fMissingConfirmations) return uint256();
+
+            if(fMissingConfirmations) {
+                governance.AddPostponedObject(govobj);
+                govobj.Relay(g_connman.get());
+            } else {
+                governance.AddGovernanceObject(govobj, g_connman.get());
+            }
+        }
+        amount = govobj.GetMinCollateralFee();
+        return govobj.GetHash();
     }
     bool sendVoting(const uint256& hash, const std::pair<std::string, std::string>& strVoteSignal, std::pair<int, int>& nResult) override
     {

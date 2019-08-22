@@ -166,6 +166,13 @@ void WalletFrame::gotoProposalPage()
         i.value()->gotoProposalPage();
 }
 
+void WalletFrame::gotoProposalGenerator(QString addr)
+{
+    WalletView *walletView = currentWalletView();
+    if (walletView)
+        walletView->gotoProposalGenerator(addr);
+}
+
 void WalletFrame::gotoSignMessageTab(QString addr)
 {
     WalletView *walletView = currentWalletView();

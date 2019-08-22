@@ -178,6 +178,9 @@ public:
     // prepare transaction for getting txfee before sending coins
     SendCoinsReturn prepareTransaction(WalletModelTransaction &transaction, const CCoinControl& coinControl);
 
+    // prepare collateral transaction for proposal generators
+    SendCoinsReturn prepareCollateral(WalletModelTransaction &transaction, const CCoinControl& coinControl, const uint256 &hash, const CAmount &amount);
+
     // Send coins to a list of recipients
     SendCoinsReturn sendCoins(WalletModelTransaction &transaction);
 

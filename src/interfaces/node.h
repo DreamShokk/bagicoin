@@ -220,6 +220,9 @@ public:
     //! Get a list of all active proposals
     virtual std::vector<Proposal> getProposals() = 0;
 
+    //! Validate proposal
+    virtual uint256 validateProposal(const std::string& data, const uint256 hash, CAmount& amount, std::string& error) = 0;
+
     //! Vote with all available Masternodes
     virtual bool sendVoting(const uint256& hash, const std::pair<std::string, std::string>& strVoteSignal, std::pair<int, int>& nResult) = 0;
 

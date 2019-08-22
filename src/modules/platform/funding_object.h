@@ -34,8 +34,8 @@ static const int GOVERNANCE_OBJECT_WATCHDOG = 3;
 
 static const CAmount GOVERNANCE_PROPOSAL_FEE_TX = (50.0*COIN);
 
-static const int64_t GOVERNANCE_FEE_CONFIRMATIONS = 1;
-static const int64_t GOVERNANCE_MIN_RELAY_FEE_CONFIRMATIONS = 1;
+static const int64_t GOVERNANCE_FEE_CONFIRMATIONS = 6;
+static const int64_t GOVERNANCE_MIN_RELAY_FEE_CONFIRMATIONS = 0;
 static const int64_t GOVERNANCE_UPDATE_MIN = 60*60;
 static const int64_t GOVERNANCE_DELETION_DELAY = 10*60;
 static const int64_t GOVERNANCE_ORPHAN_EXPIRATION_TIME = 10*60;
@@ -320,7 +320,6 @@ public:
 private:
     // FUNCTIONS FOR DEALING WITH DATA STRING
     void LoadData();
-    void GetData(UniValue& objResult);
 
     bool ProcessVote(CNode* pfrom,
                      const CGovernanceVote& vote,

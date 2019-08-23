@@ -419,7 +419,15 @@ bool openMNConfigfile()
     configMNFile.close();
 
     /* Open masternode.conf with the associated application */
-    return QDesktopServices::openUrl(QUrl::fromLocalFile(boostPathToQString(pathMNConfig)));
+    bool res = QDesktopServices::openUrl(QUrl::fromLocalFile(boostPathToQString(pathMNConfig)));
+#ifdef Q_OS_MAC
+    // Workaround for macOS-specific behavior; see #15409.
+    if (!res) {
+        res = QProcess::startDetached("/usr/bin/open", QStringList{"-t", boostPathToQString(pathMNConfig)});
+    }
+#endif
+
+    return res;
 }
 
 void showBackups()

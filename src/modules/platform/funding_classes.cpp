@@ -80,7 +80,7 @@ CAmount ParsePaymentAmount(const std::string& strAmount)
 
 bool CGovernanceTriggerManager::AddNewTrigger(uint256 nHash)
 {
-    AssertLockHeld(governance.cs);
+    AssertLockHeld(funding.cs);
 
     // IF WE ALREADY HAVE THIS HASH, RETURN
     if(mapTrigger.count(nHash)) {
@@ -118,7 +118,7 @@ bool CGovernanceTriggerManager::AddNewTrigger(uint256 nHash)
 void CGovernanceTriggerManager::CleanAndRemove()
 {
     LogPrint(BCLog::GOV, "CGovernanceTriggerManager::CleanAndRemove -- Start\n");
-    AssertLockHeld(governance.cs);
+    AssertLockHeld(funding.cs);
 
     // Remove triggers that are invalid or expired
     LogPrint(BCLog::GOV, "CGovernanceTriggerManager::CleanAndRemove -- mapTrigger.size() = %d\n", mapTrigger.size());
@@ -132,7 +132,7 @@ void CGovernanceTriggerManager::CleanAndRemove()
             LogPrint(BCLog::GOV, "CGovernanceTriggerManager::CleanAndRemove -- nullptr superblock marked for removal\n");
             remove = true;
         } else {
-            pObj = governance.FindGovernanceObject(it->first);
+            pObj = funding.FindGovernanceObject(it->first);
             if(!pObj || pObj->GetObjectType() != GOVERNANCE_OBJECT_TRIGGER) {
                 LogPrint(BCLog::GOV, "CGovernanceTriggerManager::CleanAndRemove -- Unknown or non-trigger superblock\n");
                 pSuperblock->SetStatus(SEEN_OBJECT_ERROR_INVALID);
@@ -182,12 +182,12 @@ void CGovernanceTriggerManager::CleanAndRemove()
 
 std::vector<CSuperblock_sptr> CGovernanceTriggerManager::GetActiveTriggers()
 {
-    AssertLockHeld(governance.cs);
+    AssertLockHeld(funding.cs);
     std::vector<CSuperblock_sptr> vecResults;
 
     // LOOK AT THESE OBJECTS AND COMPILE A VALID LIST OF TRIGGERS
     for (const auto& pair : mapTrigger) {
-        CGovernanceObject* pObj = governance.FindGovernanceObject(pair.first);
+        CGovernanceObject* pObj = funding.FindGovernanceObject(pair.first);
         if(pObj) {
             vecResults.push_back(pair.second);
         }
@@ -209,7 +209,7 @@ bool CSuperblockManager::IsSuperblockTriggered(int nBlockHeight)
         return false;
     }
 
-    LOCK(governance.cs);
+    LOCK(funding.cs);
     // GET ALL ACTIVE TRIGGERS
     std::vector<CSuperblock_sptr> vecTriggers = triggerman.GetActiveTriggers();
 
@@ -263,7 +263,7 @@ bool CSuperblockManager::GetBestSuperblock(CSuperblock_sptr& pSuperblockRet, int
         return false;
     }
 
-    AssertLockHeld(governance.cs);
+    AssertLockHeld(funding.cs);
     std::vector<CSuperblock_sptr> vecTriggers = triggerman.GetActiveTriggers();
     int nYesCount = 0;
 
@@ -302,7 +302,7 @@ bool CSuperblockManager::GetBestSuperblock(CSuperblock_sptr& pSuperblockRet, int
 
 void CSuperblockManager::CreateSuperblock(CMutableTransaction& txNewRet, int nBlockHeight, std::vector<CTxOut>& voutSuperblockRet)
 {
-    LOCK(governance.cs);
+    LOCK(funding.cs);
 
     // GET THE BEST SUPERBLOCK FOR THIS BLOCK HEIGHT
 
@@ -347,7 +347,7 @@ void CSuperblockManager::CreateSuperblock(CMutableTransaction& txNewRet, int nBl
 bool CSuperblockManager::IsValid(const CTransactionRef& txNew, int nBlockHeight, CAmount blockReward)
 {
     // GET BEST SUPERBLOCK, SHOULD MATCH
-    LOCK(governance.cs);
+    LOCK(funding.cs);
 
     CSuperblock_sptr pSuperblock;
     if(CSuperblockManager::GetBestSuperblock(pSuperblock, nBlockHeight)) {
@@ -359,7 +359,7 @@ bool CSuperblockManager::IsValid(const CTransactionRef& txNew, int nBlockHeight,
 
 void CSuperblockManager::ExecuteBestSuperblock(int nBlockHeight)
 {
-    LOCK(governance.cs);
+    LOCK(funding.cs);
 
     CSuperblock_sptr pSuperblock;
     if(GetBestSuperblock(pSuperblock, nBlockHeight)) {
@@ -635,7 +635,7 @@ bool CSuperblock::IsExpired()
 
     LogPrint(BCLog::GOV, "CSuperblock::IsExpired -- nBlockHeight = %d, nExpirationBlock = %d\n", nBlockHeight, nExpirationBlock);
 
-    if(governance.GetCachedBlockHeight() > nExpirationBlock) {
+    if(funding.GetCachedBlockHeight() > nExpirationBlock) {
         LogPrint(BCLog::GOV, "CSuperblock::IsExpired -- Outdated trigger found\n");
         fExpired = true;
         CGovernanceObject* pgovobj = GetGovernanceObject();
@@ -657,7 +657,7 @@ bool CSuperblock::IsExpired()
 
 std::string CSuperblockManager::GetRequiredPaymentsString(int nBlockHeight)
 {
-    LOCK(governance.cs);
+    LOCK(funding.cs);
     std::string ret = "Unknown";
 
     // GET BEST SUPERBLOCK

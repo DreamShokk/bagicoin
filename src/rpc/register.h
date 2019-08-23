@@ -22,7 +22,7 @@ void RegisterMiningRPCCommands(CRPCTable &tableRPC);
 void RegisterRawTransactionRPCCommands(CRPCTable &tableRPC);
 /** Register masternode based RPC commands */
 void RegisterMasternodeRPCCommands(CRPCTable &tableRPC);
-/** Register governance based RPC commands */
+/** Register funding based RPC commands */
 void RegisterGovernanceRPCCommands(CRPCTable &tableRPC);
 
 static inline void RegisterAllCoreRPCCommands(CRPCTable &t)

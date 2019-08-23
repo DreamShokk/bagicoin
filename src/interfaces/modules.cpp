@@ -25,7 +25,7 @@ void ModuleInterface::ProcessModuleMessage(CNode* pfrom, const NetMsgDest& dest,
     case NetMsgDest::MSG_NONE:
         return;
     case NetMsgDest::MSG_FUND:
-        governance.ProcessModuleMessage(pfrom, strCommand, ss, connman);
+        funding.ProcessModuleMessage(pfrom, strCommand, ss, connman);
         return;
     case NetMsgDest::MSG_MN_MAN:
         mnodeman.ProcessModuleMessage(pfrom, strCommand, ss, connman);
@@ -40,7 +40,7 @@ void ModuleInterface::ProcessModuleMessage(CNode* pfrom, const NetMsgDest& dest,
         coinJoinServer.ProcessModuleMessage(pfrom, strCommand, ss, connman);
         return;
     case NetMsgDest::MSG_ALL:
-        governance.ProcessModuleMessage(pfrom, strCommand, ss, connman);
+        funding.ProcessModuleMessage(pfrom, strCommand, ss, connman);
         mnodeman.ProcessModuleMessage(pfrom, strCommand, ss, connman);
         masternodeSync.ProcessModuleMessage(pfrom, strCommand, ss);
         mnpayments.ProcessModuleMessage(pfrom, strCommand, ss, connman);
@@ -60,6 +60,6 @@ void ModuleInterface::UpdatedBlockTip(const CBlockIndex *pindexNew, const CBlock
     coinJoinServer.UpdatedBlockTip(pindexNew);
     mnodeman.UpdatedBlockTip(pindexNew);
     mnpayments.UpdatedBlockTip(pindexNew, fInitialDownload, connman);
-    governance.UpdatedBlockTip(pindexNew, fInitialDownload, connman);
+    funding.UpdatedBlockTip(pindexNew, fInitialDownload, connman);
 }
 

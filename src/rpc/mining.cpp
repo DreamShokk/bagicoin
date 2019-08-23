@@ -480,7 +480,7 @@ static UniValue getblocktemplate(const JSONRPCRequest& request)
         && !mnpayments.GetBlockPayee(chainActive.Height() + 1, payee))
             throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, "Chaincoin Core is downloading masternode winners...");
 
-    // next bock is a superblock and we need governance info to correctly construct it
+    // next bock is a superblock and we need funding info to correctly construct it
     if (!masternodeSync.IsSynced()
         && CSuperblock::IsValidBlockHeight(chainActive.Height() + 1))
             throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, "Chaincoin Core is syncing with network...");

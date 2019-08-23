@@ -134,15 +134,15 @@ public:
     bool Read(CMasternodePayments& mnpayments);
 };
 
-/** Access to the governance database (governance.dat) */
+/** Access to the funding database (funding.dat) */
 class CGovDB
 {
 private:
     fs::path pathGovernance;
 public:
     CGovDB();
-    bool Write(const CGovernanceManager& governance);
-    bool Read(CGovernanceManager& governance);
+    bool Write(const CGovernanceManager& funding);
+    bool Read(CGovernanceManager& funding);
 };
 
 /** Access to the netfulfilled database (netfulfilled.dat) */

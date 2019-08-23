@@ -19,7 +19,7 @@
 #include <util/strencodings.h>
 #include <util/system.h>
 
-CGovernanceManager governance;
+CGovernanceManager funding;
 
 int nSubmittedFinalBudget;
 
@@ -118,7 +118,7 @@ void CGovernanceManager::ProcessModuleMessage(CNode* pfrom, const std::string& s
             filter.UpdateEmptyFull();
             SyncSingleObjAndItsVotes(pfrom, nProp, filter, connman);
         }
-        LogPrint(BCLog::GOV, "MNGOVERNANCESYNC -- syncing governance objects to our peer at %s\n", pfrom->addr.ToString());
+        LogPrint(BCLog::GOV, "MNGOVERNANCESYNC -- syncing funding objects to our peer at %s\n", pfrom->addr.ToString());
     }
 
     // A NEW GOVERNANCE OBJECT HAS ARRIVED
@@ -293,7 +293,7 @@ void CGovernanceManager::AddGovernanceObject(CGovernanceObject& govobj, CConnman
     // MAKE SURE THIS OBJECT IS OK
 
     if(!govobj.IsValidLocally(strError, true)) {
-        LogPrintf("CGovernanceManager::AddGovernanceObject -- invalid governance object - %s - (nCachedBlockHeight %d) \n", strError, nCachedBlockHeight);
+        LogPrintf("CGovernanceManager::AddGovernanceObject -- invalid funding object - %s - (nCachedBlockHeight %d) \n", strError, nCachedBlockHeight);
         return;
     }
 
@@ -304,7 +304,7 @@ void CGovernanceManager::AddGovernanceObject(CGovernanceObject& govobj, CConnman
     auto objpair = mapObjects.emplace(nHash, govobj);
 
     if(!objpair.second) {
-        LogPrintf("CGovernanceManager::AddGovernanceObject -- already have governance object %s\n", nHash.ToString());
+        LogPrintf("CGovernanceManager::AddGovernanceObject -- already have funding object %s\n", nHash.ToString());
         return;
     }
 
@@ -481,7 +481,7 @@ std::vector<CGovernanceVote> CGovernanceManager::GetCurrentVotes(const uint256& 
     LOCK(cs);
     std::vector<CGovernanceVote> vecResult;
 
-    // Find the governance object or short-circuit.
+    // Find the funding object or short-circuit.
     const auto& it = mapObjects.find(nParentHash);
     if(it == mapObjects.end()) return vecResult;
     const CGovernanceObject& govobj = it->second;
@@ -494,7 +494,7 @@ std::vector<CGovernanceVote> CGovernanceManager::GetCurrentVotes(const uint256& 
         mapMasternodes[mnCollateralOutpointFilter] = mn;
     }
 
-    // Loop thru each MN collateral outpoint and get the votes for the `nParentHash` governance object
+    // Loop thru each MN collateral outpoint and get the votes for the `nParentHash` funding object
     for (const auto& mnpair : mapMasternodes)
     {
         // get a vote_rec_t from the govobj
@@ -576,7 +576,7 @@ bool CGovernanceManager::ConfirmInventoryRequest(const CInv& inv)
     case MSG_GOVERNANCE_OBJECT:
     {
         if(mapObjects.count(inv.hash) == 1 || mapPostponedObjects.count(inv.hash) == 1) {
-            LogPrint(BCLog::GOV, "CGovernanceManager::ConfirmInventoryRequest already have governance object, returning false\n");
+            LogPrint(BCLog::GOV, "CGovernanceManager::ConfirmInventoryRequest already have funding object, returning false\n");
             return false;
         }
     }
@@ -584,7 +584,7 @@ bool CGovernanceManager::ConfirmInventoryRequest(const CInv& inv)
     case MSG_GOVERNANCE_OBJECT_VOTE:
     {
         if(cmapVoteToObject.HasKey(inv.hash)) {
-            LogPrint(BCLog::GOV, "CGovernanceManager::ConfirmInventoryRequest already have governance vote, returning false\n");
+            LogPrint(BCLog::GOV, "CGovernanceManager::ConfirmInventoryRequest already have funding vote, returning false\n");
             return false;
         }
     }
@@ -829,7 +829,7 @@ bool CGovernanceManager::ProcessVote(CNode* pfrom, const CGovernanceVote& vote, 
     if(cmapInvalidVotes.HasKey(nHashVote)) {
         strResult = strprintf("CGovernanceManager::ProcessVote -- Old invalid vote, MN outpoint = "
                 + vote.GetMasternodeOutpoint().ToStringShort()
-                + ", governance object hash = " + nHashGovobj.ToString());
+                + ", funding object hash = " + nHashGovobj.ToString());
         LogPrintf("%s\n", strResult);
         exception = CGovernanceException(strResult, GOVERNANCE_EXCEPTION_PERMANENT_ERROR, 20);
         LEAVE_CRITICAL_SECTION(cs);
@@ -1162,7 +1162,7 @@ bool CGovernanceManager::VoteWithAll(const uint256& hash, const std::pair<std::s
         }
 
         CGovernanceException exception;
-        if(governance.ProcessVoteAndRelay(vote, exception, connman)) {
+        if(funding.ProcessVoteAndRelay(vote, exception, connman)) {
             nResult.second++;
         }
         else {
@@ -1234,10 +1234,10 @@ void CGovernanceManager::InitOnLoad()
 {
     LOCK(cs);
     int64_t nStart = GetTimeMillis();
-    LogPrintf("Preparing masternode indexes and governance triggers...\n");
+    LogPrintf("Preparing masternode indexes and funding triggers...\n");
     RebuildIndexes();
     AddCachedTriggers();
-    LogPrintf("Masternode indexes and governance triggers prepared  %dms\n", GetTimeMillis() - nStart);
+    LogPrintf("Masternode indexes and funding triggers prepared  %dms\n", GetTimeMillis() - nStart);
     LogPrintf("     %s\n", ToString());
 }
 

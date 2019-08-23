@@ -156,12 +156,12 @@ bool CGovernanceObject::ProcessVote(CNode* pfrom,
 
     int64_t nNow = GetAdjustedTime();
     int64_t nVoteTimeUpdate = voteInstanceRef.nTime;
-    if (governance.AreRateChecksEnabled()) {
+    if (funding.AreRateChecksEnabled()) {
         int64_t nTimeDelta = nNow - voteInstanceRef.nTime;
         if (nTimeDelta < GOVERNANCE_UPDATE_MIN) {
             strResult = strprintf("CGovernanceObject::ProcessVote -- Masternode voting too often, MN outpoint = "
                  + vote.GetMasternodeOutpoint().ToStringShort()
-                 + ", governance object hash = " + GetHash().ToString()
+                 + ", funding object hash = " + GetHash().ToString()
                  + ", time delta = %d", nTimeDelta);
             LogPrint(BCLog::GOV, "%s\n", strResult);
             exception = CGovernanceException(strResult, GOVERNANCE_EXCEPTION_TEMPORARY_ERROR);
@@ -174,18 +174,18 @@ bool CGovernanceObject::ProcessVote(CNode* pfrom,
     if (!vote.IsValid(true)) {
         strResult = strprintf("CGovernanceObject::ProcessVote -- Invalid vote, MN outpoint = "
                 + vote.GetMasternodeOutpoint().ToStringShort()
-                + ", governance object hash = " + GetHash().ToString()
+                + ", funding object hash = " + GetHash().ToString()
                 + ", vote hash = " + vote.GetHash().ToString());
         LogPrintf("%s\n", strResult);
         exception = CGovernanceException(strResult, GOVERNANCE_EXCEPTION_PERMANENT_ERROR, 20);
-        governance.AddInvalidVote(vote);
+        funding.AddInvalidVote(vote);
         return false;
     }
 
     if (!mnodeman.AddGovernanceVote(vote.GetMasternodeOutpoint(), vote.GetParentHash())) {
-        strResult =  strprintf("CGovernanceObject::ProcessVote -- Unable to add governance vote, MN outpoint = "
+        strResult =  strprintf("CGovernanceObject::ProcessVote -- Unable to add funding vote, MN outpoint = "
              + vote.GetMasternodeOutpoint().ToStringShort()
-             + ", governance object hash = " + GetHash().ToString());
+             + ", funding object hash = " + GetHash().ToString());
         LogPrint(BCLog::GOV, "%s\n", strResult);
         exception = CGovernanceException(strResult, GOVERNANCE_EXCEPTION_PERMANENT_ERROR);
         return false;

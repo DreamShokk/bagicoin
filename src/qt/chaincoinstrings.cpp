@@ -15,8 +15,8 @@ QT_TRANSLATE_NOOP("chaincoin-core", ""
 "-maxtxfee is set very high! Fees this large could be paid on a single "
 "transaction."),
 QT_TRANSLATE_NOOP("chaincoin-core", ""
-"Can't generate a change-address key. Private keys are disabled for this "
-"wallet."),
+"Can't generate a change-address key. No keys in the internal keypool and "
+"can't generate any keys."),
 QT_TRANSLATE_NOOP("chaincoin-core", ""
 "Cannot obtain a lock on data directory %s. %s is probably already running."),
 QT_TRANSLATE_NOOP("chaincoin-core", ""
@@ -27,14 +27,14 @@ QT_TRANSLATE_NOOP("chaincoin-core", ""
 "keypool. Please use -upgradewallet=169900 or -upgradewallet with no version "
 "specified."),
 QT_TRANSLATE_NOOP("chaincoin-core", ""
+"CoinJoin uses exact denominated amounts to send funds, you might simply need "
+"to anonymize some more coins."),
+QT_TRANSLATE_NOOP("chaincoin-core", ""
 "Disable all Chaincoin specific functionality (Masternodes, CoinJoin, "
-"Governance) (0-1, default: %u)"),
+"Funding) (0-1, default: %u)"),
 QT_TRANSLATE_NOOP("chaincoin-core", ""
 "Distributed under the MIT software license, see the accompanying file "
 "COPYING or <http://www.opensource.org/licenses/mit-license.php>."),
-QT_TRANSLATE_NOOP("chaincoin-core", ""
-"Enable multiple CoinJoin mixing sessions per block, experimental (0-1, "
-"default: %u)"),
 QT_TRANSLATE_NOOP("chaincoin-core", ""
 "Enable use of automated CoinJoin for funds stored in this wallet (0-1, "
 "default: %u)"),
@@ -60,11 +60,8 @@ QT_TRANSLATE_NOOP("chaincoin-core", ""
 "Please contribute if you find %s useful. Visit %s for further information "
 "about the software."),
 QT_TRANSLATE_NOOP("chaincoin-core", ""
-"CoinJoin uses exact denominated amounts to send funds, you might simply "
-"need to anonymize some more coins."),
-QT_TRANSLATE_NOOP("chaincoin-core", ""
 "Provide liquidity to CoinJoin by infrequently mixing coins on a continual "
-"basis (0-100, default: %u, 1=very frequent, high fees, 100=very infrequent, "
+"basis (%u-%u, default: %u, 1=very frequent, high fees, 100=very infrequent, "
 "low fees)"),
 QT_TRANSLATE_NOOP("chaincoin-core", ""
 "Prune configured below the minimum of %d MiB.  Please use a higher number."),
@@ -85,7 +82,7 @@ QT_TRANSLATE_NOOP("chaincoin-core", ""
 "The transaction amount is too small to send after the fee has been deducted"),
 QT_TRANSLATE_NOOP("chaincoin-core", ""
 "This is a pre-release test build - use at your own risk - do not use for "
-"privatesend, mining or merchant applications"),
+"coinjoin, mining or merchant applications"),
 QT_TRANSLATE_NOOP("chaincoin-core", ""
 "This is the transaction fee you may discard if change is smaller than dust "
 "at this level"),
@@ -101,8 +98,8 @@ QT_TRANSLATE_NOOP("chaincoin-core", ""
 QT_TRANSLATE_NOOP("chaincoin-core", ""
 "Unable to locate enough CoinJoin denominated funds for this transaction."),
 QT_TRANSLATE_NOOP("chaincoin-core", ""
-"Unable to locate enough CoinJoin non-denominated funds for this "
-"transaction that are not equal 1000 CHC."),
+"Unable to locate enough CoinJoin non-denominated funds for this transaction "
+"that are not equal 1000 CHC."),
 QT_TRANSLATE_NOOP("chaincoin-core", ""
 "Unable to replay blocks. You will need to rebuild the database using -"
 "reindex-chainstate."),
@@ -110,7 +107,7 @@ QT_TRANSLATE_NOOP("chaincoin-core", ""
 "Unable to rewind the database to a pre-fork state. You will need to "
 "redownload the blockchain"),
 QT_TRANSLATE_NOOP("chaincoin-core", ""
-"Use N separate masternodes for each denominated input to mix funds (2-16, "
+"Use N separate masternodes for each denominated input to mix funds (%u-%u, "
 "default: %u)"),
 QT_TRANSLATE_NOOP("chaincoin-core", ""
 "WARNING! Failed to replenish keypool, please unlock your wallet to do so."),
@@ -130,9 +127,6 @@ QT_TRANSLATE_NOOP("chaincoin-core", ""
 "Warning: The network does not appear to fully agree! Some miners appear to "
 "be experiencing issues."),
 QT_TRANSLATE_NOOP("chaincoin-core", ""
-"Warning: Unknown block versions being mined! It's possible unknown rules are "
-"in effect"),
-QT_TRANSLATE_NOOP("chaincoin-core", ""
 "Warning: Wallet file corrupt, data salvaged! Original %s saved as %s in %s; "
 "if your balance or transactions are incorrect you should restore from a "
 "backup."),
@@ -150,24 +144,28 @@ QT_TRANSLATE_NOOP("chaincoin-core", ""
 "your remote masternodes."),
 QT_TRANSLATE_NOOP("chaincoin-core", "%d of last 100 blocks have unexpected version"),
 QT_TRANSLATE_NOOP("chaincoin-core", "%s corrupt, salvage failed"),
+QT_TRANSLATE_NOOP("chaincoin-core", "%s is not a valid backup folder!"),
 QT_TRANSLATE_NOOP("chaincoin-core", "%s is set very high!"),
 QT_TRANSLATE_NOOP("chaincoin-core", "(%d could be used only on mainnet)"),
 QT_TRANSLATE_NOOP("chaincoin-core", "(must be %d for mainnet)"),
 QT_TRANSLATE_NOOP("chaincoin-core", "-maxmempool must be at least %d MB"),
 QT_TRANSLATE_NOOP("chaincoin-core", "Already have that input."),
 QT_TRANSLATE_NOOP("chaincoin-core", "Automatic backups disabled"),
-QT_TRANSLATE_NOOP("chaincoin-core", "Can't find random Masternode."),
-QT_TRANSLATE_NOOP("chaincoin-core", "Can't mix while sync in progress."),
-QT_TRANSLATE_NOOP("chaincoin-core", "Can't mix: no compatible inputs found!"),
+QT_TRANSLATE_NOOP("chaincoin-core", "Can't find random Masternode, will retry..."),
 QT_TRANSLATE_NOOP("chaincoin-core", "Cannot downgrade wallet"),
 QT_TRANSLATE_NOOP("chaincoin-core", "Cannot resolve -%s address: '%s'"),
 QT_TRANSLATE_NOOP("chaincoin-core", "Cannot write to data directory '%s'; check permissions."),
 QT_TRANSLATE_NOOP("chaincoin-core", "Change index out of range"),
-QT_TRANSLATE_NOOP("chaincoin-core", "Collateral not valid."),
+QT_TRANSLATE_NOOP("chaincoin-core", "Client busy..."),
+QT_TRANSLATE_NOOP("chaincoin-core", "CoinJoin is idle."),
+QT_TRANSLATE_NOOP("chaincoin-core", "CoinJoin request complete:"),
+QT_TRANSLATE_NOOP("chaincoin-core", "CoinJoin request incomplete:"),
 QT_TRANSLATE_NOOP("chaincoin-core", "Config setting for %s only applied on %s network when in [%s] section."),
 QT_TRANSLATE_NOOP("chaincoin-core", "Copyright (C) %i-%i"),
 QT_TRANSLATE_NOOP("chaincoin-core", "Corrupted block database detected"),
 QT_TRANSLATE_NOOP("chaincoin-core", "Could not parse masternode.conf"),
+QT_TRANSLATE_NOOP("chaincoin-core", "Creating denominated outputs."),
+QT_TRANSLATE_NOOP("chaincoin-core", "Creating transaction"),
 QT_TRANSLATE_NOOP("chaincoin-core", "Do you want to rebuild the block database now?"),
 QT_TRANSLATE_NOOP("chaincoin-core", "Done loading"),
 QT_TRANSLATE_NOOP("chaincoin-core", "ERROR! Failed to create automatic backup"),
@@ -189,17 +187,20 @@ QT_TRANSLATE_NOOP("chaincoin-core", "Error"),
 QT_TRANSLATE_NOOP("chaincoin-core", "Error: A fatal internal error occurred, see debug.log for details"),
 QT_TRANSLATE_NOOP("chaincoin-core", "Error: Disk space is low for %s"),
 QT_TRANSLATE_NOOP("chaincoin-core", "Error: Disk space is low!"),
+QT_TRANSLATE_NOOP("chaincoin-core", "Failed to create Transaction!"),
+QT_TRANSLATE_NOOP("chaincoin-core", "Failed to create automatic backup."),
 QT_TRANSLATE_NOOP("chaincoin-core", "Failed to create backup %s!"),
 QT_TRANSLATE_NOOP("chaincoin-core", "Failed to create backup, error: %s"),
+QT_TRANSLATE_NOOP("chaincoin-core", "Failed to create denominated outputs."),
 QT_TRANSLATE_NOOP("chaincoin-core", "Failed to delete backup, error: %s"),
-QT_TRANSLATE_NOOP("chaincoin-core", "Failed to find mixing queue to join"),
+QT_TRANSLATE_NOOP("chaincoin-core", "Failed to find mixing queue to join, will retry..."),
 QT_TRANSLATE_NOOP("chaincoin-core", "Failed to listen on any port. Use -listen=0 if you want this."),
 QT_TRANSLATE_NOOP("chaincoin-core", "Failed to parse host:port string"),
 QT_TRANSLATE_NOOP("chaincoin-core", "Failed to rescan the wallet during initialization"),
-QT_TRANSLATE_NOOP("chaincoin-core", "Failed to start a new mixing queue"),
 QT_TRANSLATE_NOOP("chaincoin-core", "Found enough users, signing ( waiting %s )"),
 QT_TRANSLATE_NOOP("chaincoin-core", "Found enough users, signing ..."),
 QT_TRANSLATE_NOOP("chaincoin-core", "Importing..."),
+QT_TRANSLATE_NOOP("chaincoin-core", "Included fees too high or too low."),
 QT_TRANSLATE_NOOP("chaincoin-core", "Incompatible mode."),
 QT_TRANSLATE_NOOP("chaincoin-core", "Incompatible version."),
 QT_TRANSLATE_NOOP("chaincoin-core", "Incorrect or no genesis block found. Wrong datadir for network?"),
@@ -216,39 +217,36 @@ QT_TRANSLATE_NOOP("chaincoin-core", "Invalid amount for -paytxfee=<amount>: '%s'
 QT_TRANSLATE_NOOP("chaincoin-core", "Invalid masternodeprivkey. Please see documenation."),
 QT_TRANSLATE_NOOP("chaincoin-core", "Invalid netmask specified in -whitelist: '%s'"),
 QT_TRANSLATE_NOOP("chaincoin-core", "Invalid port detected in masternode.conf"),
-QT_TRANSLATE_NOOP("chaincoin-core", "Invalid script detected."),
 QT_TRANSLATE_NOOP("chaincoin-core", "Keep N CHC anonymized (default: %u)"),
 QT_TRANSLATE_NOOP("chaincoin-core", "Keypool ran out, please call keypoolrefill first"),
 QT_TRANSLATE_NOOP("chaincoin-core", "Last CoinJoin was too recent."),
-QT_TRANSLATE_NOOP("chaincoin-core", "Last successful CoinJoin action was too recent."),
 QT_TRANSLATE_NOOP("chaincoin-core", "Line: %d"),
+QT_TRANSLATE_NOOP("chaincoin-core", "Liquidity Provider: Idle..."),
+QT_TRANSLATE_NOOP("chaincoin-core", "Loading CoinJoin! cache..."),
 QT_TRANSLATE_NOOP("chaincoin-core", "Loading P2P addresses..."),
 QT_TRANSLATE_NOOP("chaincoin-core", "Loading banlist..."),
 QT_TRANSLATE_NOOP("chaincoin-core", "Loading block index..."),
 QT_TRANSLATE_NOOP("chaincoin-core", "Loading masternode cache..."),
 QT_TRANSLATE_NOOP("chaincoin-core", "Loading wallet..."),
-QT_TRANSLATE_NOOP("chaincoin-core", "Lock is already in place."),
 QT_TRANSLATE_NOOP("chaincoin-core", "Lock masternodes from masternode configuration file (default: %u)"),
+QT_TRANSLATE_NOOP("chaincoin-core", "Low balance (denominated)."),
 QT_TRANSLATE_NOOP("chaincoin-core", "Masternode cache is empty, skipping payments and funding cache..."),
 QT_TRANSLATE_NOOP("chaincoin-core", "Masternode queue is full."),
 QT_TRANSLATE_NOOP("chaincoin-core", "Masternode:"),
 QT_TRANSLATE_NOOP("chaincoin-core", "Masternodes are not supported in lite mode."),
 QT_TRANSLATE_NOOP("chaincoin-core", "Missing input transaction information."),
+QT_TRANSLATE_NOOP("chaincoin-core", "Missing or high masternode fees."),
 QT_TRANSLATE_NOOP("chaincoin-core", "Mixing in progress..."),
 QT_TRANSLATE_NOOP("chaincoin-core", "Need to specify a port with -whitebind: '%s'"),
-QT_TRANSLATE_NOOP("chaincoin-core", "No Masternodes detected."),
-QT_TRANSLATE_NOOP("chaincoin-core", "No compatible Masternode found."),
+QT_TRANSLATE_NOOP("chaincoin-core", "No Masternodes detected, will retry..."),
+QT_TRANSLATE_NOOP("chaincoin-core", "No compatible Masternode found, will retry..."),
 QT_TRANSLATE_NOOP("chaincoin-core", "No errors detected."),
 QT_TRANSLATE_NOOP("chaincoin-core", "No matching denominations found for mixing."),
-QT_TRANSLATE_NOOP("chaincoin-core", "Non-standard public key detected."),
 QT_TRANSLATE_NOOP("chaincoin-core", "Not compatible with existing transactions."),
 QT_TRANSLATE_NOOP("chaincoin-core", "Not enough file descriptors available."),
-QT_TRANSLATE_NOOP("chaincoin-core", "Not enough funds to anonymize."),
+QT_TRANSLATE_NOOP("chaincoin-core", "Not enough funds to anonymize, will retry..."),
 QT_TRANSLATE_NOOP("chaincoin-core", "Not in the Masternode list."),
 QT_TRANSLATE_NOOP("chaincoin-core", "Port: %d"),
-QT_TRANSLATE_NOOP("chaincoin-core", "CoinJoin is idle."),
-QT_TRANSLATE_NOOP("chaincoin-core", "CoinJoin request complete:"),
-QT_TRANSLATE_NOOP("chaincoin-core", "CoinJoin request incomplete:"),
 QT_TRANSLATE_NOOP("chaincoin-core", "Prune cannot be configured with a negative value."),
 QT_TRANSLATE_NOOP("chaincoin-core", "Prune mode is incompatible with -txindex."),
 QT_TRANSLATE_NOOP("chaincoin-core", "Pruning blockstore..."),
@@ -270,10 +268,10 @@ QT_TRANSLATE_NOOP("chaincoin-core", "Starting network threads..."),
 QT_TRANSLATE_NOOP("chaincoin-core", "Submitted following entries to masternode: %u / %d"),
 QT_TRANSLATE_NOOP("chaincoin-core", "Submitted to masternode, waiting for more entries ( %u / %d ) %s"),
 QT_TRANSLATE_NOOP("chaincoin-core", "Submitted to masternode, waiting in queue %s"),
-QT_TRANSLATE_NOOP("chaincoin-core", "Synchroning blockchain..."),
 QT_TRANSLATE_NOOP("chaincoin-core", "Synchronization failed"),
 QT_TRANSLATE_NOOP("chaincoin-core", "Synchronization finished"),
 QT_TRANSLATE_NOOP("chaincoin-core", "Synchronization pending..."),
+QT_TRANSLATE_NOOP("chaincoin-core", "Synchronizing blockchain..."),
 QT_TRANSLATE_NOOP("chaincoin-core", "Synchronizing funding objects..."),
 QT_TRANSLATE_NOOP("chaincoin-core", "Synchronizing masternode payments..."),
 QT_TRANSLATE_NOOP("chaincoin-core", "Synchronizing masternodes..."),
@@ -282,16 +280,12 @@ QT_TRANSLATE_NOOP("chaincoin-core", "The specified config file %s does not exist
 QT_TRANSLATE_NOOP("chaincoin-core", "The transaction amount is too small to pay the fee"),
 QT_TRANSLATE_NOOP("chaincoin-core", "The wallet will avoid paying less than the minimum relay fee."),
 QT_TRANSLATE_NOOP("chaincoin-core", "This is experimental software."),
-QT_TRANSLATE_NOOP("chaincoin-core", "This is not a Masternode."),
 QT_TRANSLATE_NOOP("chaincoin-core", "This is the minimum transaction fee you pay on every transaction."),
 QT_TRANSLATE_NOOP("chaincoin-core", "This is the transaction fee you will pay if you send a transaction."),
-QT_TRANSLATE_NOOP("chaincoin-core", "Too many %f denominations, removing."),
-QT_TRANSLATE_NOOP("chaincoin-core", "Too many %f denominations, skipping."),
 QT_TRANSLATE_NOOP("chaincoin-core", "Transaction amount too small"),
 QT_TRANSLATE_NOOP("chaincoin-core", "Transaction amounts must not be negative"),
 QT_TRANSLATE_NOOP("chaincoin-core", "Transaction created successfully."),
 QT_TRANSLATE_NOOP("chaincoin-core", "Transaction fee and change calculation failed"),
-QT_TRANSLATE_NOOP("chaincoin-core", "Transaction fees are too high."),
 QT_TRANSLATE_NOOP("chaincoin-core", "Transaction has too long of a mempool chain"),
 QT_TRANSLATE_NOOP("chaincoin-core", "Transaction must have at least one recipient"),
 QT_TRANSLATE_NOOP("chaincoin-core", "Transaction not valid."),
@@ -300,6 +294,7 @@ QT_TRANSLATE_NOOP("chaincoin-core", "Transaction too large"),
 QT_TRANSLATE_NOOP("chaincoin-core", "Trying to connect..."),
 QT_TRANSLATE_NOOP("chaincoin-core", "Unable to bind to %s on this computer (bind returned error %s)"),
 QT_TRANSLATE_NOOP("chaincoin-core", "Unable to bind to %s on this computer. %s is probably already running."),
+QT_TRANSLATE_NOOP("chaincoin-core", "Unable to create the PID file '%s': %s"),
 QT_TRANSLATE_NOOP("chaincoin-core", "Unable to generate initial keys"),
 QT_TRANSLATE_NOOP("chaincoin-core", "Unable to generate keys"),
 QT_TRANSLATE_NOOP("chaincoin-core", "Unable to start HTTP server. See debug log for details."),
@@ -313,9 +308,14 @@ QT_TRANSLATE_NOOP("chaincoin-core", "User Agent comment (%s) contains unsafe cha
 QT_TRANSLATE_NOOP("chaincoin-core", "Verifying and backing up wallet(s)..."),
 QT_TRANSLATE_NOOP("chaincoin-core", "Verifying blocks..."),
 QT_TRANSLATE_NOOP("chaincoin-core", "Very low number of keys left: %d"),
+QT_TRANSLATE_NOOP("chaincoin-core", "WARNING: Low disk space, disabling CoinJoin."),
+QT_TRANSLATE_NOOP("chaincoin-core", "Waiting for sync to finish..."),
 QT_TRANSLATE_NOOP("chaincoin-core", "Wallet %s resides outside wallet directory %s"),
-QT_TRANSLATE_NOOP("chaincoin-core", "Wallet is locked."),
+QT_TRANSLATE_NOOP("chaincoin-core", "Wallet is locked, please unlock first!"),
+QT_TRANSLATE_NOOP("chaincoin-core", "Wallet is locked, will retry..."),
 QT_TRANSLATE_NOOP("chaincoin-core", "Wallet is not initialized"),
+QT_TRANSLATE_NOOP("chaincoin-core", "Wallet is not initialized."),
+QT_TRANSLATE_NOOP("chaincoin-core", "Wallet is not loaded!"),
 QT_TRANSLATE_NOOP("chaincoin-core", "Wallet needed to be rewritten: restart %s to complete"),
 QT_TRANSLATE_NOOP("chaincoin-core", "Warning"),
 QT_TRANSLATE_NOOP("chaincoin-core", "Warning: unknown new rules activated (versionbit %i)"),

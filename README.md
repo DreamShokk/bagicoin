@@ -18,6 +18,11 @@ source software which enables the use of this currency.
 For more information, as well as an immediately useable, binary version of
 the Chaincoin Core software, see https://www.chaincoin.org/get-chaincoin/.
 
+What is CoinJoin(TM)?
+----------------
+
+CoinJoin(TM) is a trademark under EU legislation owned by PM-Tech.e.U.
+The owner grants permission to use CoinJoin(TM) for Chaincoin software until revoked.
 
 License
 -------

@@ -1713,11 +1713,11 @@ void CMasternodeMan::NotifyMasternodeUpdates(CConnman* connman)
     }
 
     if (fMasternodesAddedLocal) {
-        governance.CheckMasternodeOrphanObjects(connman);
-        governance.CheckMasternodeOrphanVotes(connman);
+        funding.CheckMasternodeOrphanObjects(connman);
+        funding.CheckMasternodeOrphanVotes(connman);
     }
     if (fMasternodesRemovedLocal) {
-        governance.UpdateCachesAndClean();
+        funding.UpdateCachesAndClean();
     }
 
     LOCK(cs);

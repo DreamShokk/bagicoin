@@ -34,21 +34,21 @@ UniValue gobject(const JSONRPCRequest& request)
          strCommand != "check" ))
         throw std::runtime_error(
                 "gobject \"command\"...\n"
-                "Manage governance objects\n"
+                "Manage funding objects\n"
                 "\nAvailable commands:\n"
-                "  check              - Validate governance object data (proposal only)\n"
+                "  check              - Validate funding object data (proposal only)\n"
                 "  prepare            - DEPRECATED: please use 'prepareproposal' for creating the collateral\n"
-                "  submit             - Submit governance object to network\n"
-                "  deserialize        - Deserialize governance object from hex string to JSON\n"
-                "  count              - Count governance objects and votes (additional param: 'json' or 'all', default: 'json')\n"
-                "  get                - Get governance object by hash\n"
-                "  getvotes           - Get all votes for a governance object hash (including old votes)\n"
-                "  getcurrentvotes    - Get only current (tallying) votes for a governance object hash (does not include old votes)\n"
-                "  list               - List governance objects (can be filtered by signal and/or object type)\n"
+                "  submit             - Submit funding object to network\n"
+                "  deserialize        - Deserialize funding object from hex string to JSON\n"
+                "  count              - Count funding objects and votes (additional param: 'json' or 'all', default: 'json')\n"
+                "  get                - Get funding object by hash\n"
+                "  getvotes           - Get all votes for a funding object hash (including old votes)\n"
+                "  getcurrentvotes    - Get only current (tallying) votes for a funding object hash (does not include old votes)\n"
+                "  list               - List funding objects (can be filtered by signal and/or object type)\n"
                 "  diff               - List differences since last diff\n"
-                "  vote-alias         - Vote on a governance object by masternode alias (using masternode.conf setup)\n"
-                "  vote-conf          - Vote on a governance object by masternode configured in chaincoin.conf\n"
-                "  vote-many          - Vote on a governance object by all masternodes (using masternode.conf setup)\n"
+                "  vote-alias         - Vote on a funding object by masternode alias (using masternode.conf setup)\n"
+                "  vote-conf          - Vote on a funding object by masternode configured in chaincoin.conf\n"
+                "  vote-many          - Vote on a funding object by all masternodes (using masternode.conf setup)\n"
                 );
 
 
@@ -63,7 +63,7 @@ UniValue gobject(const JSONRPCRequest& request)
             throw JSONRPCError(RPC_INVALID_PARAMETER, "Correct usage is 'gobject count ( \"json\"|\"all\" )'");
         }
 
-        return strMode == "json" ? governance.ToJson() : governance.ToString();
+        return strMode == "json" ? funding.ToJson() : funding.ToString();
     }
     /*
         ------ Example Governance Item ------
@@ -206,18 +206,18 @@ UniValue gobject(const JSONRPCRequest& request)
 
         // RELAY THIS OBJECT
         // Reject if rate check fails but don't update buffer
-        if(!governance.MasternodeRateCheck(govobj)) {
+        if(!funding.MasternodeRateCheck(govobj)) {
             LogPrintf("gobject(submit) -- Object submission rejected because of rate check failure - hash = %s\n", strHash);
             throw JSONRPCError(RPC_INVALID_PARAMETER, "Object creation rate limit exceeded");
         }
 
-        LogPrintf("gobject(submit) -- Adding locally created governance object - %s\n", strHash);
+        LogPrintf("gobject(submit) -- Adding locally created funding object - %s\n", strHash);
 
         if(fMissingConfirmations) {
-            governance.AddPostponedObject(govobj);
+            funding.AddPostponedObject(govobj);
             govobj.Relay(g_connman.get());
         } else {
-            governance.AddGovernanceObject(govobj, g_connman.get());
+            funding.AddGovernanceObject(govobj, g_connman.get());
         }
 
         return govobj.GetHash().ToString();
@@ -226,7 +226,7 @@ UniValue gobject(const JSONRPCRequest& request)
     if(strCommand == "vote-conf")
     {
         if(request.params.size() != 4)
-            throw JSONRPCError(RPC_INVALID_PARAMETER, "Correct usage is 'gobject vote-conf <governance-hash> [funding|valid|delete] [yes|no|abstain]'");
+            throw JSONRPCError(RPC_INVALID_PARAMETER, "Correct usage is 'gobject vote-conf <funding-hash> [funding|valid|delete] [yes|no|abstain]'");
 
         uint256 hash = ParseHashV(request.params[1], "Object hash");
         std::string strVoteSignal = request.params[2].get_str();
@@ -277,7 +277,7 @@ UniValue gobject(const JSONRPCRequest& request)
         }
 
         CGovernanceException exception;
-        if(governance.ProcessVoteAndRelay(vote, exception, g_connman.get())) {
+        if(funding.ProcessVoteAndRelay(vote, exception, g_connman.get())) {
             nSuccessful++;
             statusObj.pushKV("result", "success");
         }
@@ -298,7 +298,7 @@ UniValue gobject(const JSONRPCRequest& request)
     if(strCommand == "vote-many")
     {
         if(request.params.size() != 4)
-            throw JSONRPCError(RPC_INVALID_PARAMETER, "Correct usage is 'gobject vote-many <governance-hash> [funding|valid|delete] [yes|no|abstain]'");
+            throw JSONRPCError(RPC_INVALID_PARAMETER, "Correct usage is 'gobject vote-many <funding-hash> [funding|valid|delete] [yes|no|abstain]'");
 
         uint256 hash;
         std::string strVote;
@@ -376,7 +376,7 @@ UniValue gobject(const JSONRPCRequest& request)
             }
 
             CGovernanceException exception;
-            if(governance.ProcessVoteAndRelay(vote, exception, g_connman.get())) {
+            if(funding.ProcessVoteAndRelay(vote, exception, g_connman.get())) {
                 nSuccessful++;
                 statusObj.pushKV("result", "success");
             }
@@ -401,7 +401,7 @@ UniValue gobject(const JSONRPCRequest& request)
     if(strCommand == "vote-alias")
     {
         if(request.params.size() != 5)
-            throw JSONRPCError(RPC_INVALID_PARAMETER, "Correct usage is 'gobject vote-alias <governance-hash> [funding|valid|delete] [yes|no|abstain] <alias-name>'");
+            throw JSONRPCError(RPC_INVALID_PARAMETER, "Correct usage is 'gobject vote-alias <funding-hash> [funding|valid|delete] [yes|no|abstain] <alias-name>'");
 
         uint256 hash;
         std::string strVote;
@@ -498,7 +498,7 @@ UniValue gobject(const JSONRPCRequest& request)
             // UPDATE LOCAL DATABASE WITH NEW OBJECT SETTINGS
 
             CGovernanceException exception;
-            if(governance.ProcessVoteAndRelay(vote, exception, g_connman.get())) {
+            if(funding.ProcessVoteAndRelay(vote, exception, g_connman.get())) {
                 nSuccessful++;
                 statusObj.pushKV("result", "success");
             }
@@ -541,7 +541,7 @@ UniValue gobject(const JSONRPCRequest& request)
         // GET STARTING TIME TO QUERY SYSTEM WITH
 
         int nStartTime = 0; //list
-        if(strCommand == "diff") nStartTime = governance.GetLastDiffTime();
+        if(strCommand == "diff") nStartTime = funding.GetLastDiffTime();
 
         // SETUP BLOCK INDEX VARIABLE / RESULTS VARIABLE
 
@@ -549,10 +549,10 @@ UniValue gobject(const JSONRPCRequest& request)
 
         // GET MATCHING GOVERNANCE OBJECTS
 
-        LOCK2(cs_main, governance.cs);
+        LOCK2(cs_main, funding.cs);
 
-        std::vector<const CGovernanceObject*> objs = governance.GetAllNewerThan(nStartTime);
-        governance.UpdateLastDiffTime(GetTime());
+        std::vector<const CGovernanceObject*> objs = funding.GetAllNewerThan(nStartTime);
+        funding.UpdateLastDiffTime(GetTime());
 
         // CREATE RESULTS FOR USER
 
@@ -603,18 +603,18 @@ UniValue gobject(const JSONRPCRequest& request)
     if(strCommand == "get")
     {
         if (request.params.size() != 2)
-            throw JSONRPCError(RPC_INVALID_PARAMETER, "Correct usage is 'gobject get <governance-hash>'");
+            throw JSONRPCError(RPC_INVALID_PARAMETER, "Correct usage is 'gobject get <funding-hash>'");
 
         // COLLECT VARIABLES FROM OUR USER
         uint256 hash = ParseHashV(request.params[1], "GovObj hash");
 
-        LOCK2(cs_main, governance.cs);
+        LOCK2(cs_main, funding.cs);
 
         // FIND THE GOVERNANCE OBJECT THE USER IS LOOKING FOR
-        CGovernanceObject* pGovObj = governance.FindGovernanceObject(hash);
+        CGovernanceObject* pGovObj = funding.FindGovernanceObject(hash);
 
         if(pGovObj == nullptr)
-            throw JSONRPCError(RPC_INVALID_PARAMETER, "Unknown governance object");
+            throw JSONRPCError(RPC_INVALID_PARAMETER, "Unknown funding object");
 
         // REPORT BASIC OBJECT STATS
 
@@ -680,7 +680,7 @@ UniValue gobject(const JSONRPCRequest& request)
     {
         if (request.params.size() != 2)
             throw std::runtime_error(
-                "Correct usage is 'gobject getvotes <governance-hash>'"
+                "Correct usage is 'gobject getvotes <funding-hash>'"
                 );
 
         // COLLECT PARAMETERS FROM USER
@@ -689,9 +689,9 @@ UniValue gobject(const JSONRPCRequest& request)
 
         // FIND OBJECT USER IS LOOKING FOR
 
-        LOCK(governance.cs);
+        LOCK(funding.cs);
 
-        CGovernanceObject* pGovObj = governance.FindGovernanceObject(hash);
+        CGovernanceObject* pGovObj = funding.FindGovernanceObject(hash);
 
         if(pGovObj == nullptr) {
             throw JSONRPCError(RPC_INVALID_PARAMETER, "Unknown funding-hash");
@@ -703,7 +703,7 @@ UniValue gobject(const JSONRPCRequest& request)
 
         // GET MATCHING VOTES BY HASH, THEN SHOW USERS VOTE INFORMATION
 
-        std::vector<CGovernanceVote> vecVotes = governance.GetMatchingVotes(hash);
+        std::vector<CGovernanceVote> vecVotes = funding.GetMatchingVotes(hash);
         for (const auto& vote : vecVotes) {
             bResult.pushKV(vote.GetHash().ToString(),  vote.ToString());
         }
@@ -716,7 +716,7 @@ UniValue gobject(const JSONRPCRequest& request)
     {
         if (request.params.size() != 2 && request.params.size() != 4)
             throw std::runtime_error(
-                "Correct usage is 'gobject getcurrentvotes <governance-hash> [txid vout_index]'"
+                "Correct usage is 'gobject getcurrentvotes <funding-hash> [txid vout_index]'"
                 );
 
         // COLLECT PARAMETERS FROM USER
@@ -732,12 +732,12 @@ UniValue gobject(const JSONRPCRequest& request)
 
         // FIND OBJECT USER IS LOOKING FOR
 
-        LOCK(governance.cs);
+        LOCK(funding.cs);
 
-        CGovernanceObject* pGovObj = governance.FindGovernanceObject(hash);
+        CGovernanceObject* pGovObj = funding.FindGovernanceObject(hash);
 
         if(pGovObj == nullptr) {
-            throw JSONRPCError(RPC_INVALID_PARAMETER, "Unknown governance-hash");
+            throw JSONRPCError(RPC_INVALID_PARAMETER, "Unknown funding-hash");
         }
 
         // REPORT RESULTS TO USER
@@ -746,7 +746,7 @@ UniValue gobject(const JSONRPCRequest& request)
 
         // GET MATCHING VOTES BY HASH, THEN SHOW USERS VOTE INFORMATION
 
-        std::vector<CGovernanceVote> vecVotes = governance.GetCurrentVotes(hash, mnCollateralOutpoint);
+        std::vector<CGovernanceVote> vecVotes = funding.GetCurrentVotes(hash, mnCollateralOutpoint);
         for (const auto& vote : vecVotes) {
             bResult.pushKV(vote.GetHash().ToString(),  vote.ToString());
         }
@@ -761,8 +761,8 @@ UniValue voteraw(const JSONRPCRequest& request)
 {
     if (request.fHelp || request.params.size() != 7)
         throw std::runtime_error(
-                "voteraw <masternode-tx-hash> <masternode-tx-index> <governance-hash> <vote-signal> [yes|no|abstain] <time> <vote-sig>\n"
-                "Compile and relay a governance vote with provided external signature instead of signing vote internally\n"
+                "voteraw <masternode-tx-hash> <masternode-tx-index> <funding-hash> <vote-signal> [yes|no|abstain] <time> <vote-sig>\n"
+                "Compile and relay a funding vote with provided external signature instead of signing vote internally\n"
                 );
 
     uint256 hashMnTx = ParseHashV(request.params[0], "mn tx hash");
@@ -810,7 +810,7 @@ UniValue voteraw(const JSONRPCRequest& request)
     }
 
     CGovernanceException exception;
-    if(governance.ProcessVoteAndRelay(vote, exception, g_connman.get())) {
+    if(funding.ProcessVoteAndRelay(vote, exception, g_connman.get())) {
         return "Voted successfully";
     }
     else {
@@ -823,17 +823,17 @@ static UniValue getfundinginfo(const JSONRPCRequest& request)
     if (request.fHelp || request.params.size() != 0) {
         throw std::runtime_error(
             "getfundinginfo\n"
-            "Returns an object containing governance parameters.\n"
+            "Returns an object containing funding parameters.\n"
             "\nResult:\n"
             "{\n"
-            "  \"governanceminquorum\": xxxxx,           (numeric) the absolute minimum number of votes needed to trigger a governance action\n"
+            "  \"governanceminquorum\": xxxxx,           (numeric) the absolute minimum number of votes needed to trigger a funding action\n"
             "  \"masternodewatchdogmaxseconds\": xxxxx,  (numeric) sentinel watchdog expiration time in seconds (DEPRECATED)\n"
             "  \"sentinelpingmaxseconds\": xxxxx,        (numeric) sentinel ping expiration time in seconds\n"
             "  \"proposalfee\": xxx.xx,                  (numeric) the collateral transaction fee which must be paid to create a proposal in " + CURRENCY_UNIT + "\n"
             "  \"superblockcycle\": xxxxx,               (numeric) the number of blocks between superblocks\n"
             "  \"lastsuperblock\": xxxxx,                (numeric) the block number of the last superblock\n"
             "  \"nextsuperblock\": xxxxx,                (numeric) the block number of the next superblock\n"
-            "  \"maxgovobjdatasize\": xxxxx,             (numeric) maximum governance object data size in bytes\n"
+            "  \"maxgovobjdatasize\": xxxxx,             (numeric) maximum funding object data size in bytes\n"
             "}\n"
             "\nExamples:\n"
             + HelpExampleCli("getfundinginfo", "")

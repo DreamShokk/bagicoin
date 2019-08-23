@@ -24,7 +24,7 @@ class CGovernanceTriggerManager;
 class CGovernanceObject;
 class CGovernanceVote;
 
-extern CGovernanceManager governance;
+extern CGovernanceManager funding;
 
 struct ExpirationInfo {
     ExpirationInfo(int64_t _nExpirationTime, int _idFrom) : nExpirationTime(_nExpirationTime), idFrom(_idFrom) {}
@@ -186,7 +186,7 @@ private:
     std::map<uint256, CGovernanceObject> mapObjects;
 
     // mapErasedGovernanceObjects contains key-value pairs, where
-    //   key   - governance object's hash
+    //   key   - funding object's hash
     //   value - expiration time for deleted objects
     std::map<uint256, int64_t> mapErasedGovernanceObjects;
 

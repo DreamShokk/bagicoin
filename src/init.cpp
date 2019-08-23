@@ -249,7 +249,7 @@ void Shutdown(InitInterfaces& interfaces)
         CMNPayDB mnpaydb;
         mnpaydb.Write(mnpayments);
         CGovDB govdb;
-        govdb.Write(governance);
+        govdb.Write(funding);
         CNetFulDB netfuldb;
         netfuldb.Write(netfulfilledman);
         g_analyzer->WriteCache();
@@ -498,14 +498,14 @@ void SetupServerArgs()
     gArgs.AddArg("-zmqpubhashtx=<address>", "Enable publish hash transaction in <address>", false, OptionsCategory::ZMQ);
     gArgs.AddArg("-zmqpubrawblock=<address>", "Enable publish raw block in <address>", false, OptionsCategory::ZMQ);
     gArgs.AddArg("-zmqpubrawtx=<address>", "Enable publish raw transaction in <address>", false, OptionsCategory::ZMQ);
-    gArgs.AddArg("-zmqpubhashgovernancevote=<address>", "Enable publish hash of governance votes in <address>", false, OptionsCategory::ZMQ);
-    gArgs.AddArg("-zmqpubhashgovernanceobject=<address>", "Enable publish hash of governance objects (like proposals) in <address>", false, OptionsCategory::ZMQ);
+    gArgs.AddArg("-zmqpubhashgovernancevote=<address>", "Enable publish hash of funding votes in <address>", false, OptionsCategory::ZMQ);
+    gArgs.AddArg("-zmqpubhashgovernanceobject=<address>", "Enable publish hash of funding objects (like proposals) in <address>", false, OptionsCategory::ZMQ);
     gArgs.AddArg("-zmqpubhashblockhwm=<n>", strprintf("Set publish hash block outbound message high water mark (default: %d)", CZMQAbstractNotifier::DEFAULT_ZMQ_SNDHWM), false, OptionsCategory::ZMQ);
     gArgs.AddArg("-zmqpubhashtxhwm=<n>", strprintf("Set publish hash transaction outbound message high water mark (default: %d)", CZMQAbstractNotifier::DEFAULT_ZMQ_SNDHWM), false, OptionsCategory::ZMQ);
     gArgs.AddArg("-zmqpubrawblockhwm=<n>", strprintf("Set publish raw block outbound message high water mark (default: %d)", CZMQAbstractNotifier::DEFAULT_ZMQ_SNDHWM), false, OptionsCategory::ZMQ);
     gArgs.AddArg("-zmqpubrawtxhwm=<n>", strprintf("Set publish raw transaction outbound message high water mark (default: %d)", CZMQAbstractNotifier::DEFAULT_ZMQ_SNDHWM), false, OptionsCategory::ZMQ);
-    gArgs.AddArg("-zmqpubhashgovernancevotehwm=<n>", strprintf("Set publish hash of governance votes message high water mark (default: %d)", CZMQAbstractNotifier::DEFAULT_ZMQ_SNDHWM), false, OptionsCategory::ZMQ);
-    gArgs.AddArg("-zmqpubhashgovernanceobjecthwm=<n>", strprintf("Set publish hash of governance objects (like proposals) message high water mark (default: %d)", CZMQAbstractNotifier::DEFAULT_ZMQ_SNDHWM), false, OptionsCategory::ZMQ);
+    gArgs.AddArg("-zmqpubhashgovernancevotehwm=<n>", strprintf("Set publish hash of funding votes message high water mark (default: %d)", CZMQAbstractNotifier::DEFAULT_ZMQ_SNDHWM), false, OptionsCategory::ZMQ);
+    gArgs.AddArg("-zmqpubhashgovernanceobjecthwm=<n>", strprintf("Set publish hash of funding objects (like proposals) message high water mark (default: %d)", CZMQAbstractNotifier::DEFAULT_ZMQ_SNDHWM), false, OptionsCategory::ZMQ);
 #else
     hidden_args.emplace_back("-zmqpubhashblock=<address>");
     hidden_args.emplace_back("-zmqpubhashtx=<address>");
@@ -560,7 +560,7 @@ void SetupServerArgs()
 
     SetupChainParamsBaseOptions();
 
-    gArgs.AddArg("-litemode=<n>", strprintf(_("Disable all Chaincoin specific functionality (Masternodes, CoinJoin, Governance) (0-1, default: %u)"), 0), false, OptionsCategory::OPTIONS);
+    gArgs.AddArg("-litemode=<n>", strprintf(_("Disable all Chaincoin specific functionality (Masternodes, CoinJoin, Funding) (0-1, default: %u)"), 0), false, OptionsCategory::OPTIONS);
 
     gArgs.AddArg("-masternode=<n>", strprintf(_("Enable the client to act as a masternode (0-1, default: %u)"), 0), false, OptionsCategory::OPTIONS);
     gArgs.AddArg("-mnconf=<file>", strprintf(_("Specify masternode configuration file (default: %s)"), "masternode.conf"), false, OptionsCategory::OPTIONS);
@@ -1858,14 +1858,14 @@ bool AppInitMain(InitInterfaces& interfaces)
             }
             mnpayments.CheckAndRemove();
             CGovDB govdb;
-            if(!govdb.Read(governance)) {
-                LogPrintf("Invalid or missing governance.dat; recreating\n");
-                governance.Clear();
-                govdb.Write(governance);
+            if(!govdb.Read(funding)) {
+                LogPrintf("Invalid or missing funding.dat; recreating\n");
+                funding.Clear();
+                govdb.Write(funding);
             }
-            governance.InitOnLoad();
+            funding.InitOnLoad();
         } else {
-            uiInterface.InitMessage(_("Masternode cache is empty, skipping payments and governance cache..."));
+            uiInterface.InitMessage(_("Masternode cache is empty, skipping payments and funding cache..."));
         }
         CNetFulDB netfuldb;
         if(!netfuldb.Read(netfulfilledman)) {
@@ -1897,7 +1897,7 @@ bool AppInitMain(InitInterfaces& interfaces)
     mnodeman.Controller(scheduler, g_connman.get());
     masternodeSync.Controller(scheduler, g_connman.get());
     mnpayments.Controller(scheduler);
-    governance.Controller(scheduler, g_connman.get());
+    funding.Controller(scheduler, g_connman.get());
 
     if (ShutdownRequested()) {
         return false;

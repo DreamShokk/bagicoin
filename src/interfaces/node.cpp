@@ -425,14 +425,14 @@ public:
     }
     Proposal getProposal(const uint256& hash) override
     {
-        LOCK(::governance.cs);
-        CGovernanceObject* pGovObj = ::governance.FindGovernanceObject(hash);
+        LOCK(::funding.cs);
+        CGovernanceObject* pGovObj = ::funding.FindGovernanceObject(hash);
         return MakeProposal(*pGovObj);
     }
     std::vector<Proposal> getProposals() override
     {
         std::vector<Proposal> result;
-        std::vector<const CGovernanceObject*> objs = ::governance.GetAllNewerThan(0);
+        std::vector<const CGovernanceObject*> objs = ::funding.GetAllNewerThan(0);
         for (const auto& pGovObj : objs)
         {
             if(pGovObj->GetObjectType() != GOVERNANCE_OBJECT_PROPOSAL) continue;
@@ -464,10 +464,10 @@ public:
             if(!govobj.IsValidLocally(error, fMissingMasternode, fMissingConfirmations, true) && !fMissingConfirmations) return uint256();
 
             if(fMissingConfirmations) {
-                governance.AddPostponedObject(govobj);
+                funding.AddPostponedObject(govobj);
                 govobj.Relay(g_connman.get());
             } else {
-                governance.AddGovernanceObject(govobj, g_connman.get());
+                funding.AddGovernanceObject(govobj, g_connman.get());
             }
         }
         amount = govobj.GetMinCollateralFee();
@@ -475,7 +475,7 @@ public:
     }
     bool sendVoting(const uint256& hash, const std::pair<std::string, std::string>& strVoteSignal, std::pair<int, int>& nResult) override
     {
-        return g_connman ? ::governance.VoteWithAll(hash, strVoteSignal, nResult, g_connman.get()) : false;
+        return g_connman ? ::funding.VoteWithAll(hash, strVoteSignal, nResult, g_connman.get()) : false;
     }
     int analyzeCoin(const COutPoint& outpoint) override
     {

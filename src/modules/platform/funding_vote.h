@@ -34,7 +34,7 @@ static const int MAX_SUPPORTED_VOTE_SIGNAL = VOTE_SIGNAL_ENDORSED;
 /**
 * Governance Voting
 *
-*   Static class for accessing governance data
+*   Static class for accessing funding data
 */
 
 class CGovernanceVoting

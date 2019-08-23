@@ -223,7 +223,7 @@ A proposal, contract or setting.
 
 Governance Vote
 
-Masternodes use governance voting in response to new proposals, contracts, settings or finalized budgets.
+Masternodes use funding voting in response to new proposals, contracts, settings or finalized budgets.
 
 | Field Size | Field Name | Data type | Description |
 | ---------- | ----------- | --------- | -------- |

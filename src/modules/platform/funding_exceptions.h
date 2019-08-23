@@ -46,7 +46,7 @@ inline std::ostream& operator<<(std::ostream& os, governance_exception_type_enum
 }
 
 /**
- * A class which encapsulates information about a governance exception condition
+ * A class which encapsulates information about a funding exception condition
  *
  * Derives from std::exception so is suitable for throwing
  * (ie. will be caught by a std::exception handler) but may also be used as a

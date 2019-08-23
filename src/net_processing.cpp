@@ -1228,7 +1228,7 @@ bool static AlreadyHave(const CInv& inv) EXCLUSIVE_LOCKS_REQUIRED(cs_main)
 
     case MSG_GOVERNANCE_OBJECT:
     case MSG_GOVERNANCE_OBJECT_VOTE:
-        return !governance.ConfirmInventoryRequest(inv);
+        return !funding.ConfirmInventoryRequest(inv);
 
     case MSG_MASTERNODE_VERIFY:
         return mnodeman.mapSeenMasternodeVerification.count(inv.hash);
@@ -1514,9 +1514,9 @@ void static ProcessGetData(CNode* pfrom, const CChainParams& chainparams, CConnm
                         CDataStream ss(SER_NETWORK, pfrom->GetSendVersion());
                         bool topush = false;
                         {
-                            if(governance.HaveObjectForHash(inv.hash)) {
+                            if(funding.HaveObjectForHash(inv.hash)) {
                                 ss.reserve(1000);
-                                if(governance.SerializeObjectForHash(inv.hash, ss)) {
+                                if(funding.SerializeObjectForHash(inv.hash, ss)) {
                                     topush = true;
                                 }
                             }
@@ -1531,9 +1531,9 @@ void static ProcessGetData(CNode* pfrom, const CChainParams& chainparams, CConnm
                         CDataStream ss(SER_NETWORK, pfrom->GetSendVersion());
                         bool topush = false;
                         {
-                            if(governance.HaveVoteForHash(inv.hash)) {
+                            if(funding.HaveVoteForHash(inv.hash)) {
                                 ss.reserve(1000);
-                                if(governance.SerializeVoteForHash(inv.hash, ss)) {
+                                if(funding.SerializeVoteForHash(inv.hash, ss)) {
                                     topush = true;
                                 }
                             }

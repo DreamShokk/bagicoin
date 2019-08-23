@@ -4261,7 +4261,7 @@ static UniValue prepareproposal(const JSONRPCRequest& request)
     CTransactionRef tx;
     auto locked_chain = pwallet->chain().lock();
     if(!pwallet->GetBudgetSystemCollateralTX(*locked_chain, tx, govobj.GetHash(), govobj.GetMinCollateralFee())) {
-        throw JSONRPCError(RPC_INTERNAL_ERROR, "Error making collateral transaction for governance object. Please check your wallet balance and make sure your wallet is unlocked.");
+        throw JSONRPCError(RPC_INTERNAL_ERROR, "Error making collateral transaction for funding object. Please check your wallet balance and make sure your wallet is unlocked.");
     }
 
     // -- make our change address

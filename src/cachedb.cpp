@@ -183,17 +183,17 @@ bool CMNPayDB::Read(CMasternodePayments& mnpayments)
 
 CGovDB::CGovDB()
 {
-    pathGovernance = GetDataDir() / "governance.dat";
+    pathGovernance = GetDataDir() / "funding.dat";
 }
 
-bool CGovDB::Write(const CGovernanceManager& governance)
+bool CGovDB::Write(const CGovernanceManager& funding)
 {
-    return SerializeFileDB("governance", pathGovernance, governance);
+    return SerializeFileDB("funding", pathGovernance, funding);
 }
 
-bool CGovDB::Read(CGovernanceManager& governance)
+bool CGovDB::Read(CGovernanceManager& funding)
 {
-    return DeserializeFileDB(pathGovernance, governance);
+    return DeserializeFileDB(pathGovernance, funding);
 }
 
 CNetFulDB::CNetFulDB()

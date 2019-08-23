@@ -106,7 +106,7 @@ std::string CMasternodeSync::GetSyncStatus()
         case MASTERNODE_SYNC_WAITING:       return _("Synchronization pending...");
         case MASTERNODE_SYNC_LIST:          return _("Synchronizing masternodes...");
         case MASTERNODE_SYNC_MNW:           return _("Synchronizing masternode payments...");
-        case MASTERNODE_SYNC_GOVERNANCE:    return _("Synchronizing governance objects...");
+        case MASTERNODE_SYNC_GOVERNANCE:    return _("Synchronizing funding objects...");
         case MASTERNODE_SYNC_FAILED:        return _("Synchronization failed");
         case MASTERNODE_SYNC_FINISHED:      return _("Synchronization finished");
         default:                            return "";
@@ -157,7 +157,7 @@ void CMasternodeSync::ProcessTick(CConnman* connman)
     // gradually request the rest of the votes after sync finished
     if (IsSynced()) {
         std::vector<CNode*> vNodesCopy = connman->CopyNodeVector();
-        governance.RequestGovernanceObjectVotes(vNodesCopy, connman);
+        funding.RequestGovernanceObjectVotes(vNodesCopy, connman);
         connman->ReleaseNodeVector(vNodesCopy);
         return;
     }
@@ -317,8 +317,8 @@ void CMasternodeSync::ProcessTick(CConnman* connman)
                 }
 
                 // only request obj sync once from each peer, then request votes on per-obj basis
-                if (netfulfilledman.HasFulfilledRequest(pnode->addr, "governance-sync")) {
-                    int nObjsLeftToAsk = governance.RequestGovernanceObjectVotes(pnode, connman);
+                if (netfulfilledman.HasFulfilledRequest(pnode->addr, "funding-sync")) {
+                    int nObjsLeftToAsk = funding.RequestGovernanceObjectVotes(pnode, connman);
                     static int64_t nTimeNoObjectsLeft = 0;
                     // check for data
                     if (nObjsLeftToAsk == 0) {
@@ -331,7 +331,7 @@ void CMasternodeSync::ProcessTick(CConnman* connman)
                         // make sure the condition below is checked only once per tick
                         if (nLastTick == nTick) continue;
                         if (GetTime() - nTimeNoObjectsLeft > MASTERNODE_SYNC_TIMEOUT_SECONDS &&
-                            governance.GetVoteCount() - nLastVotes < std::max(int(0.0001 * nLastVotes), MASTERNODE_SYNC_TICK_SECONDS)
+                            funding.GetVoteCount() - nLastVotes < std::max(int(0.0001 * nLastVotes), MASTERNODE_SYNC_TICK_SECONDS)
                         ) {
                             // We already asked for all objects, waited for MASTERNODE_SYNC_TIMEOUT_SECONDS
                             // after that and less then 0.01% or MASTERNODE_SYNC_TICK_SECONDS
@@ -345,11 +345,11 @@ void CMasternodeSync::ProcessTick(CConnman* connman)
                             return;
                         }
                         nLastTick = nTick;
-                        nLastVotes = governance.GetVoteCount();
+                        nLastVotes = funding.GetVoteCount();
                     }
                     continue;
                 }
-                netfulfilledman.AddFulfilledRequest(pnode->addr, "governance-sync");
+                netfulfilledman.AddFulfilledRequest(pnode->addr, "funding-sync");
 
                 if (pnode->nVersion < MIN_GOVERNANCE_PEER_PROTO_VERSION) continue;
                 nRequestedMasternodeAttempt++;

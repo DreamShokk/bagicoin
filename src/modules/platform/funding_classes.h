@@ -22,7 +22,7 @@ extern CGovernanceTriggerManager triggerman;
 /**
 *   Trigger Mananger
 *
-*   - Track governance objects which are triggers
+*   - Track funding objects which are triggers
 *   - After triggers are activated and executed, they can be removed
 */
 
@@ -158,8 +158,8 @@ public:
 
     CGovernanceObject* GetGovernanceObject()
     {
-        AssertLockHeld(governance.cs);
-        CGovernanceObject* pObj = governance.FindGovernanceObject(nGovObjHash);
+        AssertLockHeld(funding.cs);
+        CGovernanceObject* pObj = funding.FindGovernanceObject(nGovObjHash);
         return pObj;
     }
 

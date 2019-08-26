@@ -70,7 +70,6 @@
 #include <malloc.h>
 #endif
 
-#include <boost/algorithm/string/join.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/classification.hpp>
 
@@ -1235,11 +1234,10 @@ uint32_t StringVersionToInt(const std::string& strVersion)
 {
     std::vector<std::string> tokens;
     boost::split(tokens, strVersion, boost::is_any_of("."));
-    if(tokens.size() != 3)
+    if (tokens.size() != 3)
         throw std::bad_cast();
     uint32_t nVersion = 0;
-    for(unsigned idx = 0; idx < 3; idx++)
-    {
+    for (unsigned idx = 0; idx < 3; idx++) {
         if(tokens[idx].length() == 0)
             throw std::bad_cast();
         uint32_t value = std::stoi(tokens[idx]);
@@ -1251,24 +1249,22 @@ uint32_t StringVersionToInt(const std::string& strVersion)
     return nVersion;
 }
 
-std::string IntVersionToString(uint32_t nVersion)
+std::string IntVersionToString(const uint32_t& nVersion)
 {
-    if((nVersion >> 24) > 0) // MSB is always 0
+    if ((nVersion >> 24) > 0) // MSB is always 0
         throw std::bad_cast();
-    if(nVersion == 0)
+    if (nVersion == 0)
         throw std::bad_cast();
-    std::vector<std::string> tokens;
+    std::vector<unsigned char> tokens;
     tokens.reserve(3);
-    for(unsigned idx = 0; idx < 3; idx++)
-    {
-        unsigned shift = (2 - idx) * 8;
-        uint32_t byteValue = (nVersion >> shift) & 0xff;
-        tokens[idx] = std::to_string(byteValue);
+    for (auto idx = 0; idx < 3; idx++) {
+        int32_t byte_value = (nVersion >> ((2 - idx) * 8));
+        tokens[idx] = byte_value & 0xff;
     }
-    return boost::join(tokens, ".");
+    return strprintf("%d.%d.%d", tokens[0], tokens[1], tokens[2]);
 }
 
-std::string SafeIntVersionToString(uint32_t nVersion)
+std::string SafeIntVersionToString(const uint32_t& nVersion)
 {
     try
     {

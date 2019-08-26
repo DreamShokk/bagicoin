@@ -371,7 +371,7 @@ uint32_t StringVersionToInt(const std::string& strVersion);
  * @return version string in "x.x.x" format (last 3 bytes as version parts)
  * Throws std::bad_cast if format doesn\t match.
  */
-std::string IntVersionToString(uint32_t nVersion);
+std::string IntVersionToString(const uint32_t &nVersion);
 
 
 /**
@@ -381,7 +381,7 @@ std::string IntVersionToString(uint32_t nVersion);
  * @return version string in "x.x.x" format (last 3 bytes as version parts)
  * or "Invalid version" if can't cast the given value
  */
-std::string SafeIntVersionToString(uint32_t nVersion);
+std::string SafeIntVersionToString(const uint32_t &nVersion);
 
 std::string CopyrightHolders(const std::string& strPrefix);
 

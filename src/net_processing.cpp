@@ -4181,7 +4181,8 @@ bool PeerLogicValidation::SendMessages(CNode* pto)
         //
         auto& inv_process_time = state.m_inv_download.m_inv_process_time;
         while (!inv_process_time.empty() && inv_process_time.begin()->first <= nNow && state.m_inv_download.m_inv_in_flight.size() < MAX_PEER_INV_IN_FLIGHT) {
-            const CInv& inv = inv_process_time.begin()->second;
+            const CInv& _inv = inv_process_time.begin()->second;
+            const CInv& inv = _inv.type == MSG_TX ? CInv(MSG_TX | GetFetchFlags(pto), _inv.hash) : _inv;
             if (!AlreadyHave(inv)) {
                 // If this inventory was last requested more than 1 minute ago,
                 // then request.

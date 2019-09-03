@@ -105,10 +105,10 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_SEGWIT].nTimeout = 1577750400; // Dec 31st, 2019.
 
         // The best chain should have at least this much work.
-        consensus.nMinimumChainWork = uint256S("0x00000000000000000000000000000000000000000000000004b643d48e088b67"); // 1499485 // PM-Tech: ChainCoin
+        consensus.nMinimumChainWork = uint256S("0x000000000000000000000000000000000000000000000000067c4ffc7eff7472"); // 1942991 // PM-Tech: ChainCoin
 
         // By default assume that the signatures in ancestors of this block are valid.
-        consensus.defaultAssumeValid = uint256S("0x0000000001aa875dd078fe2381501d724dade107bea7868fd6586918f4f8421f"); //1499485 // PM-Tech: ChainCoin
+        consensus.defaultAssumeValid = uint256S("0x000000000002853f21e36da851c71b83f4de6781354c9007527bb443fe1dde6b"); //1942991 // PM-Tech: ChainCoin
 
         /**
          * The message start string is designed to be unlikely to occur in normal data.

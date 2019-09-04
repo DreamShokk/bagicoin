@@ -16,6 +16,8 @@ namespace Consensus {
 enum DeploymentPos
 {
     DEPLOYMENT_TESTDUMMY,
+    DEPLOYMENT_CSV,  // required to prevent soft fork warnings
+    DEPLOYMENT_SEGWIT,  // required to prevent soft fork warnings
     // NOTE: Also add new deployments to VersionBitsDeploymentInfo in versionbits.cpp
     MAX_VERSION_BITS_DEPLOYMENTS
 };

@@ -8,6 +8,7 @@
 #include <qt/forms/ui_receivecoinsdialog.h>
 
 #include <qt/addressbookpage.h>
+#include <interfaces/node.h>
 #include <qt/addresstablemodel.h>
 #include <qt/bitcoinunits.h>
 #include <qt/optionsmodel.h>
@@ -30,7 +31,6 @@ ReceiveCoinsDialog::ReceiveCoinsDialog(const PlatformStyle *_platformStyle, QWid
     platformStyle(_platformStyle)
 {
     ui->setupUi(this);
-    QString theme = GUIUtil::getThemeName();
     
     if (!_platformStyle->getImagesOnButtons()) {
         ui->clearButton->setIcon(QIcon());
@@ -38,10 +38,10 @@ ReceiveCoinsDialog::ReceiveCoinsDialog(const PlatformStyle *_platformStyle, QWid
         ui->showRequestButton->setIcon(QIcon());
         ui->removeRequestButton->setIcon(QIcon());
     } else {
-        ui->clearButton->setIcon(QIcon(":/icons/" + theme + "/remove"));
-        ui->receiveButton->setIcon(QIcon(":/icons/" + theme + "/receiving_addresses"));
-        ui->showRequestButton->setIcon(QIcon(":/icons/" + theme + "/edit"));
-        ui->removeRequestButton->setIcon(QIcon(":/icons/" + theme + "/remove"));
+        ui->clearButton->setIcon(QIcon(":/icons/remove"));
+        ui->receiveButton->setIcon(QIcon(":/icons/receiving_addresses"));
+        ui->showRequestButton->setIcon(QIcon(":/icons/edit"));
+        ui->removeRequestButton->setIcon(QIcon(":/icons/remove"));
     }
 
     // context menu actions
@@ -93,6 +93,18 @@ void ReceiveCoinsDialog::setModel(WalletModel *_model)
             &ReceiveCoinsDialog::recentRequestsView_selectionChanged);
         // Last 2 columns are set by the columnResizingFixer, when the table geometry is ready.
         columnResizingFixer = new GUIUtil::TableViewLastColumnResizingFixer(tableView, AMOUNT_MINIMUM_COLUMN_WIDTH, DATE_COLUMN_WIDTH, this);
+
+        if (model->node().isAddressTypeSet()) {
+            // user explicitly set the type, use it
+            if (model->wallet().getDefaultAddressType() == OutputType::BECH32) {
+                ui->useLegacyAddress->setCheckState(Qt::Unchecked);
+            } else {
+                ui->useLegacyAddress->setCheckState(Qt::Checked);
+            }
+        } else {
+            // Always fall back to bech32 in the gui
+            ui->useLegacyAddress->setCheckState(Qt::Unchecked);
+        }
 
         // Set the button to be enabled or disabled based on whether the wallet can give out new addresses.
         ui->receiveButton->setEnabled(model->canGetAddresses());

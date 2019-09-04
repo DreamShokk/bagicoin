@@ -11,13 +11,4 @@ const struct VBDeploymentInfo VersionBitsDeploymentInfo[Consensus::MAX_VERSION_B
         /*.name =*/ "testdummy",
         /*.gbt_force =*/ true,
     },
-    // CSV and Segwit versionbits parameters required to prevent soft fork warnings
-    {
-        /*.name =*/ "csv",
-        /*.gbt_force =*/ true,
-    },
-    {
-        /*.name =*/ "segwit",
-        /*.gbt_force =*/ true,
-    },
 };

@@ -331,7 +331,6 @@ QVariant ProposalTableModel::data(const QModelIndex &index, int role) const
                 return COLOR_GREEN;
             }
         } 
-        break;
         if(index.column() == Funding) {
             if(rec->funding) {
                 return COLOR_GREEN;

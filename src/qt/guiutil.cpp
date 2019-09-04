@@ -52,6 +52,7 @@
 #include <QProgressDialog>
 #include <QSettings>
 #include <QTextDocument> // for Qt::mightBeRichText
+#include <QTextStream>
 #include <QThread>
 #include <QUrlQuery>
 
@@ -816,8 +817,9 @@ QString loadStyleSheet()
     QString styleSheet;
 
     QFile qFile(QString(":/qss/style") );
-    if (qFile.open(QFile::ReadOnly)) {
-        styleSheet = QLatin1String(qFile.readAll());
+    if (qFile.open(QFile::ReadOnly | QFile::Text)) {
+        QTextStream stream(&qFile);
+        styleSheet = stream.readAll();
     }
         
     return styleSheet;

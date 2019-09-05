@@ -1,13 +1,7 @@
-.QFrame
-{
-    background-color:transparent;
-    border:0px solid #fff;
-}
-
 WalletFrame
 {
+    border:0px solid #000;
     border-image: url(':/images/walletFrame_bg') 0 0 0 0 stretch stretch;
-    border-top:0px solid #000;
     margin:0;
     padding-top:20px;
     padding-bottom: 20px;
@@ -17,6 +11,13 @@ QStatusBar
 {
     background-color:#ffffff;
 }
+
+.QFrame
+{
+    background-color:transparent;
+    border:0px solid #fff;
+}
+
 
 QMenuBar
 {

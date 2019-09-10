@@ -1229,6 +1229,19 @@ void BitcoinGUI::message(const QString &title, const QString &message, unsigned 
         notificator->notify(static_cast<Notificator::Class>(nNotifyIcon), strTitle, message);
 }
 
+void BitcoinGUI::resizeEvent(QResizeEvent* evt)
+{
+    QPixmap bkgnd(":/images/walletFrame_bg");
+    bkgnd = bkgnd.scaled(this->width(), this->height() - statusBar()->height(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+
+    QPalette palette;
+
+    palette.setBrush(QPalette::Window, bkgnd);
+    this->setPalette(palette);
+
+    QMainWindow::resizeEvent(evt); // call inherited implementation
+}
+
 void BitcoinGUI::changeEvent(QEvent *e)
 {
     QMainWindow::changeEvent(e);

@@ -17,6 +17,8 @@ QWidget(parent),
 ui(new Ui::ModalOverlay),
 bestHeaderHeight(0),
 bestHeaderDate(QDateTime()),
+bkgnd(":/images/overlayFrame_bg"),
+bkgndInitialized(false),
 layerIsVisible(false),
 userClosed(false)
 {
@@ -26,7 +28,6 @@ userClosed(false)
         parent->installEventFilter(this);
         raise();
     }
-
     blockProcessTime.clear();
     setVisible(false);
 }
@@ -39,11 +40,11 @@ ModalOverlay::~ModalOverlay()
 bool ModalOverlay::eventFilter(QObject * obj, QEvent * ev) {
     if (obj == parent()) {
         if (ev->type() == QEvent::Resize) {
+            initBackground(true);
             QResizeEvent * rev = static_cast<QResizeEvent*>(ev);
             resize(rev->size());
             if (!layerIsVisible)
                 setGeometry(0, height(), width(), height());
-
         }
         else if (ev->type() == QEvent::ChildAdded) {
             raise();
@@ -140,6 +141,7 @@ void ModalOverlay::tipUpdate(int count, const QDateTime& blockDate, double nVeri
         UpdateHeaderSyncLabel();
         ui->expectedTimeLeft->setText(tr("Unknown..."));
     }
+    initBackground();
 }
 
 void ModalOverlay::UpdateHeaderSyncLabel() {
@@ -171,10 +173,28 @@ void ModalOverlay::showHide(bool hide, bool userRequested)
     animation->setEasingCurve(QEasingCurve::OutQuad);
     animation->start(QAbstractAnimation::DeleteWhenStopped);
     layerIsVisible = !hide;
+    if (layerIsVisible) initBackground();
 }
 
 void ModalOverlay::closeClicked()
 {
     showHide(true);
     userClosed = true;
+}
+
+void ModalOverlay::initBackground(bool fForce)
+{
+    QPalette palette;
+    if (!bkgndInitialized) {
+        palette.setBrush(QPalette::Window, Qt::NoBrush);
+        ui->contentWidget->setPalette(palette);
+        if (!fForce)
+            return;
+        else {
+            bkgndInitialized = true;
+            return;
+        }
+    }
+    palette.setBrush(QPalette::Window, bkgnd.scaled(ui->contentWidget->size(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
+    ui->contentWidget->setPalette(palette);
 }

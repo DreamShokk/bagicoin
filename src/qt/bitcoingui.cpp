@@ -1232,7 +1232,7 @@ void BitcoinGUI::message(const QString &title, const QString &message, unsigned 
 void BitcoinGUI::resizeEvent(QResizeEvent* evt)
 {
     QPixmap bkgnd(":/images/walletFrame_bg");
-    bkgnd = bkgnd.scaled(this->size(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+    bkgnd = bkgnd.scaled(this->width(), this->height() - statusBar()->height(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
 
     QPalette palette;
 

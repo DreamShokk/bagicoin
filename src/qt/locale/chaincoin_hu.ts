@@ -2690,6 +2690,6 @@ Kérem a kulcsmondatban használjon &lt;b&gt; tíz vagy több véletlenszerű ka
     </message>
 </context>
 <context>
-    <name>chaincoin-core</name>
+    <name>bagicoin-core</name>
     </context>
 </TS>

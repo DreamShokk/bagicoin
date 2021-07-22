@@ -50,7 +50,7 @@ HelpMessageDialog::HelpMessageDialog(interfaces::Node& node, QWidget *parent, He
 
     if (helpMode == about)
     {
-        setWindowTitle(tr("About Chaincoin Core"));
+        setWindowTitle(tr("About Bagicoin Core"));
 
         std::string licenseInfo = LicenseInfo();
         /// HTML-format the license message from the core
@@ -70,7 +70,7 @@ HelpMessageDialog::HelpMessageDialog(interfaces::Node& node, QWidget *parent, He
         ui->helpMessage->setVisible(false);
     } else if (helpMode == cmdline) {
         setWindowTitle(tr("Command-line options"));
-        QString header = "Usage:  chaincoin-qt [command-line options]                     \n";
+        QString header = "Usage:  bagicoin-qt [command-line options]                     \n";
         QTextCursor cursor(ui->helpMessage->document());
         cursor.insertText(version);
         cursor.insertBlock();
@@ -123,7 +123,7 @@ HelpMessageDialog::HelpMessageDialog(interfaces::Node& node, QWidget *parent, He
         ui->aboutMessage->setText(tr("\
 <h3>CoinJoin Basics</h3> \
 CoinJoin gives you true financial privacy by obscuring the origins of your funds. \
-All the Chaincoin in your wallet is comprised of different \"inputs\" which you can think of as separate, discrete coins.<br> \
+All the Bagicoin in your wallet is comprised of different \"inputs\" which you can think of as separate, discrete coins.<br> \
 CoinJoin uses an improved process to mix your inputs with the inputs of two  or more other people, without having your coins ever leave your wallet. \
 You retain control of your money at all times.<hr> \
 <b>The CoinJoin process works like this:</b>\
@@ -192,7 +192,7 @@ ShutdownWindow::ShutdownWindow(QWidget *parent, Qt::WindowFlags f):
 {
     QVBoxLayout *layout = new QVBoxLayout();
     layout->addWidget(new QLabel(
-        tr("Chaincoin Core is shutting down...") + "<br /><br />" +
+        tr("Bagicoin Core is shutting down...") + "<br /><br />" +
         tr("Do not shut down the computer until this window disappears.")));
     setLayout(layout);
 }

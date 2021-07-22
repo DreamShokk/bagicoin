@@ -229,7 +229,7 @@ void CMasternode::Check(bool fForce)
             return;
         }
 
-        // part 1: expire based on chaincoind ping
+        // part 1: expire based on bagicoind ping
         bool fDaemonPingExpired = !IsPingedWithin(MASTERNODE_SENTINEL_PING_MAX_SECONDS);
         LogPrint(BCLog::MNODE, "CMasternode::Check -- outpoint=%s, GetAdjustedTime()=%d, fDaemonPingExpired=%d\n",
                 outpoint.ToStringShort(), GetAdjustedTime(), fDaemonPingExpired);

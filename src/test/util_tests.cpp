@@ -9,7 +9,7 @@
 #include <sync.h>
 #include <util/strencodings.h>
 #include <util/moneystr.h>
-#include <test/test_chaincoin.h>
+#include <test/test_bagicoin.h>
 
 #include <stdint.h>
 #include <vector>

@@ -5,7 +5,7 @@
 #include <random.h>
 #include <scheduler.h>
 
-#include <test/test_chaincoin.h>
+#include <test/test_bagicoin.h>
 
 #include <boost/thread.hpp>
 #include <boost/test/unit_test.hpp>

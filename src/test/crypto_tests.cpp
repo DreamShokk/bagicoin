@@ -12,7 +12,7 @@
 #include <crypto/hmac_sha512.h>
 #include <random.h>
 #include <util/strencodings.h>
-#include <test/test_chaincoin.h>
+#include <test/test_bagicoin.h>
 
 #include <vector>
 

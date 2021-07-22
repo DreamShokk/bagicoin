@@ -1,21 +1,21 @@
-Chaincoin Core *version* is now available from:
+Bagicoin Core *version* is now available from:
 
-  <https://github.com/chaincoin/chaincoin/releases/tag/>
+  <https://github.com/bagicoin/bagicoin/releases/tag/>
 
 This is a new major version release, including new features, various bugfixes
 and performance improvements, as well as updated translations.
 
 Please report bugs using the issue tracker at GitHub:
 
-  <https://github.com/chaincoin/chaincoin/issues>
+  <https://github.com/bagicoin/bagicoin/issues>
 
 How to Upgrade
 ==============
 
 If you are running an older version, shut it down. Wait until it has completely
 shut down (which might take a few minutes for older versions), then run the
-installer (on Windows) or just copy over `/Applications/Chaincoin-Qt` (on Mac)
-or `chaincoind`/`chaincoin-qt` (on Linux).
+installer (on Windows) or just copy over `/Applications/Bagicoin-Qt` (on Mac)
+or `bagicoind`/`bagicoin-qt` (on Linux).
 
 The first time you run version 0.15.0 or newer, your chainstate database will be converted to a
 new format, which will take anywhere from a few minutes to half an hour,
@@ -36,11 +36,11 @@ wallets that were created with older versions are not affected by this.
 Compatibility
 ==============
 
-Chaincoin Core is supported and extensively tested on operating systems using
+Bagicoin Core is supported and extensively tested on operating systems using
 the Linux kernel, macOS 10.11+, and Windows 7 and newer.  It is not recommended
-to use Chaincoin Core on unsupported systems.
+to use Bagicoin Core on unsupported systems.
 
-Chaincoin Core should also work on most other Unix-like systems but is not
+Bagicoin Core should also work on most other Unix-like systems but is not
 frequently tested on them.
 
 From 0.17.0 onwards, macOS <10.11 is no longer supported.  0.17.0 is
@@ -75,7 +75,7 @@ Configuration option changes
   messages that ZMQ will queue in memory (the "high water mark") before
   dropping additional messages.  The default value is 1,000, the same as
   was used for previous releases.  See the [ZMQ
-  documentation](https://github.com/chaincoin/chaincoin/blob/master/doc/zmq.md#usage)
+  documentation](https://github.com/bagicoin/bagicoin/blob/master/doc/zmq.md#usage)
   for details.
 
 - The `enablebip61` option (introduced in Bitcoin Core 0.16.99) is
@@ -125,11 +125,11 @@ Documentation
   about how to secure this interface.
 
 - A new [document](https://github.com/bitcoin/bitcoin/blob/master/doc/bitcoin-conf.md)
-  about the `chaincoin.conf` file describes how to use it to configure
-  Chaincoin Core.
+  about the `bagicoin.conf` file describes how to use it to configure
+  Bagicoin Core.
 
 - A new document introduces Bitcoin Core's BIP174
-  [Partially-Signed Chaincoin Transactions (PSBT)](https://github.com/chaincoin/chaincoin/blob/master/doc/psbt.md)
+  [Partially-Signed Bagicoin Transactions (PSBT)](https://github.com/bagicoin/bagicoin/blob/master/doc/psbt.md)
   interface, which is used to allow multiple programs to collaboratively
   work to create, sign, and broadcast new transactions.  This is useful
   for offline (cold storage) wallets, multisig wallets, coinjoin
@@ -199,7 +199,7 @@ same as before.
 Dynamic loading and creation of wallets
 ---------------------------------------
 
-Previously, wallets could only be loaded or created at startup, by specifying `-wallet` parameters on the command line or in the chaincoin.conf file. It is now possible to load, create and unload wallets dynamically at runtime:
+Previously, wallets could only be loaded or created at startup, by specifying `-wallet` parameters on the command line or in the bagicoin.conf file. It is now possible to load, create and unload wallets dynamically at runtime:
 
 - Existing wallets can be loaded by calling the `loadwallet` RPC. The wallet can be specified as file/directory basename (which must be located in the `walletdir` directory), or as an absolute path to a file/directory.
 - New wallets can be created (and loaded) by calling the `createwallet` RPC. The provided name must not match a wallet file in the `walletdir` directory or the name of a wallet that is currently loaded.
@@ -221,8 +221,8 @@ It is now possible for a single configuration file to set different
 options for different networks. This is done by using sections or by
 prefixing the option with the network, such as:
 
-main.uacomment=chaincoin
-test.uacomment=chaincoin-testnet
+main.uacomment=bagicoin
+test.uacomment=bagicoin-testnet
 regtest.uacomment=regtest
 [main]
 mempoolsize=300
@@ -240,7 +240,7 @@ configuration file, unless a network is specified.
 
 A new 'label' API has been introduced for the wallet. This is intended as a
 replacement for the deprecated 'account' API. The 'account' can continue to
-be used in V0.17 by starting chaincoind with the '-deprecatedrpc=accounts'
+be used in V0.17 by starting bagicoind with the '-deprecatedrpc=accounts'
 argument, and will be fully removed in V0.18.
 
 The label RPC methods mirror the account functionality, with the following functional differences:
@@ -276,9 +276,9 @@ Here are the changes to RPC methods:
 Low-level RPC changes
 ---------------------
 
-- When chaincoin is not started with any `-wallet=<path>` options, the name of
+- When bagicoin is not started with any `-wallet=<path>` options, the name of
 the default wallet returned by `getwalletinfo` and `listwallets` RPCs is
-now the empty string `""` instead of `"wallet.dat"`. If chaincoin is started
+now the empty string `""` instead of `"wallet.dat"`. If bagicoin is started
 with any `-wallet=<path>` options, there is no change in behavior, and the
 name of any wallet is just its `<path>` string.
 - Passing an empty string (`""`) as the `address_type` parameter to
@@ -309,7 +309,7 @@ Other API changes
 
 - The log timestamp format is now ISO 8601 (e.g. "2018-02-28T12:34:56Z").
 
-- When running chaincoind with `-debug` but without `-daemon`, logging to stdout
+- When running bagicoind with `-debug` but without `-daemon`, logging to stdout
 is now the default behavior. Setting `-printtoconsole=1` no longer implicitly
 disables logging to debug.log. Instead, logging to file can be explicitly disabled
 by setting `-debuglogfile=0`.
@@ -318,7 +318,7 @@ Transaction index changes
 -------------------------
 
 The transaction index is now built separately from the main node procedure,
-meaning the `-txindex` flag can be toggled without a full reindex. If chaincoind
+meaning the `-txindex` flag can be toggled without a full reindex. If bagicoind
 is run with `-txindex` on a node that is already partially or fully synced
 without one, the transaction index will be built in the background and become
 available once caught up. When switching from running `-txindex` to running
@@ -551,4 +551,4 @@ Credits
 Thanks to everyone who directly contributed to this release:
 
 
-As well as everyone that helped translating on [Transifex](https://www.transifex.com/projects/p/chaincoin/).
+As well as everyone that helped translating on [Transifex](https://www.transifex.com/projects/p/bagicoin/).

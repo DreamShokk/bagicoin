@@ -38,7 +38,7 @@
 #include <memory>
 
 #if defined(NDEBUG)
-# error "Chaincoin Core cannot be compiled without assertions."
+# error "Bagicoin Core cannot be compiled without assertions."
 #endif
 
 /** Expiration time for orphan transactions in seconds */
@@ -1226,7 +1226,7 @@ bool static AlreadyHave(const CInv& inv) EXCLUSIVE_LOCKS_REQUIRED(cs_main)
         return LookupBlockIndex(inv.hash) != nullptr;
 
     /* 
-        Chaincoin Related Inventory Messages
+        Bagicoin Related Inventory Messages
 
         --
 
@@ -2698,7 +2698,7 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
             pfrom->AddInventoryKnown(inv);
 
             GetMainSignals().ProcessModuleMessage(pfrom, NetMsgDest::MSG_MN_MAN, strCommand, vRecv, connman);
-            LogPrint(BCLog::NET, "Forwarded message \"%s\" from peer=%d to Chaincoin modules\n", SanitizeString(strCommand), pfrom->GetId());
+            LogPrint(BCLog::NET, "Forwarded message \"%s\" from peer=%d to Bagicoin modules\n", SanitizeString(strCommand), pfrom->GetId());
 
             CNodeState* nodestate = State(pfrom->GetId());
 
@@ -2722,7 +2722,7 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
             pfrom->AddInventoryKnown(inv);
 
             GetMainSignals().ProcessModuleMessage(pfrom, NetMsgDest::MSG_MN_MAN, strCommand, vRecv, connman);
-            LogPrint(BCLog::NET, "Forwarded message \"%s\" from peer=%d to Chaincoin modules\n", SanitizeString(strCommand), pfrom->GetId());
+            LogPrint(BCLog::NET, "Forwarded message \"%s\" from peer=%d to Bagicoin modules\n", SanitizeString(strCommand), pfrom->GetId());
 
             CNodeState* nodestate = State(pfrom->GetId());
 
@@ -2746,7 +2746,7 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
             pfrom->AddInventoryKnown(inv);
 
             GetMainSignals().ProcessModuleMessage(pfrom, NetMsgDest::MSG_MN_MAN, strCommand, vRecv, connman);
-            LogPrint(BCLog::NET, "Forwarded message \"%s\" from peer=%d to Chaincoin modules\n", SanitizeString(strCommand), pfrom->GetId());
+            LogPrint(BCLog::NET, "Forwarded message \"%s\" from peer=%d to Bagicoin modules\n", SanitizeString(strCommand), pfrom->GetId());
 
             CNodeState* nodestate = State(pfrom->GetId());
 
@@ -2770,7 +2770,7 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
             pfrom->AddInventoryKnown(inv);
 
             GetMainSignals().ProcessModuleMessage(pfrom, NetMsgDest::MSG_MN_PAY, strCommand, vRecv, connman);
-            LogPrint(BCLog::NET, "Forwarded message \"%s\" from peer=%d to Chaincoin modules\n", SanitizeString(strCommand), pfrom->GetId());
+            LogPrint(BCLog::NET, "Forwarded message \"%s\" from peer=%d to Bagicoin modules\n", SanitizeString(strCommand), pfrom->GetId());
 
             CNodeState* nodestate = State(pfrom->GetId());
 
@@ -2794,7 +2794,7 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
             pfrom->AddInventoryKnown(inv);
 
             GetMainSignals().ProcessModuleMessage(pfrom, NetMsgDest::MSG_FUND, strCommand, vRecv, connman);
-            LogPrint(BCLog::NET, "Forwarded message \"%s\" from peer=%d to Chaincoin modules\n", SanitizeString(strCommand), pfrom->GetId());
+            LogPrint(BCLog::NET, "Forwarded message \"%s\" from peer=%d to Bagicoin modules\n", SanitizeString(strCommand), pfrom->GetId());
 
             CNodeState* nodestate = State(pfrom->GetId());
 
@@ -2818,7 +2818,7 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
             pfrom->AddInventoryKnown(inv);
 
             GetMainSignals().ProcessModuleMessage(pfrom, NetMsgDest::MSG_FUND, strCommand, vRecv, connman);
-            LogPrint(BCLog::NET, "Forwarded message \"%s\" from peer=%d to Chaincoin modules\n", SanitizeString(strCommand), pfrom->GetId());
+            LogPrint(BCLog::NET, "Forwarded message \"%s\" from peer=%d to Bagicoin modules\n", SanitizeString(strCommand), pfrom->GetId());
 
             CNodeState* nodestate = State(pfrom->GetId());
 
@@ -3401,7 +3401,7 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
         if(msg == strCommand) {
             //probably for one of the modules
             GetMainSignals().ProcessModuleMessage(pfrom, NetMsgDest::MSG_ALL, strCommand, vRecv, connman);
-            LogPrint(BCLog::NET, "Forwarded message \"%s\" from peer=%d to Chaincoin modules\n", SanitizeString(strCommand), pfrom->GetId());
+            LogPrint(BCLog::NET, "Forwarded message \"%s\" from peer=%d to Bagicoin modules\n", SanitizeString(strCommand), pfrom->GetId());
             break;
         }
     }

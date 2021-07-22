@@ -1,13 +1,13 @@
 *.tar.gz
 
 *.exe
-src/chaincoin
-src/chaincoind
-src/chaincoin-cli
-src/chaincoin-tx
-src/test/test_chaincoin
-src/test/test_chaincoin_fuzzy
-src/qt/test/test_chaincoin-qt
+src/bagicoin
+src/bagicoind
+src/bagicoin-cli
+src/bagicoin-tx
+src/test/test_bagicoin
+src/test/test_bagicoin_fuzzy
+src/qt/test/test_bagicoin-qt
 
 # autoreconf
 Makefile.in
@@ -30,8 +30,8 @@ config.log
 config.status
 configure
 libtool
-src/config/chaincoin-config.h
-src/config/chaincoin-config.h.in
+src/config/bagicoin-config.h
+src/config/bagicoin-config.h.in
 src/config/stamp-h1
 share/setup.nsi
 share/qt/Info.plist
@@ -44,11 +44,11 @@ src/qt/forms/ui_*.h
 
 src/qt/test/moc*.cpp
 
-src/qt/chaincoin-qt.config
-src/qt/chaincoin-qt.creator
-src/qt/chaincoin-qt.creator.user
-src/qt/chaincoin-qt.files
-src/qt/chaincoin-qt.includes
+src/qt/bagicoin-qt.config
+src/qt/bagicoin-qt.creator
+src/qt/bagicoin-qt.creator.user
+src/qt/bagicoin-qt.files
+src/qt/bagicoin-qt.includes
 
 .deps
 .dirstamp
@@ -80,13 +80,13 @@ src/qt/chaincoin-qt.includes
 # Compilation and Qt preprocessor part
 *.qm
 Makefile
-chaincoin-qt
-Chaincoin-Qt.app
+bagicoin-qt
+Bagicoin-Qt.app
 background.tiff*
 
 # Unit-tests
 Makefile.test
-chaincoin-qt_test
+bagicoin-qt_test
 
 # Resources cpp
 qrc_*.cpp
@@ -99,7 +99,7 @@ build
 *.gcno
 *.gcda
 /*.info
-test_chaincoin.coverage/
+test_bagicoin.coverage/
 total.coverage/
 coverage_percent.txt
 
@@ -114,12 +114,12 @@ test/cache/*
 
 /doc/doxygen/
 
-libchaincoinconsensus.pc
+libbagicoinconsensus.pc
 contrib/devtools/split-debug.sh
 
 # Output from running db4 installation
 db4/
-chaincoin-wallet
-Chaincoin.cflags
-Chaincoin.creator.user.4.8-pre1
-Chaincoin.cxxflags
+bagicoin-wallet
+Bagicoin.cflags
+Bagicoin.creator.user.4.8-pre1
+Bagicoin.cxxflags

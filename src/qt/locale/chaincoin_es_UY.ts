@@ -474,6 +474,6 @@
     </message>
     </context>
 <context>
-    <name>chaincoin-core</name>
+    <name>bagicoin-core</name>
     </context>
 </TS>

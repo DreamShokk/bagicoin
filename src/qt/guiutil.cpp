@@ -108,7 +108,7 @@ void setupAddressWidget(QValidatedLineEdit *widget, QWidget *parent)
     widget->setFont(fixedPitchFont());
     // We don't want translators to use own addresses in translations
     // and this is the only place, where this address is supplied.
-    widget->setPlaceholderText(QObject::tr("Enter a Chaincoin address (e.g. %1)").arg(
+    widget->setPlaceholderText(QObject::tr("Enter a Bagicoin address (e.g. %1)").arg(
         QString::fromStdString(DummyAddress(Params()))));
     widget->setValidator(new BitcoinAddressEntryValidator(parent));
     widget->setCheckValidator(new BitcoinAddressCheckValidator(parent));
@@ -116,8 +116,8 @@ void setupAddressWidget(QValidatedLineEdit *widget, QWidget *parent)
 
 bool parseBitcoinURI(const QUrl &uri, SendCoinsRecipient *out)
 {
-    // return if URI is not valid or is no chaincoin: URI
-    if(!uri.isValid() || uri.scheme() != QString("chaincoin"))
+    // return if URI is not valid or is no bagicoin: URI
+    if(!uri.isValid() || uri.scheme() != QString("bagicoin"))
         return false;
 
     SendCoinsRecipient rv;
@@ -180,7 +180,7 @@ bool parseBitcoinURI(QString uri, SendCoinsRecipient *out)
 
 QString formatBitcoinURI(const SendCoinsRecipient &info)
 {
-    QString ret = QString("chaincoin:%1").arg(info.address);
+    QString ret = QString("bagicoin:%1").arg(info.address);
     int paramCount = 0;
 
     if (info.amount)
@@ -582,15 +582,15 @@ fs::path static StartupShortcutPath()
 {
     std::string chain = gArgs.GetChainName();
     if (chain == CBaseChainParams::MAIN)
-        return GetSpecialFolderPath(CSIDL_STARTUP) / "Chaincoin Core.lnk";
+        return GetSpecialFolderPath(CSIDL_STARTUP) / "Bagicoin Core.lnk";
     if (chain == CBaseChainParams::TESTNET) // Remove this special case when CBaseChainParams::TESTNET = "testnet4"
-        return GetSpecialFolderPath(CSIDL_STARTUP) / "Chaincoin Core (testnet).lnk";
-    return GetSpecialFolderPath(CSIDL_STARTUP) / strprintf("Chaincoin Core (%s).lnk", chain);
+        return GetSpecialFolderPath(CSIDL_STARTUP) / "Bagicoin Core (testnet).lnk";
+    return GetSpecialFolderPath(CSIDL_STARTUP) / strprintf("Bagicoin Core (%s).lnk", chain);
 }
 
 bool GetStartOnSystemStartup()
 {
-    // check for "Chaincoin Core*.lnk"
+    // check for "Bagicoin Core*.lnk"
     return fs::exists(StartupShortcutPath());
 }
 
@@ -665,8 +665,8 @@ fs::path static GetAutostartFilePath()
 {
     std::string chain = gArgs.GetChainName();
     if (chain == CBaseChainParams::MAIN)
-        return GetAutostartDir() / "chaincoincore.desktop";
-    return GetAutostartDir() / strprintf("chaincoincore-%s.lnk", chain);
+        return GetAutostartDir() / "bagicoincore.desktop";
+    return GetAutostartDir() / strprintf("bagicoincore-%s.lnk", chain);
 }
 
 bool GetStartOnSystemStartup()
@@ -706,13 +706,13 @@ bool SetStartOnSystemStartup(bool fAutoStart)
         if (!optionFile.good())
             return false;
         std::string chain = gArgs.GetChainName();
-        // Write a chaincoin.desktop file to the autostart directory:
+        // Write a bagicoin.desktop file to the autostart directory:
         optionFile << "[Desktop Entry]\n";
         optionFile << "Type=Application\n";
         if (chain == CBaseChainParams::MAIN)
-            optionFile << "Name=Chaincoin Core\n";
+            optionFile << "Name=Bagicoin Core\n";
         else
-            optionFile << strprintf("Name=Chaincoin Core (%s)\n", chain);
+            optionFile << strprintf("Name=Bagicoin Core (%s)\n", chain);
         optionFile << "Exec=" << pszExePath << strprintf(" -min -testnet=%d -regtest=%d\n", gArgs.GetBoolArg("-testnet", false), gArgs.GetBoolArg("-regtest", false));
         optionFile << "Terminal=false\n";
         optionFile << "Hidden=false\n";
@@ -788,7 +788,7 @@ bool SetStartOnSystemStartup(bool fAutoStart)
     LSSharedFileListItemRef foundItem = findStartupItemInList(listSnapshot, loginItems, bitcoinAppUrl);
 
     if(fAutoStart && !foundItem) {
-        // add Chaincoin Core app to startup item list
+        // add Bagicoin Core app to startup item list
         LSSharedFileListInsertItemURL(loginItems, kLSSharedFileListItemBeforeFirst, nullptr, nullptr, bitcoinAppUrl, nullptr, nullptr);
     }
     else if(!fAutoStart && foundItem) {

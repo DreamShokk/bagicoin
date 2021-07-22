@@ -4,7 +4,7 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #if defined(HAVE_CONFIG_H)
-#include <config/chaincoin-config.h>
+#include <config/bagicoin-config.h>
 #endif
 
 #include <net.h>
@@ -1449,7 +1449,7 @@ static void ThreadMapPort()
             }
         }
 
-        std::string strDesc = "Chaincoin Core " + FormatFullVersion();
+        std::string strDesc = "Bagicoin Core " + FormatFullVersion();
 
         do {
 #ifndef UPNPDISCOVER_SUCCESS

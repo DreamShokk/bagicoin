@@ -136,17 +136,17 @@ public:
         // release ASAP to avoid it where possible.
         vSeeds.emplace_back("chc1.hashunlimited.com");
         vSeeds.emplace_back("chc2.hashunlimited.com");
-        vSeeds.emplace_back("seed1.chaincoin.org");
-        vSeeds.emplace_back("seed2.chaincoin.org");
-        vSeeds.emplace_back("seed3.chaincoin.org");
-        vSeeds.emplace_back("seed4.chaincoin.org");
+        vSeeds.emplace_back("seed1.bagicoin.org");
+        vSeeds.emplace_back("seed2.bagicoin.org");
+        vSeeds.emplace_back("seed3.bagicoin.org");
+        vSeeds.emplace_back("seed4.bagicoin.org");
 
         base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1,28); // PM-Tech: ChainCoin
         base58Prefixes[SCRIPT_ADDRESS] = std::vector<unsigned char>(1,4); // PM-Tech: ChainCoin
         base58Prefixes[SECRET_KEY] =     std::vector<unsigned char>(1,28 + 128); // PM-Tech: ChainCoin
-        // Chaincoin BIP32 pubkeys start with 'xpub' (Bitcoin defaults)
+        // Bagicoin BIP32 pubkeys start with 'xpub' (Bitcoin defaults)
         base58Prefixes[EXT_PUBLIC_KEY] = {0x04, 0x88, 0xB2, 0x1E};
-        // Chaincoin BIP32 prvkeys start with 'xprv' (Bitcoin defaults)
+        // Bagicoin BIP32 prvkeys start with 'xprv' (Bitcoin defaults)
         base58Prefixes[EXT_SECRET_KEY] = {0x04, 0x88, 0xAD, 0xE4};
 
         bech32_hrp = "chc";
@@ -266,9 +266,9 @@ public:
         base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1,80);
         base58Prefixes[SCRIPT_ADDRESS] = std::vector<unsigned char>(1,44);
         base58Prefixes[SECRET_KEY] =     std::vector<unsigned char>(1,88+128);
-        // Testnet Chaincoin BIP32 pubkeys start with 'tpub' (Bitcoin defaults)
+        // Testnet Bagicoin BIP32 pubkeys start with 'tpub' (Bitcoin defaults)
         base58Prefixes[EXT_PUBLIC_KEY] = {0x04, 0x35, 0x87, 0xCF};
-        // Testnet Chaincoin BIP32 prvkeys start with 'tprv' (Bitcoin defaults)
+        // Testnet Bagicoin BIP32 prvkeys start with 'tprv' (Bitcoin defaults)
         base58Prefixes[EXT_SECRET_KEY] = {0x04, 0x35, 0x83, 0x94};
 
         bech32_hrp = "tchc";
@@ -305,7 +305,7 @@ public:
 };
 
 /**
- * Regression test taken straigt from Chaincoin except port and timing
+ * Regression test taken straigt from Bagicoin except port and timing
  */
 class CRegTestParams : public CChainParams {
 public:

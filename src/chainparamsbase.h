@@ -10,8 +10,8 @@
 #include <vector>
 
 /**
- * CBaseChainParams defines the base parameters (shared between chaincoin-cli and chaincoind)
- * of a given instance of the Chaincoin system.
+ * CBaseChainParams defines the base parameters (shared between bagicoin-cli and bagicoind)
+ * of a given instance of the Bagicoin system.
  */
 class CBaseChainParams
 {

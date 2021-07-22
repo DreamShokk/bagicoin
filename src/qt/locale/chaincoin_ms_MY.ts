@@ -553,6 +553,6 @@ Alihkan fail data ke dalam tab semasa</translation>
     </message>
     </context>
 <context>
-    <name>chaincoin-core</name>
+    <name>bagicoin-core</name>
     </context>
 </TS>

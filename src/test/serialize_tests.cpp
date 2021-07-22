@@ -5,7 +5,7 @@
 #include <serialize.h>
 #include <streams.h>
 #include <hash.h>
-#include <test/test_chaincoin.h>
+#include <test/test_bagicoin.h>
 
 #include <stdint.h>
 

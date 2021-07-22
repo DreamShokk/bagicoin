@@ -44,7 +44,7 @@ enum NumConnections {
     CONNECTIONS_ALL  = (CONNECTIONS_IN | CONNECTIONS_OUT),
 };
 
-/** Model for Chaincoin network client. */
+/** Model for Bagicoin network client. */
 class ClientModel : public QObject
 {
     Q_OBJECT

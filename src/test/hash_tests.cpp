@@ -5,7 +5,7 @@
 #include <crypto/siphash.h>
 #include <hash.h>
 #include <util/strencodings.h>
-#include <test/test_chaincoin.h>
+#include <test/test_bagicoin.h>
 
 #include <vector>
 

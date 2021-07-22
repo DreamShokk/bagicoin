@@ -6,7 +6,7 @@
 
 #include <chainparams.h>
 #include <init.h>
-#include <qt/chaincoin.h>
+#include <qt/bagicoin.h>
 #include <qt/bitcoingui.h>
 #include <qt/networkstyle.h>
 #include <qt/rpcconsole.h>
@@ -14,7 +14,7 @@
 #include <validation.h>
 
 #if defined(HAVE_CONFIG_H)
-#include <config/chaincoin-config.h>
+#include <config/bagicoin-config.h>
 #endif
 #ifdef ENABLE_WALLET
 #include <wallet/db.h>
@@ -61,7 +61,7 @@ void AppTests::appTests()
         // and fails to handle returned nulls
         // (https://bugreports.qt.io/browse/QTBUG-49686).
         QWARN("Skipping AppTests on mac build with 'minimal' platform set due to Qt bugs. To run AppTests, invoke "
-              "with 'test_chaincoin-qt -platform cocoa' on mac, or else use a linux or windows build.");
+              "with 'test_bagicoin-qt -platform cocoa' on mac, or else use a linux or windows build.");
         return;
     }
 #endif

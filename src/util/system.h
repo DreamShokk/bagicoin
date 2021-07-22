@@ -12,7 +12,7 @@
 #define BITCOIN_UTIL_SYSTEM_H
 
 #if defined(HAVE_CONFIG_H)
-#include <config/chaincoin-config.h>
+#include <config/bagicoin-config.h>
 #endif
 
 #include <attributes.h>
@@ -37,7 +37,7 @@
 
 #include <boost/thread/condition_variable.hpp> // for boost::thread_interrupted
 
-//Chaincoin only features
+//Bagicoin only features
 
 extern bool fMasternodeMode;
 extern bool fLiteMode;
@@ -333,7 +333,7 @@ void RenameThread(const char* name);
  */
 template <typename Callable> void TraceThread(const char* name,  Callable func)
 {
-    std::string s = strprintf("chaincoin-%s", name);
+    std::string s = strprintf("bagicoin-%s", name);
     RenameThread(s.c_str());
     try
     {

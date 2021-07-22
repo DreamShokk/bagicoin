@@ -6,7 +6,7 @@
 #define BITCOIN_QT_BITCOINGUI_H
 
 #if defined(HAVE_CONFIG_H)
-#include <config/chaincoin-config.h>
+#include <config/bagicoin-config.h>
 #endif
 
 #include <qt/optionsdialog.h>
@@ -299,7 +299,7 @@ public Q_SLOTS:
     /** Show debug window and set focus to the console */
     void showDebugWindowActivateConsole();
 
-    /** Open external (default) editor with chaincoin.conf */
+    /** Open external (default) editor with bagicoin.conf */
     void showConfEditor();
     /** Open external (default) editor with masternode.conf */
     void showMNConfEditor();

@@ -110,7 +110,7 @@ public:
     bool Read(banmap_t& banSet);
 };
 
-// Chaincoin specific cache files
+// Bagicoin specific cache files
 
 /** Access to the mncache database (mncache.dat) */
 class CMNCacheDB

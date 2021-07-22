@@ -1,11 +1,11 @@
 Sample configuration files for:
 ```
-SystemD: chaincoind.service
-Upstart: chaincoind.conf
-OpenRC:  chaincoind.openrc
-         chaincoind.openrcconf
-CentOS:  chaincoind.init
-macOS:    org.chaincoin.chaincoind.plist
+SystemD: bagicoind.service
+Upstart: bagicoind.conf
+OpenRC:  bagicoind.openrc
+         bagicoind.openrcconf
+CentOS:  bagicoind.init
+macOS:    org.bagicoin.bagicoind.plist
 ```
 have been made available to assist packagers in creating node packages here.
 

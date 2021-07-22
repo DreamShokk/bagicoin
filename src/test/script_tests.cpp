@@ -12,7 +12,7 @@
 #include <script/sign.h>
 #include <util/system.h>
 #include <util/strencodings.h>
-#include <test/test_chaincoin.h>
+#include <test/test_bagicoin.h>
 #include <rpc/server.h>
 
 #if defined(HAVE_CONSENSUS_LIB)

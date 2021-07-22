@@ -800,7 +800,7 @@ void CMasternodeMan::ProcessPendingMnbRequests(CConnman* connman)
 
 void CMasternodeMan::ProcessModuleMessage(CNode* pfrom, const std::string& strCommand, CDataStream& vRecv, CConnman* connman)
 {
-    if (fLiteMode) return; // disable all Chaincoin specific functionality
+    if (fLiteMode) return; // disable all Bagicoin specific functionality
 
     if (strCommand == NetMsgType::MNANNOUNCE) { //Masternode Broadcast
 

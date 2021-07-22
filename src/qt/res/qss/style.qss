@@ -806,13 +806,13 @@ QDialog#HelpMessageDialog QScrollBar:horizontal
     border:0;
 }
 
-/* About Chaincoin Dialog */
+/* About Bagicoin Dialog */
 QDialog#AboutDialog
 {
     background-color:#F8F6F6;
 }
 
-/* About Chaincoin Contents */
+/* About Bagicoin Contents */
 QDialog#AboutDialog QLabel#label,
 QDialog#AboutDialog QLabel#copyrightLabel,
 QDialog#AboutDialog QLabel#label_2
@@ -820,7 +820,7 @@ QDialog#AboutDialog QLabel#label_2
     margin-left:10px;
 }
 
-/* Margin for About Chaincoin text */
+/* Margin for About Bagicoin text */
 QDialog#AboutDialog QLabel#label_2
 {
     margin-right:10px;
@@ -1266,7 +1266,7 @@ QWidget .QFrame#frame_2
     margin-right:0px;
     margin-left:0;
     margin-top:15px;
-    background-image: url(':/images/chaincoin_logo_horizontal');
+    background-image: url(':/images/bagicoin_logo_horizontal');
     background-repeat:none;
 }
 

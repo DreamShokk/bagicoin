@@ -6,7 +6,7 @@
 #include <util/time.h>
 #include <validation.h>
 
-#include <test/test_chaincoin.h>
+#include <test/test_bagicoin.h>
 #include <checkqueue.h>
 #include <boost/test/unit_test.hpp>
 #include <boost/thread.hpp>

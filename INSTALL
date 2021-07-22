@@ -21,10 +21,10 @@ use the autogen script to prepare the build environment.
     make
 
 Precompiled binaries are available at github, see
-https://github.com/chaincoin/chaincoin/releases
+https://github.com/bagicoin/bagicoin/releases
 
 Always verify the signatures and checksums.
 
-See doc/build-*.md for instructions on building chaincoind,
+See doc/build-*.md for instructions on building bagicoind,
 the intended-for-services, no-graphical-interface,
 reference implementation of Dash.

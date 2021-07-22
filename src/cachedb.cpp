@@ -149,7 +149,7 @@ bool CAddrDB::Read(CAddrMan& addr, CDataStream& ssPeers)
     return ret;
 }
 
-// Chaincoin specific cache files
+// Bagicoin specific cache files
 
 CMNCacheDB::CMNCacheDB()
 {

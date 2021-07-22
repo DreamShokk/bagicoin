@@ -4,7 +4,7 @@
 
 #include <streams.h>
 #include <support/allocators/zeroafterfree.h>
-#include <test/test_chaincoin.h>
+#include <test/test_bagicoin.h>
 
 #include <boost/test/unit_test.hpp>
 

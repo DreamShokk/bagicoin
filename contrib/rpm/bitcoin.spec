@@ -243,7 +243,7 @@ done
 
 %if %{_buildqt}
 # qt icons
-install -D -p share/pixmaps/chaincoin.ico %{buildroot}%{_datadir}/pixmaps/chaincoin.ico
+install -D -p share/pixmaps/bagicoin.ico %{buildroot}%{_datadir}/pixmaps/bagicoin.ico
 install -p share/pixmaps/nsis-header.bmp %{buildroot}%{_datadir}/pixmaps/
 install -p share/pixmaps/nsis-wizard.bmp %{buildroot}%{_datadir}/pixmaps/
 install -p %{SOURCE100} %{buildroot}%{_datadir}/pixmaps/bitcoin.svg
@@ -296,14 +296,14 @@ makedir=false
 deleting=false
 EOF
 # change touch date when modifying protocol
-touch -a -m -t 201511100546 %{buildroot}%{_datadir}/kde4/services/chaincoin-core.protocol
+touch -a -m -t 201511100546 %{buildroot}%{_datadir}/kde4/services/bagicoin-core.protocol
 %endif
 
 # man pages
-install -D -p %{SOURCE20} %{buildroot}%{_mandir}/man1/chaincoind.1
-install -p %{SOURCE21} %{buildroot}%{_mandir}/man1/chaincoin-cli.1
+install -D -p %{SOURCE20} %{buildroot}%{_mandir}/man1/bagicoind.1
+install -p %{SOURCE21} %{buildroot}%{_mandir}/man1/bagicoin-cli.1
 %if %{_buildqt}
-install -p %{SOURCE22} %{buildroot}%{_mandir}/man1/chaincoin-qt.1
+install -p %{SOURCE22} %{buildroot}%{_mandir}/man1/bagicoin-qt.1
 %endif
 
 # nuke these, we do extensive testing of binaries in %%check before packaging
@@ -311,7 +311,7 @@ rm -f %{buildroot}%{_bindir}/test_*
 
 %check
 make check
-srcdir=src test/chaincoin-util-test.py
+srcdir=src test/bagicoin-util-test.py
 test/functional/test_runner.py --extended
 
 %post libs -p /sbin/ldconfig
@@ -319,37 +319,37 @@ test/functional/test_runner.py --extended
 %postun libs -p /sbin/ldconfig
 
 %pre server
-getent group chaincoin >/dev/null || groupadd -r chaincoin
-getent passwd chaincoin >/dev/null ||
-        useradd -r -g chaincoin -d /var/lib/chaincoin -s /sbin/nologin \
-        -c "Bitcoin wallet server" chaincoin
+getent group bagicoin >/dev/null || groupadd -r bagicoin
+getent passwd bagicoin >/dev/null ||
+        useradd -r -g bagicoin -d /var/lib/bagicoin -s /sbin/nologin \
+        -c "Bitcoin wallet server" bagicoin
 exit 0
 
 %post server
-%systemd_post chaincoin.service
+%systemd_post bagicoin.service
 # SELinux
 if [ `%{_sbindir}/sestatus |grep -c "disabled"` -eq 0 ]; then
 for selinuxvariant in %{selinux_variants}; do
-        %{_sbindir}/semodule -s ${selinuxvariant} -i %{_datadir}/selinux/${selinuxvariant}/chaincoin.pp &> /dev/null || :
+        %{_sbindir}/semodule -s ${selinuxvariant} -i %{_datadir}/selinux/${selinuxvariant}/bagicoin.pp &> /dev/null || :
 done
-%{_sbindir}/semanage port -a -t chaincoin_port_t -p tcp 11995
-%{_sbindir}/semanage port -a -t chaincoin_port_t -p tcp 11994
-%{_sbindir}/semanage port -a -t chaincoin_port_t -p tcp 21995
-%{_sbindir}/semanage port -a -t chaincoin_port_t -p tcp 21994
-%{_sbindir}/semanage port -a -t chaincoin_port_t -p tcp 18443
-%{_sbindir}/semanage port -a -t chaincoin_port_t -p tcp 18444
-%{_sbindir}/fixfiles -R chaincoin-server restore &> /dev/null || :
-%{_sbindir}/restorecon -R %{_localstatedir}/lib/chaincoin || :
+%{_sbindir}/semanage port -a -t bagicoin_port_t -p tcp 11995
+%{_sbindir}/semanage port -a -t bagicoin_port_t -p tcp 11994
+%{_sbindir}/semanage port -a -t bagicoin_port_t -p tcp 21995
+%{_sbindir}/semanage port -a -t bagicoin_port_t -p tcp 21994
+%{_sbindir}/semanage port -a -t bagicoin_port_t -p tcp 18443
+%{_sbindir}/semanage port -a -t bagicoin_port_t -p tcp 18444
+%{_sbindir}/fixfiles -R bagicoin-server restore &> /dev/null || :
+%{_sbindir}/restorecon -R %{_localstatedir}/lib/bagicoin || :
 fi
 
 %posttrans server
 %{_bindir}/systemd-tmpfiles --create
 
 %preun server
-%systemd_preun chaincoin.service
+%systemd_preun bagicoin.service
 
 %postun server
-%systemd_postun chaincoin.service
+%systemd_postun bagicoin.service
 # SELinux
 if [ $1 -eq 0 ]; then
 	if [ `%{_sbindir}/sestatus |grep -c "disabled"` -eq 0 ]; then
@@ -360,11 +360,11 @@ if [ $1 -eq 0 ]; then
 	%{_sbindir}/semanage port -d -p tcp 18443
 	%{_sbindir}/semanage port -d -p tcp 18444
 	for selinuxvariant in %{selinux_variants}; do
-                %{_sbindir}/semodule -s ${selinuxvariant} -r chaincoin &> /dev/null || :
+                %{_sbindir}/semodule -s ${selinuxvariant} -r bagicoin &> /dev/null || :
 	done
-        %{_sbindir}/fixfiles -R chaincoin-server restore &> /dev/null || :
-        [ -d %{_localstatedir}/lib/chaincoin ] && \
-                %{_sbindir}/restorecon -R %{_localstatedir}/lib/chaincoin &> /dev/null || :
+        %{_sbindir}/fixfiles -R bagicoin-server restore &> /dev/null || :
+        [ -d %{_localstatedir}/lib/bagicoin ] && \
+                %{_sbindir}/restorecon -R %{_localstatedir}/lib/bagicoin &> /dev/null || :
 	fi
 fi
 
@@ -375,16 +375,16 @@ rm -rf %{buildroot}
 %files core
 %defattr(-,root,root,-)
 %license COPYING db-%{bdbv}.NC-LICENSE
-%doc COPYING chaincoin.conf.example doc/README.md doc/bips.md doc/files.md doc/multiwallet-qt.md doc/reduce-traffic.md doc/release-notes.md doc/tor.md
-%attr(0755,root,root) %{_bindir}/chaincoin-qt
-%attr(0644,root,root) %{_datadir}/applications/chaincoin-core.desktop
-%attr(0644,root,root) %{_datadir}/kde4/services/chaincoin-core.protocol
+%doc COPYING bagicoin.conf.example doc/README.md doc/bips.md doc/files.md doc/multiwallet-qt.md doc/reduce-traffic.md doc/release-notes.md doc/tor.md
+%attr(0755,root,root) %{_bindir}/bagicoin-qt
+%attr(0644,root,root) %{_datadir}/applications/bagicoin-core.desktop
+%attr(0644,root,root) %{_datadir}/kde4/services/bagicoin-core.protocol
 %attr(0644,root,root) %{_datadir}/pixmaps/*.ico
 %attr(0644,root,root) %{_datadir}/pixmaps/*.bmp
 %attr(0644,root,root) %{_datadir}/pixmaps/*.svg
 %attr(0644,root,root) %{_datadir}/pixmaps/*.png
 %attr(0644,root,root) %{_datadir}/pixmaps/*.xpm
-%attr(0644,root,root) %{_mandir}/man1/chaincoin-qt.1*
+%attr(0644,root,root) %{_mandir}/man1/bagicoin-qt.1*
 %endif
 
 %files libs
@@ -406,30 +406,30 @@ rm -rf %{buildroot}
 %files server
 %defattr(-,root,root,-)
 %license COPYING db-%{bdbv}.NC-LICENSE
-%doc COPYING chaincoin.conf.example doc/README.md doc/REST-interface.md doc/bips.md doc/dnsseed-policy.md doc/files.md doc/reduce-traffic.md doc/release-notes.md doc/tor.md
-%attr(0755,root,root) %{_sbindir}/chaincoind
-%attr(0644,root,root) %{_tmpfilesdir}/chaincoin.conf
-%attr(0644,root,root) %{_unitdir}/chaincoin.service
-%dir %attr(0750,chaincoin,chaincoin) %{_sysconfdir}/chaincoin
-%dir %attr(0750,chaincoin,chaincoin) %{_localstatedir}/lib/chaincoin
-%config(noreplace) %attr(0600,root,root) %{_sysconfdir}/sysconfig/chaincoin
+%doc COPYING bagicoin.conf.example doc/README.md doc/REST-interface.md doc/bips.md doc/dnsseed-policy.md doc/files.md doc/reduce-traffic.md doc/release-notes.md doc/tor.md
+%attr(0755,root,root) %{_sbindir}/bagicoind
+%attr(0644,root,root) %{_tmpfilesdir}/bagicoin.conf
+%attr(0644,root,root) %{_unitdir}/bagicoin.service
+%dir %attr(0750,bagicoin,bagicoin) %{_sysconfdir}/bagicoin
+%dir %attr(0750,bagicoin,bagicoin) %{_localstatedir}/lib/bagicoin
+%config(noreplace) %attr(0600,root,root) %{_sysconfdir}/sysconfig/bagicoin
 %attr(0644,root,root) %{_datadir}/selinux/*/*.pp
-%attr(0644,root,root) %{_mandir}/man1/chaincoind.1*
+%attr(0644,root,root) %{_mandir}/man1/bagicoind.1*
 
 %files utils
 %defattr(-,root,root,-)
 %license COPYING
-%doc COPYING chaincoin.conf.example doc/README.md
-%attr(0755,root,root) %{_bindir}/chaincoin-cli
-%attr(0755,root,root) %{_bindir}/chaincoin-tx
-%attr(0755,root,root) %{_bindir}/bench_chaincoin
-%attr(0644,root,root) %{_mandir}/man1/chaincoin-cli.1*
+%doc COPYING bagicoin.conf.example doc/README.md
+%attr(0755,root,root) %{_bindir}/bagicoin-cli
+%attr(0755,root,root) %{_bindir}/bagicoin-tx
+%attr(0755,root,root) %{_bindir}/bench_bagicoin
+%attr(0644,root,root) %{_mandir}/man1/bagicoin-cli.1*
 
 
 
 %changelog
 * Fri Feb 26 2016 Alice Wonder <buildmaster@librelamp.com> - 0.12.0-2
-- Rename Qt package from chaincoin to chaincoin-core
+- Rename Qt package from bagicoin to bagicoin-core
 - Make building of the Qt package optional
 - When building the Qt package, default to Qt5 but allow building
 -  against Qt4

@@ -1051,7 +1051,7 @@
     <name>WalletView</name>
     </context>
 <context>
-    <name>chaincoin-core</name>
+    <name>bagicoin-core</name>
     <message>
         <source>Masternode:</source>
         <translation>مسترنود:</translation>

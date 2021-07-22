@@ -12,7 +12,7 @@ static const int MODEL_UPDATE_DELAY = 250;
 /* AskPassphraseDialog -- Maximum passphrase length */
 static const int MAX_PASSPHRASE_SIZE = 1024;
 
-/* ChaincoinGUI -- Size of icons in status bar */
+/* BagicoinGUI -- Size of icons in status bar */
 static const int STATUSBAR_ICONSIZE = 16;
 
 static const bool DEFAULT_SPLASHSCREEN = true;
@@ -49,11 +49,11 @@ static const int MAX_URI_LENGTH = 255;
 /* Number of frames in spinner animation */
 #define SPINNER_FRAMES 36
 
-#define QAPP_ORG_NAME "Chaincoin"
-#define QAPP_ORG_DOMAIN "chaincoin.org"
-#define QAPP_APP_NAME_DEFAULT "Chaincoin-Qt"
-#define QAPP_APP_NAME_TESTNET "Chaincoin-Qt-testnet"
-#define QAPP_APP_NAME_REGTEST "Chaincoin-Qt-regtest"
+#define QAPP_ORG_NAME "Bagicoin"
+#define QAPP_ORG_DOMAIN "bagicoin.org"
+#define QAPP_APP_NAME_DEFAULT "Bagicoin-Qt"
+#define QAPP_APP_NAME_TESTNET "Bagicoin-Qt-testnet"
+#define QAPP_APP_NAME_REGTEST "Bagicoin-Qt-regtest"
 
 /* One gigabyte (GB) in bytes */
 static constexpr uint64_t GB_BYTES{1000000000};

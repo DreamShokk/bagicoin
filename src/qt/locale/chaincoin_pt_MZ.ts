@@ -62,12 +62,12 @@
         <translation>Endereços de recebimento</translation>
     </message>
     <message>
-        <source>These are your Chaincoin addresses for sending payments. Always check the amount and the receiving address before sending coins.</source>
+        <source>These are your Bagicoin addresses for sending payments. Always check the amount and the receiving address before sending coins.</source>
         <translation>Estes são os seus endereços para envio de pagamentos. Sempre verifique a quantia e o endereço, para o qual está enviando, antes de enviar suas moedas.</translation>
     </message>
     <message>
-        <source>These are your Chaincoin addresses for receiving payments. It is recommended to use a new receiving address for each transaction.</source>
-        <translation>Estes são os seus endereços para recebimentos de pagamento em Chaincoin. É recomendado que use um novo endereço para cada transação.</translation>
+        <source>These are your Bagicoin addresses for receiving payments. It is recommended to use a new receiving address for each transaction.</source>
+        <translation>Estes são os seus endereços para recebimentos de pagamento em Bagicoin. É recomendado que use um novo endereço para cada transação.</translation>
     </message>
     <message>
         <source>&amp;Copy Address</source>
@@ -266,11 +266,11 @@
         <translation>Mostrar visão geral da carteira</translation>
     </message>
     <message>
-        <source>Send coins to a Chaincoin address</source>
-        <translation>Enviar moedas para um endereço de Chaincoin</translation>
+        <source>Send coins to a Bagicoin address</source>
+        <translation>Enviar moedas para um endereço de Bagicoin</translation>
     </message>
     <message>
-        <source>Request payments (generates QR codes and chaincoin: URIs)</source>
+        <source>Request payments (generates QR codes and bagicoin: URIs)</source>
         <translation>Solicitar pagamentos (gera um código QR e URLs)</translation>
     </message>
     <message>
@@ -330,12 +330,12 @@
         <translation>&amp;Mudar frase de segurança...</translation>
     </message>
     <message>
-        <source>Sign messages with your Chaincoin addresses to prove you own them</source>
-        <translation>Assinar uma mensagem com o seu endereço de Chaincoin para provar que você é o proprietário dela</translation>
+        <source>Sign messages with your Bagicoin addresses to prove you own them</source>
+        <translation>Assinar uma mensagem com o seu endereço de Bagicoin para provar que você é o proprietário dela</translation>
     </message>
     <message>
-        <source>Verify messages to ensure they were signed with specified Chaincoin addresses</source>
-        <translation>Verificar mensagem para ter certeza que ela foi assinada por um endereço de Chaincoin específico</translation>
+        <source>Verify messages to ensure they were signed with specified Bagicoin addresses</source>
+        <translation>Verificar mensagem para ter certeza que ela foi assinada por um endereço de Bagicoin específico</translation>
     </message>
     <message>
         <source>&amp;Information</source>
@@ -446,8 +446,8 @@
         <translation>&amp;Receber</translation>
     </message>
     <message>
-        <source>&amp;About Chaincoin Core</source>
-        <translation>&amp;Sobre Chaincoin Core</translation>
+        <source>&amp;About Bagicoin Core</source>
+        <translation>&amp;Sobre Bagicoin Core</translation>
     </message>
     <message>
         <source>&amp;Show / Hide</source>
@@ -522,12 +522,12 @@
         <translation>Abrir $URI...</translation>
     </message>
     <message>
-        <source>Open a chaincoin: URI or payment request</source>
-        <translation>Abrir um chaincoin: URI ou cobrança</translation>
+        <source>Open a bagicoin: URI or payment request</source>
+        <translation>Abrir um bagicoin: URI ou cobrança</translation>
     </message>
     <message>
-        <source>Show the Chaincoin Core help message to get a list with possible Chaincoin Core command-line options</source>
-        <translation>Mostrar a ajuda do Chaincoin Core para receber uma lista com as possíveis opções de linha de comando</translation>
+        <source>Show the Bagicoin Core help message to get a list with possible Bagicoin Core command-line options</source>
+        <translation>Mostrar a ajuda do Bagicoin Core para receber uma lista com as possíveis opções de linha de comando</translation>
     </message>
     <message>
         <source>&amp;PrivateSend information</source>
@@ -562,8 +562,8 @@
         <translation>O arquivo de configuração não pode ser aberto</translation>
     </message>
     <message numerus="yes">
-        <source>%n active connection(s) to Chaincoin network</source>
-        <translation><numerusform>%n conexão(ões) ativas na rede Chaincoin</numerusform><numerusform>%n conexão(ões) ativas na rede Chaincoin</numerusform></translation>
+        <source>%n active connection(s) to Bagicoin network</source>
+        <translation><numerusform>%n conexão(ões) ativas na rede Bagicoin</numerusform><numerusform>%n conexão(ões) ativas na rede Bagicoin</numerusform></translation>
     </message>
     <message>
         <source>Connecting to peers...</source>
@@ -578,8 +578,8 @@
         <translation>Sincronizando dados adicionais: %p%</translation>
     </message>
     <message>
-        <source>Chaincoin Core</source>
-        <translation>Chaincoin Core</translation>
+        <source>Bagicoin Core</source>
+        <translation>Bagicoin Core</translation>
     </message>
     <message>
         <source>Date: %1
@@ -640,8 +640,8 @@
         <translation>Carteira está &lt;b&gt;criptografada&lt;/b&gt; e atualmente &lt;b&gt;bloqueada&lt;/b&gt;</translation>
     </message>
     <message>
-        <source>A fatal error occurred. Chaincoin can no longer continue safely and will quit.</source>
-        <translation>Um erro fatal ocorreu. Chaincoin não pode continuar em segurança e fechará.</translation>
+        <source>A fatal error occurred. Bagicoin can no longer continue safely and will quit.</source>
+        <translation>Um erro fatal ocorreu. Bagicoin não pode continuar em segurança e fechará.</translation>
     </message>
 </context>
 <context>
@@ -877,16 +877,16 @@
         <translation>Configuração do PrivateSend</translation>
     </message>
     <message>
-        <source>PrivateSend was successfully set to basic (%1 and 2 rounds). You can change this at any time by opening Chaincoin's configuration screen.</source>
-        <translation>PrivateSend foi configurado com sucesso para (%1 e 2 rodadas). Você pode mudar essa opção a qualquer momento abrindo a tela de configuração do Chaincoin</translation>
+        <source>PrivateSend was successfully set to basic (%1 and 2 rounds). You can change this at any time by opening Bagicoin's configuration screen.</source>
+        <translation>PrivateSend foi configurado com sucesso para (%1 e 2 rodadas). Você pode mudar essa opção a qualquer momento abrindo a tela de configuração do Bagicoin</translation>
     </message>
     <message>
-        <source>PrivateSend was successfully set to high (%1 and 8 rounds). You can change this at any time by opening Chaincoin's configuration screen.</source>
-        <translation>PrivateSend foi configurado com sucesso para (%1 e 8 rodadas). Você pode mudar essa opção a qualquer momento abrindo a tela de configuração do Chaincoin</translation>
+        <source>PrivateSend was successfully set to high (%1 and 8 rounds). You can change this at any time by opening Bagicoin's configuration screen.</source>
+        <translation>PrivateSend foi configurado com sucesso para (%1 e 8 rodadas). Você pode mudar essa opção a qualquer momento abrindo a tela de configuração do Bagicoin</translation>
     </message>
     <message>
-        <source>PrivateSend was successfully set to maximum (%1 and 16 rounds). You can change this at any time by opening Chaincoin's configuration screen.</source>
-        <translation>PrivateSend foi configurado com sucesso para (%1 e 16 rodadas). Você pode mudar essa opção a qualquer momento abrindo a tela de configuração do Chaincoin</translation>
+        <source>PrivateSend was successfully set to maximum (%1 and 16 rounds). You can change this at any time by opening Bagicoin's configuration screen.</source>
+        <translation>PrivateSend foi configurado com sucesso para (%1 e 16 rodadas). Você pode mudar essa opção a qualquer momento abrindo a tela de configuração do Bagicoin</translation>
     </message>
 </context>
 <context>
@@ -928,8 +928,8 @@
         <translation>Editar endereço de envio</translation>
     </message>
     <message>
-        <source>The entered address "%1" is not a valid Chaincoin address.</source>
-        <translation>"%1" não é um endereço de Chaincoin válido</translation>
+        <source>The entered address "%1" is not a valid Bagicoin address.</source>
+        <translation>"%1" não é um endereço de Bagicoin válido</translation>
     </message>
     <message>
         <source>The entered address "%1" is already in the address book.</source>
@@ -974,16 +974,16 @@
         <translation>versão</translation>
     </message>
     <message>
-        <source>Chaincoin Core</source>
-        <translation>Chaincoin Core</translation>
+        <source>Bagicoin Core</source>
+        <translation>Bagicoin Core</translation>
     </message>
     <message>
         <source>(%1-bit)</source>
         <translation>(%1-bit)</translation>
     </message>
     <message>
-        <source>About Chaincoin Core</source>
-        <translation>Sobre o Chaincoin Core</translation>
+        <source>About Bagicoin Core</source>
+        <translation>Sobre o Bagicoin Core</translation>
     </message>
     <message>
         <source>Command-line options</source>
@@ -1030,10 +1030,10 @@
         <translation>Informações do PrivateSend</translation>
     </message>
     <message>
-        <source>&lt;h3&gt;PrivateSend Basics&lt;/h3&gt; PrivateSend gives you true financial privacy by obscuring the origins of your funds. All the Chaincoin in your wallet is comprised of different "inputs" which you can think of as separate, discrete coins.&lt;br&gt; PrivateSend uses an innovative process to mix your inputs with the inputs of two other people, without having your coins ever leave your wallet. You retain control of your money at all times..&lt;hr&gt; &lt;b&gt;The PrivateSend process works like this:&lt;/b&gt;&lt;ol type="1"&gt; &lt;li&gt;PrivateSend begins by breaking your transaction inputs down into standard denominations. These denominations are 0.01 CHC, 0.1 CHC, 1 CHC and 10 CHC -- sort of like the paper money you use every day.&lt;/li&gt; &lt;li&gt;Your wallet then sends requests to specially configured software nodes on the network, called "masternodes." These masternodes are informed then that you are interested in mixing a certain denomination. No identifiable information is sent to the masternodes, so they never know "who" you are.&lt;/li&gt; &lt;li&gt;When two other people send similar messages, indicating that they wish to mix the same denomination, a mixing session begins. The masternode mixes up the inputs and instructs all three users' wallets to pay the now-transformed input back to themselves. Your wallet pays that denomination directly to itself, but in a different address (called a change address).&lt;/li&gt; &lt;li&gt;In order to fully obscure your funds, your wallet must repeat this process a number of times with each denomination. Each time the process is completed, it's called a "round." Each round of PrivateSend makes it exponentially more difficult to determine where your funds originated.&lt;/li&gt; &lt;li&gt;This mixing process happens in the background without any intervention on your part. When you wish to make a transaction, your funds will already be anonymized. No additional waiting is required.&lt;/li&gt; &lt;/ol&gt; &lt;hr&gt;&lt;b&gt;IMPORTANT:&lt;/b&gt; Your wallet only contains 1000 of these "change addresses." Every time a mixing event happens, up to 9 of your addresses are used up. This means those 1000 addresses last for about 100 mixing events. When 900 of them are used, your wallet must create more addresses. It can only do this, however, if you have automatic backups enabled.&lt;br&gt; Consequently, users who have backups disabled will also have PrivateSend disabled. &lt;hr&gt;For more info see &lt;a href="https://dashpay.atlassian.net/wiki/display/DOC/PrivateSend"&gt;https://dashpay.atlassian.net/wiki/display/DOC/PrivateSend&lt;/a&gt;         </source>
+        <source>&lt;h3&gt;PrivateSend Basics&lt;/h3&gt; PrivateSend gives you true financial privacy by obscuring the origins of your funds. All the Bagicoin in your wallet is comprised of different "inputs" which you can think of as separate, discrete coins.&lt;br&gt; PrivateSend uses an innovative process to mix your inputs with the inputs of two other people, without having your coins ever leave your wallet. You retain control of your money at all times..&lt;hr&gt; &lt;b&gt;The PrivateSend process works like this:&lt;/b&gt;&lt;ol type="1"&gt; &lt;li&gt;PrivateSend begins by breaking your transaction inputs down into standard denominations. These denominations are 0.01 CHC, 0.1 CHC, 1 CHC and 10 CHC -- sort of like the paper money you use every day.&lt;/li&gt; &lt;li&gt;Your wallet then sends requests to specially configured software nodes on the network, called "masternodes." These masternodes are informed then that you are interested in mixing a certain denomination. No identifiable information is sent to the masternodes, so they never know "who" you are.&lt;/li&gt; &lt;li&gt;When two other people send similar messages, indicating that they wish to mix the same denomination, a mixing session begins. The masternode mixes up the inputs and instructs all three users' wallets to pay the now-transformed input back to themselves. Your wallet pays that denomination directly to itself, but in a different address (called a change address).&lt;/li&gt; &lt;li&gt;In order to fully obscure your funds, your wallet must repeat this process a number of times with each denomination. Each time the process is completed, it's called a "round." Each round of PrivateSend makes it exponentially more difficult to determine where your funds originated.&lt;/li&gt; &lt;li&gt;This mixing process happens in the background without any intervention on your part. When you wish to make a transaction, your funds will already be anonymized. No additional waiting is required.&lt;/li&gt; &lt;/ol&gt; &lt;hr&gt;&lt;b&gt;IMPORTANT:&lt;/b&gt; Your wallet only contains 1000 of these "change addresses." Every time a mixing event happens, up to 9 of your addresses are used up. This means those 1000 addresses last for about 100 mixing events. When 900 of them are used, your wallet must create more addresses. It can only do this, however, if you have automatic backups enabled.&lt;br&gt; Consequently, users who have backups disabled will also have PrivateSend disabled. &lt;hr&gt;For more info see &lt;a href="https://dashpay.atlassian.net/wiki/display/DOC/PrivateSend"&gt;https://dashpay.atlassian.net/wiki/display/DOC/PrivateSend&lt;/a&gt;         </source>
         <translation>&lt;h3&gt;Noções Básicas do PrivateSend&lt;/h3&gt;
 
-PrivateSend oferece real privacidade financeira ao obscurecer as entradas dos seus fundos. Todas as Chaincoins em sua carteira são compostas de entradas diferentes, que você pode imaginar como moedas diferentes. &lt;br&gt;
+PrivateSend oferece real privacidade financeira ao obscurecer as entradas dos seus fundos. Todas as Bagicoins em sua carteira são compostas de entradas diferentes, que você pode imaginar como moedas diferentes. &lt;br&gt;
 O PrivateSend é um processo inovador para misturar as suas entradas com as entradas de outras pessoas, sem que suas moedas saiam da sua carteira. Você mantém o controle do seu dinheiro durante todo o processo.&lt;hr&gt;&lt;b&gt;O PrivateSend funciona da seguinte maneira: &lt;/b&gt;&lt;ol type="1"&gt;&lt;li&gt;O PrivateSend começa dividindo suas entradas em denominações padrões. Essas denominações são 0,01 CHC; 0,1 CHC; 1 CHC e 10 CHC - mais ou menos como o papel-moeda que você usa todos os dias.&lt;/li&gt;&lt;li&gt;Sua carteira envia solicitações para nós especiais da rede, os masternodes. Estes masternodes são informados que você está interessado em misturar uma certa denominação. Nenhuma informação identificável é enviada para os masternodes, então eles nunca sabem "quem" você é. &lt;/li&gt;&lt;li&gt;Quando duas outras pessoas enviam mensagens semelhantes, indicando que desejam misturar a mesma denominação, uma sessão de mistura começa. O masternode mistura as entradas e instrui as carteiras dos três usuários a pagar a entrada. Sua carteira paga essa denominação diretamente para si mesma, mas em um endereço diferente (chamado de endereço de mudança).&lt;/li&gt;&lt;li&gt;Para ocultar totalmente seus fundos, sua carteira deve repetir esse processo várias vezes com cada denominação. Cada vez que o processo é concluído, têm-se o que é chamado de "rodada". Cada rodada de PrivateSend torna exponencialmente mais difícil determinar de onde seus fundos se originaram. &lt;/li&gt;&lt;li&gt;Este processo de mistura acontece em segundo plano, sem qualquer intervenção da sua parte. Quando você deseja fazer uma transação, seus fundos já estão anonimizados. Nenhuma espera adicional é necessária.&lt;/li&gt;&lt;/ol&gt;
 &lt;hr&gt;
 &lt;b&gt;Importante:&lt;/b&gt;Sua careteira contém apenas 1000 desses "endereços de alteração". Toda vez que ocorre um evento de mistura, até 9 de seus endereços serão usados. Isso significa que esses 1000 endereços duram cerca de 100 eventos de mistura. Quando 900 deles são usados, sua carteira precisa de mais endereços. Isso só poderá ser feito, no entanto, se você tiver o backup automático da carteira ativado.&lt;br&gt;Consequentemente, usuários que estiverem com os backups automáticos desativados, terão o PrivateSend desativado.&lt;hr&gt;Para maiores informações, veja: &lt;a href="https://dashpay.atlassian.net/wiki/display/DOC/PrivateSend"&gt;https://dashpay.atlassian.net/wiki/display/DOC/PrivateSend&lt;/a&gt;</translation>
@@ -1075,7 +1075,7 @@ Esta sincronização inicial é muito exigente e pode expor problemas de hardwar
         <translation>Use um diretório de dados personalizado:</translation>
     </message>
     <message>
-        <source>Chaincoin</source>
+        <source>Bagicoin</source>
         <translation>Chainco</translation>
     </message>
     <message>
@@ -1261,11 +1261,11 @@ Esta sincronização inicial é muito exigente e pode expor problemas de hardwar
         <translation>Formulário</translation>
     </message>
     <message>
-        <source>Recent transactions may not yet be visible, and therefore your wallet's balance might be incorrect. This information will be correct once your wallet has finished synchronizing with the Chaincoin network, as detailed below.</source>
-        <translation>Transações recentes podem não estar visíveis ainda, portanto o seu saldo pode estar incorreto. Esta informação será corrigida assim que a sua carteira terminar a sincronização com a rede Chaincoin, como detalhado abaixo.</translation>
+        <source>Recent transactions may not yet be visible, and therefore your wallet's balance might be incorrect. This information will be correct once your wallet has finished synchronizing with the Bagicoin network, as detailed below.</source>
+        <translation>Transações recentes podem não estar visíveis ainda, portanto o seu saldo pode estar incorreto. Esta informação será corrigida assim que a sua carteira terminar a sincronização com a rede Bagicoin, como detalhado abaixo.</translation>
     </message>
     <message>
-        <source>Attempting to spend Chaincoin that are affected by not-yet-displayed transactions will not be accepted by the network.</source>
+        <source>Attempting to spend Bagicoin that are affected by not-yet-displayed transactions will not be accepted by the network.</source>
         <translation>Tentativa de gastar moedas de transações ainda não exibidas não será aceito pela rede</translation>
     </message>
     <message>
@@ -1403,16 +1403,16 @@ Esta sincronização inicial é muito exigente e pode expor problemas de hardwar
         <translation>Esta quantia funciona como um limite - para desativar o PrivateSend quando a quantia for atingida</translation>
     </message>
     <message>
-        <source>Amount of Chaincoin to keep anonymized</source>
-        <translation>Quantia de Chaincoins para manter anônimas</translation>
+        <source>Amount of Bagicoin to keep anonymized</source>
+        <translation>Quantia de Bagicoins para manter anônimas</translation>
     </message>
     <message>
-        <source>Automatically open the Chaincoin Core client port on the router. This only works when your router  UPnP and it is enabled.</source>
-        <translation>Abrir as portas do cliente Chaincoin automaticamente no roteador. Isto só funcionará se seu roteador suportar UPnP e esta função estiver habilitada.</translation>
+        <source>Automatically open the Bagicoin Core client port on the router. This only works when your router  UPnP and it is enabled.</source>
+        <translation>Abrir as portas do cliente Bagicoin automaticamente no roteador. Isto só funcionará se seu roteador suportar UPnP e esta função estiver habilitada.</translation>
     </message>
     <message>
-        <source>Connect to the Chaincoin network through a SOCKS5 proxy.</source>
-        <translation>Conectar na rede Chaincoin através de um proxy SOCKS5.</translation>
+        <source>Connect to the Bagicoin network through a SOCKS5 proxy.</source>
+        <translation>Conectar na rede Bagicoin através de um proxy SOCKS5.</translation>
     </message>
     <message>
         <source>IP address of the proxy (e.g. IPv4: 127.0.0.1 / IPv6: ::1)</source>
@@ -1423,8 +1423,8 @@ Esta sincronização inicial é muito exigente e pode expor problemas de hardwar
         <translation>Mostra se o proxy padrão fornecido SOCKS5 é utilizado para encontrar participantes por este tipo de rede.</translation>
     </message>
     <message>
-        <source>Connect to the Chaincoin network through a separate SOCKS5 proxy for Tor hidden services.</source>
-        <translation>Conecte-se à rede Chaincoin através de um proxy SOCKS5 separado para utilizar serviços ocultos Tor.</translation>
+        <source>Connect to the Bagicoin network through a separate SOCKS5 proxy for Tor hidden services.</source>
+        <translation>Conecte-se à rede Bagicoin através de um proxy SOCKS5 separado para utilizar serviços ocultos Tor.</translation>
     </message>
     <message>
         <source>Use separate SOCKS&amp;5 proxy to reach peers via Tor hidden services:</source>
@@ -1467,12 +1467,12 @@ Esta sincronização inicial é muito exigente e pode expor problemas de hardwar
         <translation>Rede</translation>
     </message>
     <message>
-        <source>Automatically start Chaincoin Core after logging in to the system.</source>
-        <translation>Iniciar o Chaincoin Core automaticamente após logar no sistema</translation>
+        <source>Automatically start Bagicoin Core after logging in to the system.</source>
+        <translation>Iniciar o Bagicoin Core automaticamente após logar no sistema</translation>
     </message>
     <message>
-        <source>&amp;Start Chaincoin Core on system login</source>
-        <translation>&amp;Iniciar o Chaincoin Core ao logar no sistema</translation>
+        <source>&amp;Start Bagicoin Core on system login</source>
+        <translation>&amp;Iniciar o Bagicoin Core ao logar no sistema</translation>
     </message>
     <message>
         <source>(0 = auto, &lt;0 = leave that many cores free)</source>
@@ -1575,13 +1575,13 @@ Esta sincronização inicial é muito exigente e pode expor problemas de hardwar
         <translation>Mostrar ou não opções de controle da moeda.</translation>
     </message>
     <message>
-        <source>The user interface language can be set here. This setting will take effect after restarting Chaincoin Core.</source>
-        <translation>O idioma da interface pode ser definido aqui. Essa configuração só terá efeito após reiniciar o Chaincoin core.</translation>
+        <source>The user interface language can be set here. This setting will take effect after restarting Bagicoin Core.</source>
+        <translation>O idioma da interface pode ser definido aqui. Essa configuração só terá efeito após reiniciar o Bagicoin core.</translation>
     </message>
     <message>
         <source>Language missing or translation incomplete? Help contributing translations here:
-https://www.transifex.com/projects/p/chaincoin/</source>
-        <translation>Tradução incompleta ou errada? Ajude traduzindo aqui: https://www.transifex.com/projects/p/chaincoin/</translation>
+https://www.transifex.com/projects/p/bagicoin/</source>
+        <translation>Tradução incompleta ou errada? Ajude traduzindo aqui: https://www.transifex.com/projects/p/bagicoin/</translation>
     </message>
     <message>
         <source>User Interface Theme:</source>
@@ -1691,8 +1691,8 @@ https://www.transifex.com/projects/p/chaincoin/</source>
         <translation>Saldos</translation>
     </message>
     <message>
-        <source>The displayed information may be out of date. Your wallet automatically synchronizes with the Chaincoin network after a connection is established, but this process has not completed yet.</source>
-        <translation>A informação mostrada pode estar desatualizada. Sua carteira sincroniza automaticamente com a rede Chaincoin depois que a conexão é estabelecida, mas este processo pode não estar completo ainda.</translation>
+        <source>The displayed information may be out of date. Your wallet automatically synchronizes with the Bagicoin network after a connection is established, but this process has not completed yet.</source>
+        <translation>A informação mostrada pode estar desatualizada. Sua carteira sincroniza automaticamente com a rede Bagicoin depois que a conexão é estabelecida, mas este processo pode não estar completo ainda.</translation>
     </message>
     <message>
         <source>Total:</source>
@@ -1940,11 +1940,11 @@ https://www.transifex.com/projects/p/chaincoin/</source>
         <translation>Endereço de pagamento %1 inválido</translation>
     </message>
     <message>
-        <source>Cannot start chaincoin: click-to-pay handler</source>
-        <translation>Não foi possível iniciar Chaincoin: manipulador click-to-pay</translation>
+        <source>Cannot start bagicoin: click-to-pay handler</source>
+        <translation>Não foi possível iniciar Bagicoin: manipulador click-to-pay</translation>
     </message>
     <message>
-        <source>URI cannot be parsed! This can be caused by an invalid Chaincoin address or malformed URI parameters.</source>
+        <source>URI cannot be parsed! This can be caused by an invalid Bagicoin address or malformed URI parameters.</source>
         <translation>URI não pode ser analisado! Isto pode ser causado por um endereço inválido ou parâmetros URI informados incorretamente.</translation>
     </message>
     <message>
@@ -2052,8 +2052,8 @@ https://www.transifex.com/projects/p/chaincoin/</source>
         <translation>Quantidade</translation>
     </message>
     <message>
-        <source>Enter a Chaincoin address (e.g. %1)</source>
-        <translation>Informe um endereço Chaincoin (ex: %1)</translation>
+        <source>Enter a Bagicoin address (e.g. %1)</source>
+        <translation>Informe um endereço Bagicoin (ex: %1)</translation>
     </message>
     <message>
         <source>%1 d</source>
@@ -2279,8 +2279,8 @@ https://www.transifex.com/projects/p/chaincoin/</source>
         <translation>Uso de memória</translation>
     </message>
     <message>
-        <source>Open the Chaincoin Core debug log file from the current data directory. This can take a few seconds for large log files.</source>
-        <translation>Abrir o arquivo de log de depuração do Chaincoin localizado no diretório atual de dados. Isso pode levar alguns segundos para arquivos grandes.</translation>
+        <source>Open the Bagicoin Core debug log file from the current data directory. This can take a few seconds for large log files.</source>
+        <translation>Abrir o arquivo de log de depuração do Bagicoin localizado no diretório atual de dados. Isso pode levar alguns segundos para arquivos grandes.</translation>
     </message>
     <message>
         <source>Number of Masternodes</source>
@@ -2554,8 +2554,8 @@ https://www.transifex.com/projects/p/chaincoin/</source>
         <translation>&amp;Requisitar Pagamento</translation>
     </message>
     <message>
-        <source>An optional message to attach to the payment request, which will be displayed when the request is opened. Note: The message will not be sent with the payment over the Chaincoin network.</source>
-        <translation>Uma mensagem opcional que será anexada na cobrança e será mostrada quando ela for aberta. Nota: A mensagem não será enviada com o pagamento pela rede Chaincoin.</translation>
+        <source>An optional message to attach to the payment request, which will be displayed when the request is opened. Note: The message will not be sent with the payment over the Bagicoin network.</source>
+        <translation>Uma mensagem opcional que será anexada na cobrança e será mostrada quando ela for aberta. Nota: A mensagem não será enviada com o pagamento pela rede Bagicoin.</translation>
     </message>
     <message>
         <source>Show the selected request (does the same as double clicking an entry)</source>
@@ -2795,7 +2795,7 @@ https://www.transifex.com/projects/p/chaincoin/</source>
         <translation>Se a taxa personalizada for definida em 1000 chuffs e a transação tiver somente 250 bytes, então "por kilobyte" somente paga 250 chuffs de taxa, enquanto "pelo menos" paga 1000 chuffs. Se a transação for maior que 1 kilobyte, ambos pagam por kilobyte.</translation>
     </message>
     <message>
-        <source>Paying only the minimum fee is just fine as long as there is less transaction volume than space in the blocks.&lt;br /&gt;But be aware that this can end up in a never confirming transaction once there is more demand for chaincoin transactions than the network can process.</source>
+        <source>Paying only the minimum fee is just fine as long as there is less transaction volume than space in the blocks.&lt;br /&gt;But be aware that this can end up in a never confirming transaction once there is more demand for bagicoin transactions than the network can process.</source>
         <translation>Pagar apenas a taxa mínima é bom, desde que haja pouco volume de transações. &lt;br /&gt;Mas esteja ciente de que isso pode acabar em uma transação nunca confirmada uma vez que há mais demanda por transações do que a rede pode processar.</translation>
     </message>
     <message>
@@ -2955,7 +2955,7 @@ https://www.transifex.com/projects/p/chaincoin/</source>
         <translation><numerusform>Confirmação em %n bloco.</numerusform><numerusform>Confirmação em %n blocos.</numerusform></translation>
     </message>
     <message>
-        <source>Warning: Invalid Chaincoin address</source>
+        <source>Warning: Invalid Bagicoin address</source>
         <translation>Aviso: Endereço inválido</translation>
     </message>
     <message>
@@ -2986,7 +2986,7 @@ https://www.transifex.com/projects/p/chaincoin/</source>
         <translation>Pagar &amp;Para:</translation>
     </message>
     <message>
-        <source>The Chaincoin address to send the payment to</source>
+        <source>The Bagicoin address to send the payment to</source>
         <translation>Endereço que enviará o pagamento</translation>
     </message>
     <message>
@@ -3018,8 +3018,8 @@ https://www.transifex.com/projects/p/chaincoin/</source>
         <translation>Remover esta entrada</translation>
     </message>
     <message>
-        <source>The fee will be deducted from the amount being sent. The recipient will receive a lower amount of Chaincoin than you enter in the amount field. If multiple recipients are selected, the fee is split equally.</source>
-        <translation>A taxa será deduzida da quantia que está sendo enviada. O destinatário receberá menos chaincoins do que você colocou no campo de quantidade. Se vários destinatários estão selecionados, a taxa é dividida igualmente.</translation>
+        <source>The fee will be deducted from the amount being sent. The recipient will receive a lower amount of Bagicoin than you enter in the amount field. If multiple recipients are selected, the fee is split equally.</source>
+        <translation>A taxa será deduzida da quantia que está sendo enviada. O destinatário receberá menos bagicoins do que você colocou no campo de quantidade. Se vários destinatários estão selecionados, a taxa é dividida igualmente.</translation>
     </message>
     <message>
         <source>S&amp;ubtract fee from amount</source>
@@ -3034,8 +3034,8 @@ https://www.transifex.com/projects/p/chaincoin/</source>
         <translation>Mensagem:</translation>
     </message>
     <message>
-        <source>A message that was attached to the chaincoin: URI which will be stored with the transaction for your reference. Note: This message will not be sent over the Chaincoin network.</source>
-        <translation>A mensagem que foi anexada ao chaincoin: URI na qual será gravada na transação para sua referência. Nota: Essa mensagem não será gravada publicamente na rede Chaincoin.</translation>
+        <source>A message that was attached to the bagicoin: URI which will be stored with the transaction for your reference. Note: This message will not be sent over the Bagicoin network.</source>
+        <translation>A mensagem que foi anexada ao bagicoin: URI na qual será gravada na transação para sua referência. Nota: Essa mensagem não será gravada publicamente na rede Bagicoin.</translation>
     </message>
     <message>
         <source>This is an unauthenticated payment request.</source>
@@ -3072,8 +3072,8 @@ https://www.transifex.com/projects/p/chaincoin/</source>
 <context>
     <name>ShutdownWindow</name>
     <message>
-        <source>Chaincoin Core is shutting down...</source>
-        <translation>Chaincoin Core está desligando...</translation>
+        <source>Bagicoin Core is shutting down...</source>
+        <translation>Bagicoin Core está desligando...</translation>
     </message>
     <message>
         <source>Do not shut down the computer until this window disappears.</source>
@@ -3091,12 +3091,12 @@ https://www.transifex.com/projects/p/chaincoin/</source>
         <translation>&amp;Assinar mensagem</translation>
     </message>
     <message>
-        <source>You can sign messages/agreements with your addresses to prove you can receive Chaincoin sent to them. Be careful not to sign anything vague or random, as phishing attacks may try to trick you into signing your identity over to them. Only sign fully-detailed statements you agree to.</source>
-        <translation>Você pode assinar mensagens com seus endereços para provar que você pode receber chaincoins enviados por alguém. Cuidado para não assinar nada vago ou aleatório, pois ataques phishing podem tentar te enganar para assinar coisas para eles como se fosse você. Somente assine termos bem detalhados que você concorde.</translation>
+        <source>You can sign messages/agreements with your addresses to prove you can receive Bagicoin sent to them. Be careful not to sign anything vague or random, as phishing attacks may try to trick you into signing your identity over to them. Only sign fully-detailed statements you agree to.</source>
+        <translation>Você pode assinar mensagens com seus endereços para provar que você pode receber bagicoins enviados por alguém. Cuidado para não assinar nada vago ou aleatório, pois ataques phishing podem tentar te enganar para assinar coisas para eles como se fosse você. Somente assine termos bem detalhados que você concorde.</translation>
     </message>
     <message>
-        <source>The Chaincoin address to sign the message with</source>
-        <translation>O endereço de Chaincoin que assinará a mensagem</translation>
+        <source>The Bagicoin address to sign the message with</source>
+        <translation>O endereço de Bagicoin que assinará a mensagem</translation>
     </message>
     <message>
         <source>Choose previously used address</source>
@@ -3127,16 +3127,16 @@ https://www.transifex.com/projects/p/chaincoin/</source>
         <translation>Copiar a assinatura para a área de transferência do sistema</translation>
     </message>
     <message>
-        <source>Sign the message to prove you own this Chaincoin address</source>
-        <translation>Assinar a mensagem para provar que você é dono deste endereço Chaincoin</translation>
+        <source>Sign the message to prove you own this Bagicoin address</source>
+        <translation>Assinar a mensagem para provar que você é dono deste endereço Bagicoin</translation>
     </message>
     <message>
-        <source>The Chaincoin address the message was signed with</source>
-        <translation>O endereço de Chaincoin com o qual a mensagem foi assinada</translation>
+        <source>The Bagicoin address the message was signed with</source>
+        <translation>O endereço de Bagicoin com o qual a mensagem foi assinada</translation>
     </message>
     <message>
-        <source>Verify the message to ensure it was signed with the specified Chaincoin address</source>
-        <translation>Verificar mensagem para se assegurar que ela foi assinada por um endereço de Chaincoin específico.</translation>
+        <source>Verify the message to ensure it was signed with the specified Bagicoin address</source>
+        <translation>Verificar mensagem para se assegurar que ela foi assinada por um endereço de Bagicoin específico.</translation>
     </message>
     <message>
         <source>Sign &amp;Message</source>
@@ -3238,8 +3238,8 @@ https://www.transifex.com/projects/p/chaincoin/</source>
         <translation>Dash Core developers</translation>
     </message>
     <message>
-        <source>The Chaincoin Core developers</source>
-        <translation>Chaincoin Core developers</translation>
+        <source>The Bagicoin Core developers</source>
+        <translation>Bagicoin Core developers</translation>
     </message>
 </context>
 <context>
@@ -3850,7 +3850,7 @@ https://www.transifex.com/projects/p/chaincoin/</source>
     </message>
 </context>
 <context>
-    <name>chaincoin-core</name>
+    <name>bagicoin-core</name>
     <message>
         <source>None</source>
         <translation>Nenhu</translation>
@@ -3912,8 +3912,8 @@ https://www.transifex.com/projects/p/chaincoin/</source>
         <translation>Apaga todas as transações da carteira e somente recupera essas partes da blockchain usando o comando -rescan na inicialização</translation>
     </message>
     <message>
-        <source>Disable all Chaincoin specific functionality (Masternodes, PrivateSend, Governance) (0-1, default: %u)</source>
-        <translation>Desativa todas as funcionalidades específicas da Chaincoin (masternodes, PrivateSend, Governance) (0-1, padrão: %u)</translation>
+        <source>Disable all Bagicoin specific functionality (Masternodes, PrivateSend, Governance) (0-1, default: %u)</source>
+        <translation>Desativa todas as funcionalidades específicas da Bagicoin (masternodes, PrivateSend, Governance) (0-1, padrão: %u)</translation>
     </message>
     <message>
         <source>Discover own IP addresses (default: 1 when listening and no -externalip or -proxy)</source>
@@ -4100,8 +4100,8 @@ https://www.transifex.com/projects/p/chaincoin/</source>
         <translation>Especificar local do arquivo do log de debug: pode ser um caminho absoluto ou um caminho relativo ao diretório de dados (padrão: "%s")</translation>
     </message>
     <message>
-        <source>Starting in lite mode, all Chaincoin-specific functionality is disabled.</source>
-        <translation>Iniciando no modo leve, todas as funcionalidades específicas do Chaincoin estarão desativadas.</translation>
+        <source>Starting in lite mode, all Bagicoin-specific functionality is disabled.</source>
+        <translation>Iniciando no modo leve, todas as funcionalidades específicas do Bagicoin estarão desativadas.</translation>
     </message>
     <message>
         <source>Support filtering of blocks and transaction with bloom filters (default: %u)</source>

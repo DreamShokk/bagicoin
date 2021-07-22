@@ -1166,6 +1166,6 @@ Ví của bạn chưa được mã hóa.</translation>
     </message>
     </context>
 <context>
-    <name>chaincoin-core</name>
+    <name>bagicoin-core</name>
     </context>
 </TS>

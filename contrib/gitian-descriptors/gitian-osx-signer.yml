@@ -1,5 +1,5 @@
 ---
-name: "chaincoin-dmg-signer"
+name: "bagicoin-dmg-signer"
 suites:
 - "bionic"
 architectures:
@@ -7,10 +7,10 @@ architectures:
 packages:
 - "faketime"
 remotes:
-- "url": "https://github.com/chaincoin/chaincoin-detached-sigs.git"
+- "url": "https://github.com/bagicoin/bagicoin-detached-sigs.git"
   "dir": "signature"
 files:
-- "chaincoin-osx-unsigned.tar.gz"
+- "bagicoin-osx-unsigned.tar.gz"
 script: |
   set -e -o pipefail
 
@@ -29,8 +29,8 @@ script: |
     chmod +x ${WRAP_DIR}/${prog}
   done
 
-  UNSIGNED=chaincoin-osx-unsigned.tar.gz
-  SIGNED=chaincoin-osx-signed.dmg
+  UNSIGNED=bagicoin-osx-unsigned.tar.gz
+  SIGNED=bagicoin-osx-signed.dmg
 
   tar -xf ${UNSIGNED}
   OSX_VOLNAME="$(cat osx_volname)"

@@ -1,0 +1,11 @@
+[Protocol]
+exec=bagicoin-qt '%u'
+protocol=bagicoin
+input=none
+output=none
+helper=true
+listing=
+reading=false
+writing=false
+makedir=false
+deleting=false

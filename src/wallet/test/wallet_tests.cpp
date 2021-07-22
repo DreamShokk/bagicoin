@@ -13,7 +13,7 @@
 #include <consensus/validation.h>
 #include <interfaces/chain.h>
 #include <rpc/server.h>
-#include <test/test_chaincoin.h>
+#include <test/test_bagicoin.h>
 #include <validation.h>
 #include <wallet/coincontrol.h>
 #include <wallet/test/wallet_test_fixture.h>

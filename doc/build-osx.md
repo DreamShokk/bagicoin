@@ -39,17 +39,17 @@ from the root of the repository.
 
 **Note**: You only need Berkeley DB if the wallet is enabled (see [*Disable-wallet mode*](/doc/build-osx.md#disable-wallet-mode)).
 
-Build Chaincoin Core
+Build Bagicoin Core
 ------------------------
 
-1. Clone the Chaincoin Core source code:
+1. Clone the Bagicoin Core source code:
 
-        git clone https://github.com/chaincoin/chaincoin
-        cd chaincoin
+        git clone https://github.com/bagicoin/bagicoin
+        cd bagicoin
 
-2.  Build Chaincoin Core:
+2.  Build Bagicoin Core:
 
-    Configure and build the headless Chaincoin Core binaries as well as the GUI (if Qt is found).
+    Configure and build the headless Bagicoin Core binaries as well as the GUI (if Qt is found).
 
     You can disable the GUI build by passing `--without-gui` to configure.
 
@@ -67,7 +67,7 @@ Build Chaincoin Core
 
 Disable-wallet mode
 --------------------
-When the intention is to run only a P2P node without a wallet, Chaincoin Core may be compiled in
+When the intention is to run only a P2P node without a wallet, Bagicoin Core may be compiled in
 disable-wallet mode with:
 
     ./configure --disable-wallet
@@ -79,29 +79,29 @@ Mining is also possible in disable-wallet mode using the `getblocktemplate` RPC 
 Running
 -------
 
-Chaincoin Core is now available at `./src/chaincoind`
+Bagicoin Core is now available at `./src/bagicoind`
 
 Before running, you may create an empty configuration file:
 
 
-    mkdir -p "/Users/${USER}/Library/Application Support/Chaincoin"
+    mkdir -p "/Users/${USER}/Library/Application Support/Bagicoin"
 
-    touch "/Users/${USER}/Library/Application Support/Chaincoin/chaincoin.conf"
+    touch "/Users/${USER}/Library/Application Support/Bagicoin/bagicoin.conf"
 
-    chmod 600 "/Users/${USER}/Library/Application Support/Chaincoin/chaincoin.conf"
+    chmod 600 "/Users/${USER}/Library/Application Support/Bagicoin/bagicoin.conf"
 
-The first time you run chaincoind, it will start downloading the blockchain. This process could take many hours, or even days on slower than average systems.
+The first time you run bagicoind, it will start downloading the blockchain. This process could take many hours, or even days on slower than average systems.
 
 You can monitor the download process by looking at the debug.log file:
 
-    tail -f $HOME/Library/Application\ Support/Chaincoin/debug.log
+    tail -f $HOME/Library/Application\ Support/Bagicoin/debug.log
 
 Other commands:
 -------
 
-    ./src/chaincoind -daemon # Starts the chaincoin daemon.
-    ./src/chaincoin-cli --help # Outputs a list of command-line options.
-    ./src/chaincoin-cli help # Outputs a list of RPC commands when the daemon is running.
+    ./src/bagicoind -daemon # Starts the bagicoin daemon.
+    ./src/bagicoin-cli --help # Outputs a list of command-line options.
+    ./src/bagicoin-cli help # Outputs a list of RPC commands when the daemon is running.
 
 
 Notes
@@ -206,7 +206,7 @@ build process to remain somewhat deterministic. Here's how it works:
   that have been previously (deterministically) built in order to create a
   final dmg.
 - The Apple keyholder uses this unsigned app to create a detached signature,
-  using the script that is also included there. Detached signatures are available from this [repository](https://github.com/chaincoin/chaincoin-detached-sigs).
+  using the script that is also included there. Detached signatures are available from this [repository](https://github.com/bagicoin/bagicoin-detached-sigs).
 - Builders feed the unsigned app + detached signature back into Gitian. It
   uses the pre-built tools to recombine the pieces into a deterministic dmg.
 

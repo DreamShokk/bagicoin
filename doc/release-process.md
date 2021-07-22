@@ -3,9 +3,9 @@ Release Process
 
 Before every release candidate:
 
-* Update translations (ping wumpus on IRC) see [translation_process.md](https://github.com/chaincoin/chaincoin/blob/master/doc/translation_process.md#synchronising-translations).
+* Update translations (ping wumpus on IRC) see [translation_process.md](https://github.com/bagicoin/bagicoin/blob/master/doc/translation_process.md#synchronising-translations).
 
-* Update manpages, see [gen-manpages.sh](https://github.com/chaincoin/chaincoin/blob/master/contrib/devtools/README.md#gen-manpagessh).
+* Update manpages, see [gen-manpages.sh](https://github.com/bagicoin/bagicoin/blob/master/contrib/devtools/README.md#gen-manpagessh).
 * Update release candidate version in `configure.ac` (`CLIENT_VERSION_RC`)
 
 Before every minor and major release:
@@ -25,7 +25,7 @@ Before every major release:
 * Update hardcoded [seeds](/contrib/seeds/README.md), see [this pull request](https://github.com/bitcoin/bitcoin/pull/7415) for an example.
 * Update [`src/chainparams.cpp`](/src/chainparams.cpp) m_assumed_blockchain_size and m_assumed_chain_state_size with the current size plus some overhead.
 * Update `src/chainparams.cpp` chainTxData with statistics about the transaction count and rate. Use the output of the RPC `getchaintxstats`, see
-  [this pull request](https://github.com/chaincoin/chaincoin/pull/12270) for an example.
+  [this pull request](https://github.com/bagicoin/bagicoin/pull/12270) for an example.
 * Update version of `contrib/gitian-descriptors/*.yml`: usually one'd want to do this on master after branching off the release - but be sure to at least do it before a new major release
 
 ### First time / New builders
@@ -35,12 +35,12 @@ If you're using the automated script (found in [contrib/gitian-build.py](/contri
 Check out the source code in the following directory hierarchy.
 
     cd /path/to/your/toplevel/build
-    git clone https://github.com/chaincoin/gitian.sigs.git
-    git clone https://github.com/chaincoin/chaincoin-detached-sigs.git
+    git clone https://github.com/bagicoin/gitian.sigs.git
+    git clone https://github.com/bagicoin/bagicoin-detached-sigs.git
     git clone https://github.com/devrandom/gitian-builder.git
-    git clone https://github.com/chaincoin/chaincoin.git
+    git clone https://github.com/bagicoin/bagicoin.git
 
-### Chaincoin maintainers/release engineers, suggestion for writing release notes
+### Bagicoin maintainers/release engineers, suggestion for writing release notes
 
 Write release notes. git shortlog helps a lot, for example:
 
@@ -63,7 +63,7 @@ If you're using the automated script (found in [contrib/gitian-build.py](/contri
 
 Setup Gitian descriptors:
 
-    pushd ./chaincoin
+    pushd ./bagicoin
     export SIGNER="(your Gitian key, ie bluematt, sipa, etc)"
     export VERSION=(new version, e.g. 0.8.0)
     git fetch
@@ -98,10 +98,10 @@ Create the macOS SDK tarball, see the [macOS build instructions](build-osx.md#de
 
 NOTE: Gitian is sometimes unable to download files. If you have errors, try the step below.
 
-By default, Gitian will fetch source files as needed. To cache them ahead of time, make sure you have checked out the tag you want to build in chaincoin, then:
+By default, Gitian will fetch source files as needed. To cache them ahead of time, make sure you have checked out the tag you want to build in bagicoin, then:
 
     pushd ./gitian-builder
-    make -C ../chaincoin/depends download SOURCES_PATH=`pwd`/cache/common
+    make -C ../bagicoin/depends download SOURCES_PATH=`pwd`/cache/common
     popd
 
 Only missing files will be fetched, so this is safe to re-run for each build.
@@ -109,47 +109,47 @@ Only missing files will be fetched, so this is safe to re-run for each build.
 NOTE: Offline builds must use the --url flag to ensure Gitian fetches only from local URLs. For example:
 
     pushd ./gitian-builder
-    ./bin/gbuild --url chaincoin=/path/to/chaincoin,signature=/path/to/sigs {rest of arguments}
+    ./bin/gbuild --url bagicoin=/path/to/bagicoin,signature=/path/to/sigs {rest of arguments}
     popd
 
 The gbuild invocations below <b>DO NOT DO THIS</b> by default.
 
-### Build and sign Chaincoin Core for Linux, Windows, and macOS:
+### Build and sign Bagicoin Core for Linux, Windows, and macOS:
 
     pushd ./gitian-builder
-    ./bin/gbuild --num-make 2 --memory 3000 --commit chaincoin=v${VERSION} ../chaincoin/contrib/gitian-descriptors/gitian-linux.yml
-    ./bin/gsign --signer "$SIGNER" --release ${VERSION}-linux --destination ../gitian.sigs/ ../chaincoin/contrib/gitian-descriptors/gitian-linux.yml
-    mv build/out/chaincoin-*.tar.gz build/out/src/chaincoin-*.tar.gz ../
+    ./bin/gbuild --num-make 2 --memory 3000 --commit bagicoin=v${VERSION} ../bagicoin/contrib/gitian-descriptors/gitian-linux.yml
+    ./bin/gsign --signer "$SIGNER" --release ${VERSION}-linux --destination ../gitian.sigs/ ../bagicoin/contrib/gitian-descriptors/gitian-linux.yml
+    mv build/out/bagicoin-*.tar.gz build/out/src/bagicoin-*.tar.gz ../
 
-    ./bin/gbuild --num-make 2 --memory 3000 --commit chaincoin=v${VERSION} ../chaincoin/contrib/gitian-descriptors/gitian-win.yml
-    ./bin/gsign --signer "$SIGNER" --release ${VERSION}-win-unsigned --destination ../gitian.sigs/ ../chaincoin/contrib/gitian-descriptors/gitian-win.yml
-    mv build/out/chaincoin-*-win-unsigned.tar.gz inputs/chaincoin-win-unsigned.tar.gz
-    mv build/out/chaincoin-*.zip build/out/chaincoin-*.exe ../
+    ./bin/gbuild --num-make 2 --memory 3000 --commit bagicoin=v${VERSION} ../bagicoin/contrib/gitian-descriptors/gitian-win.yml
+    ./bin/gsign --signer "$SIGNER" --release ${VERSION}-win-unsigned --destination ../gitian.sigs/ ../bagicoin/contrib/gitian-descriptors/gitian-win.yml
+    mv build/out/bagicoin-*-win-unsigned.tar.gz inputs/bagicoin-win-unsigned.tar.gz
+    mv build/out/bagicoin-*.zip build/out/bagicoin-*.exe ../
 
-    ./bin/gbuild --num-make 2 --memory 3000 --commit chaincoin=v${VERSION} ../chaincoin/contrib/gitian-descriptors/gitian-osx.yml
-    ./bin/gsign --signer "$SIGNER" --release ${VERSION}-osx-unsigned --destination ../gitian.sigs/ ../chaincoin/contrib/gitian-descriptors/gitian-osx.yml
-    mv build/out/chaincoin-*-osx-unsigned.tar.gz inputs/chaincoin-osx-unsigned.tar.gz
-    mv build/out/chaincoin-*.tar.gz build/out/chaincoin-*.dmg ../
+    ./bin/gbuild --num-make 2 --memory 3000 --commit bagicoin=v${VERSION} ../bagicoin/contrib/gitian-descriptors/gitian-osx.yml
+    ./bin/gsign --signer "$SIGNER" --release ${VERSION}-osx-unsigned --destination ../gitian.sigs/ ../bagicoin/contrib/gitian-descriptors/gitian-osx.yml
+    mv build/out/bagicoin-*-osx-unsigned.tar.gz inputs/bagicoin-osx-unsigned.tar.gz
+    mv build/out/bagicoin-*.tar.gz build/out/bagicoin-*.dmg ../
     popd
 
 Build output expected:
 
-  1. source tarball (`chaincoin-${VERSION}.tar.gz`)
-  2. linux 32-bit and 64-bit dist tarballs (`chaincoin-${VERSION}-linux[32|64].tar.gz`)
-  3. windows 32-bit and 64-bit unsigned installers and dist zips (`chaincoin-${VERSION}-win[32|64]-setup-unsigned.exe`, `chaincoin-${VERSION}-win[32|64].zip`)
-  4. macOS unsigned installer and dist tarball (`chaincoin-${VERSION}-osx-unsigned.dmg`, `chaincoin-${VERSION}-osx64.tar.gz`)
+  1. source tarball (`bagicoin-${VERSION}.tar.gz`)
+  2. linux 32-bit and 64-bit dist tarballs (`bagicoin-${VERSION}-linux[32|64].tar.gz`)
+  3. windows 32-bit and 64-bit unsigned installers and dist zips (`bagicoin-${VERSION}-win[32|64]-setup-unsigned.exe`, `bagicoin-${VERSION}-win[32|64].zip`)
+  4. macOS unsigned installer and dist tarball (`bagicoin-${VERSION}-osx-unsigned.dmg`, `bagicoin-${VERSION}-osx64.tar.gz`)
   5. Gitian signatures (in `gitian.sigs/${VERSION}-<linux|{win,osx}-unsigned>/(your Gitian key)/`)
 
 ### Verify other gitian builders signatures to your own. (Optional)
 
-Add other gitian builders keys to your gpg keyring, and/or refresh keys: See `../chaincoin/contrib/gitian-keys/README.md`.
+Add other gitian builders keys to your gpg keyring, and/or refresh keys: See `../bagicoin/contrib/gitian-keys/README.md`.
 
 Verify the signatures
 
     pushd ./gitian-builder
-    ./bin/gverify -v -d ../gitian.sigs/ -r ${VERSION}-linux ../chaincoin/contrib/gitian-descriptors/gitian-linux.yml
-    ./bin/gverify -v -d ../gitian.sigs/ -r ${VERSION}-win-unsigned ../chaincoin/contrib/gitian-descriptors/gitian-win.yml
-    ./bin/gverify -v -d ../gitian.sigs/ -r ${VERSION}-osx-unsigned ../chaincoin/contrib/gitian-descriptors/gitian-osx.yml
+    ./bin/gverify -v -d ../gitian.sigs/ -r ${VERSION}-linux ../bagicoin/contrib/gitian-descriptors/gitian-linux.yml
+    ./bin/gverify -v -d ../gitian.sigs/ -r ${VERSION}-win-unsigned ../bagicoin/contrib/gitian-descriptors/gitian-win.yml
+    ./bin/gverify -v -d ../gitian.sigs/ -r ${VERSION}-osx-unsigned ../bagicoin/contrib/gitian-descriptors/gitian-osx.yml
     popd
 
 ### Next steps:
@@ -170,22 +170,22 @@ Codesigner only: Create Windows/macOS detached signatures:
 
 Codesigner only: Sign the macOS binary:
 
-    transfer chaincoin-osx-unsigned.tar.gz to macOS for signing
-    tar xf chaincoin-osx-unsigned.tar.gz
+    transfer bagicoin-osx-unsigned.tar.gz to macOS for signing
+    tar xf bagicoin-osx-unsigned.tar.gz
     ./detached-sig-create.sh -s "Key ID"
     Enter the keychain password and authorize the signature
     Move signature-osx.tar.gz back to the gitian host
 
 Codesigner only: Sign the windows binaries:
 
-    tar xf chaincoin-win-unsigned.tar.gz
+    tar xf bagicoin-win-unsigned.tar.gz
     ./detached-sig-create.sh -key /path/to/codesign.key
     Enter the passphrase for the key when prompted
     signature-win.tar.gz will be created
 
 Codesigner only: Commit the detached codesign payloads:
 
-    cd ~/chaincoin-detached-sigs
+    cd ~/bagicoin-detached-sigs
     checkout the appropriate branch for this release series
     rm -rf *
     tar xf signature-osx.tar.gz
@@ -198,25 +198,25 @@ Codesigner only: Commit the detached codesign payloads:
 Non-codesigners: wait for Windows/macOS detached signatures:
 
 - Once the Windows/macOS builds each have 3 matching signatures, they will be signed with their respective release keys.
-- Detached signatures will then be committed to the [chaincoin-detached-sigs](https://github.com/chaincoin/chaincoin-detached-sigs) repository, which can be combined with the unsigned apps to create signed binaries.
+- Detached signatures will then be committed to the [bagicoin-detached-sigs](https://github.com/bagicoin/bagicoin-detached-sigs) repository, which can be combined with the unsigned apps to create signed binaries.
 
 Create (and optionally verify) the signed macOS binary:
 
     pushd ./gitian-builder
-    ./bin/gbuild -i --commit signature=v${VERSION} ../chaincoin/contrib/gitian-descriptors/gitian-osx-signer.yml
-    ./bin/gsign --signer "$SIGNER" --release ${VERSION}-osx-signed --destination ../gitian.sigs/ ../chaincoin/contrib/gitian-descriptors/gitian-osx-signer.yml
-    ./bin/gverify -v -d ../gitian.sigs/ -r ${VERSION}-osx-signed ../chaincoin/contrib/gitian-descriptors/gitian-osx-signer.yml
-    mv build/out/chaincoin-osx-signed.dmg ../chaincoin-${VERSION}-osx.dmg
+    ./bin/gbuild -i --commit signature=v${VERSION} ../bagicoin/contrib/gitian-descriptors/gitian-osx-signer.yml
+    ./bin/gsign --signer "$SIGNER" --release ${VERSION}-osx-signed --destination ../gitian.sigs/ ../bagicoin/contrib/gitian-descriptors/gitian-osx-signer.yml
+    ./bin/gverify -v -d ../gitian.sigs/ -r ${VERSION}-osx-signed ../bagicoin/contrib/gitian-descriptors/gitian-osx-signer.yml
+    mv build/out/bagicoin-osx-signed.dmg ../bagicoin-${VERSION}-osx.dmg
     popd
 
 Create (and optionally verify) the signed Windows binaries:
 
     pushd ./gitian-builder
-    ./bin/gbuild -i --commit signature=v${VERSION} ../chaincoin/contrib/gitian-descriptors/gitian-win-signer.yml
-    ./bin/gsign --signer "$SIGNER" --release ${VERSION}-win-signed --destination ../gitian.sigs/ ../chaincoin/contrib/gitian-descriptors/gitian-win-signer.yml
-    ./bin/gverify -v -d ../gitian.sigs/ -r ${VERSION}-win-signed ../chaincoin/contrib/gitian-descriptors/gitian-win-signer.yml
-    mv build/out/chaincoin-*win64-setup.exe ../chaincoin-${VERSION}-win64-setup.exe
-    mv build/out/chaincoin-*win32-setup.exe ../chaincoin-${VERSION}-win32-setup.exe
+    ./bin/gbuild -i --commit signature=v${VERSION} ../bagicoin/contrib/gitian-descriptors/gitian-win-signer.yml
+    ./bin/gsign --signer "$SIGNER" --release ${VERSION}-win-signed --destination ../gitian.sigs/ ../bagicoin/contrib/gitian-descriptors/gitian-win-signer.yml
+    ./bin/gverify -v -d ../gitian.sigs/ -r ${VERSION}-win-signed ../bagicoin/contrib/gitian-descriptors/gitian-win-signer.yml
+    mv build/out/bagicoin-*win64-setup.exe ../bagicoin-${VERSION}-win64-setup.exe
+    mv build/out/bagicoin-*win32-setup.exe ../bagicoin-${VERSION}-win32-setup.exe
     popd
 
 Commit your signature for the signed macOS/Windows binaries:
@@ -238,23 +238,23 @@ sha256sum * > SHA256SUMS
 
 The list of files should be:
 ```
-chaincoin-${VERSION}-aarch64-linux-gnu.tar.gz
-chaincoin-${VERSION}-arm-linux-gnueabihf.tar.gz
-chaincoin-${VERSION}-i686-pc-linux-gnu.tar.gz
-chaincoin-${VERSION}-x86_64-linux-gnu.tar.gz
-chaincoin-${VERSION}-osx64.tar.gz
-chaincoin-${VERSION}-osx.dmg
-chaincoin-${VERSION}.tar.gz
-chaincoin-${VERSION}-win32-setup.exe
-chaincoin-${VERSION}-win32.zip
-chaincoin-${VERSION}-win64-setup.exe
-chaincoin-${VERSION}-win64.zip
+bagicoin-${VERSION}-aarch64-linux-gnu.tar.gz
+bagicoin-${VERSION}-arm-linux-gnueabihf.tar.gz
+bagicoin-${VERSION}-i686-pc-linux-gnu.tar.gz
+bagicoin-${VERSION}-x86_64-linux-gnu.tar.gz
+bagicoin-${VERSION}-osx64.tar.gz
+bagicoin-${VERSION}-osx.dmg
+bagicoin-${VERSION}.tar.gz
+bagicoin-${VERSION}-win32-setup.exe
+bagicoin-${VERSION}-win32.zip
+bagicoin-${VERSION}-win64-setup.exe
+bagicoin-${VERSION}-win64.zip
 ```
 The `*-debug*` files generated by the gitian build contain debug symbols
 for troubleshooting by developers. It is assumed that anyone that is interested
 in debugging can run gitian to generate the files for themselves. To avoid
 end-user confusion about which file to pick, as well as save storage
-space *do not upload these to the chaincoin.org server, nor put them in the torrent*.
+space *do not upload these to the bagicoin.org server, nor put them in the torrent*.
 
 - GPG-sign it, delete the unsigned file:
 ```

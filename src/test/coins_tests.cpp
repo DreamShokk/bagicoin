@@ -9,7 +9,7 @@
 #include <uint256.h>
 #include <undo.h>
 #include <util/strencodings.h>
-#include <test/test_chaincoin.h>
+#include <test/test_bagicoin.h>
 #include <validation.h>
 
 #include <map>

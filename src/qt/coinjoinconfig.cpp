@@ -41,7 +41,7 @@ void CoinJoinConfig::clickBasic()
         model->getOptionsModel()->getDisplayUnit(), 1000 * COIN));
     QMessageBox::information(this, tr("CoinJoin Configuration"),
         tr(
-            "CoinJoin was successfully set to basic (%1 and 1 parent). You can change this at any time by opening Chaincoin's configuration screen."
+            "CoinJoin was successfully set to basic (%1 and 1 parent). You can change this at any time by opening Bagicoin's configuration screen."
         ).arg(strAmount)
     );
 
@@ -56,7 +56,7 @@ void CoinJoinConfig::clickHigh()
         model->getOptionsModel()->getDisplayUnit(), 1000 * COIN));
     QMessageBox::information(this, tr("CoinJoin Configuration"),
         tr(
-            "CoinJoin was successfully set to high (%1 and 2 parents). You can change this at any time by opening Chaincoin's configuration screen."
+            "CoinJoin was successfully set to high (%1 and 2 parents). You can change this at any time by opening Bagicoin's configuration screen."
         ).arg(strAmount)
     );
 
@@ -71,7 +71,7 @@ void CoinJoinConfig::clickMax()
         model->getOptionsModel()->getDisplayUnit(), 1000 * COIN));
     QMessageBox::information(this, tr("CoinJoin Configuration"),
         tr(
-            "CoinJoin was successfully set to maximum (%1 and 3 parents). You can change this at any time by opening Chaincoin's configuration screen."
+            "CoinJoin was successfully set to maximum (%1 and 3 parents). You can change this at any time by opening Bagicoin's configuration screen."
         ).arg(strAmount)
     );
 

@@ -62,12 +62,12 @@
         <translation>Adresa za primanje</translation>
     </message>
     <message>
-        <source>These are your Chaincoin addresses for sending payments. Always check the amount and the receiving address before sending coins.</source>
-        <translation>Ovo su vaše Chaincoin adrese za slanje uplata. Proverite uvek iznos i adresu na koju šaljete pre slanja novčića.</translation>
+        <source>These are your Bagicoin addresses for sending payments. Always check the amount and the receiving address before sending coins.</source>
+        <translation>Ovo su vaše Bagicoin adrese za slanje uplata. Proverite uvek iznos i adresu na koju šaljete pre slanja novčića.</translation>
     </message>
     <message>
-        <source>These are your Chaincoin addresses for receiving payments. It is recommended to use a new receiving address for each transaction.</source>
-        <translation>Ovo su vaše Chaincoin adrese za primanje uplata. Preporučuje se da koristite novu adresu za svaku transakciju.</translation>
+        <source>These are your Bagicoin addresses for receiving payments. It is recommended to use a new receiving address for each transaction.</source>
+        <translation>Ovo su vaše Bagicoin adrese za primanje uplata. Preporučuje se da koristite novu adresu za svaku transakciju.</translation>
     </message>
     <message>
         <source>&amp;Copy Address</source>
@@ -266,12 +266,12 @@
         <translation>Погледајте општи преглед новчаника</translation>
     </message>
     <message>
-        <source>Send coins to a Chaincoin address</source>
-        <translation>Pošaljite novčiće na Chaincoin adresu</translation>
+        <source>Send coins to a Bagicoin address</source>
+        <translation>Pošaljite novčiće na Bagicoin adresu</translation>
     </message>
     <message>
-        <source>Request payments (generates QR codes and chaincoin: URIs)</source>
-        <translation>Zahtevajte plaćanje (generiše se QR kod i chaincoin: URis)</translation>
+        <source>Request payments (generates QR codes and bagicoin: URIs)</source>
+        <translation>Zahtevajte plaćanje (generiše se QR kod i bagicoin: URis)</translation>
     </message>
     <message>
         <source>&amp;Transactions</source>
@@ -330,8 +330,8 @@
         <translation>Promenite &amp;lozinku za šifrovanje...</translation>
     </message>
     <message>
-        <source>Sign messages with your Chaincoin addresses to prove you own them</source>
-        <translation>Potpišite poruku sa Chaincoin adresa da bi ste dolazali da su u vašem posedu</translation>
+        <source>Sign messages with your Bagicoin addresses to prove you own them</source>
+        <translation>Potpišite poruku sa Bagicoin adresa da bi ste dolazali da su u vašem posedu</translation>
     </message>
     <message>
         <source>&amp;Information</source>
@@ -695,6 +695,6 @@
     </message>
     </context>
 <context>
-    <name>chaincoin-core</name>
+    <name>bagicoin-core</name>
     </context>
 </TS>

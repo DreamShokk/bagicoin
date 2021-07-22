@@ -1,4 +1,4 @@
-Source: chaincoin
+Source: bagicoin
 Section: utils
 Priority: optional
 Maintainer: Matt Corallo <matt@mattcorallo.com>
@@ -31,7 +31,7 @@ Homepage: https://bitcoincore.org/
 Vcs-Git: git://github.com/bitcoin/bitcoin.git
 Vcs-Browser: https://github.com/bitcoin/bitcoin
 
-Package: chaincoind
+Package: bagicoind
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: peer-to-peer network based digital currency - daemon
@@ -41,10 +41,10 @@ Description: peer-to-peer network based digital currency - daemon
  transact directly with each other, with the help of a P2P network to
  check for double-spending.
  .
- This package provides the daemon, chaincoind, and the CLI tool
- chaincoin-cli to interact with the daemon.
+ This package provides the daemon, bagicoind, and the CLI tool
+ bagicoin-cli to interact with the daemon.
 
-Package: chaincoin-qt
+Package: bagicoin-qt
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: peer-to-peer network based digital currency - Qt GUI
@@ -54,18 +54,18 @@ Description: peer-to-peer network based digital currency - Qt GUI
  transact directly with each other, with the help of a P2P network to
  check for double-spending.
  .
- This package provides Chaincoin-Qt, a GUI for Chaincoin based on Qt.
+ This package provides Bagicoin-Qt, a GUI for Bagicoin based on Qt.
 
-Package: chaincoin-tx
+Package: bagicoin-tx
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: peer-to-peer digital currency - standalone transaction tool
- Chaincoin is a free open source peer-to-peer electronic cash system that
+ Bagicoin is a free open source peer-to-peer electronic cash system that
  is completely decentralized, without the need for a central server or
  trusted parties.  Users hold the crypto keys to their own money and
  transact directly with each other, with the help of a P2P network to
  check for double-spending.
  .
- This package provides chaincoin-tx, a command-line transaction creation
- tool which can be used without a chaincoin daemon.  Some means of
+ This package provides bagicoin-tx, a command-line transaction creation
+ tool which can be used without a bagicoin daemon.  Some means of
  exchanging minimal transaction data with peers is still required.

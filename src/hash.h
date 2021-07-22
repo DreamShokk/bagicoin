@@ -80,7 +80,7 @@ public:
     }
 };
 
-/** A hasher class for Chaincoin's C11 hash. */
+/** A hasher class for Bagicoin's C11 hash. */
 class CHashC11 {
 private:
     CBLAKE512     ctx_blake;

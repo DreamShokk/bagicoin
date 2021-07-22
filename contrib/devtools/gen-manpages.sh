@@ -7,11 +7,11 @@ BUILDDIR=${BUILDDIR:-$TOPDIR}
 BINDIR=${BINDIR:-$BUILDDIR/src}
 MANDIR=${MANDIR:-$TOPDIR/doc/man}
 
-BITCOIND=${BITCOIND:-$BINDIR/chaincoind}
-BITCOINCLI=${BITCOINCLI:-$BINDIR/chaincoin-cli}
-BITCOINTX=${BITCOINTX:-$BINDIR/chaincoin-tx}
-WALLET_TOOL=${WALLET_TOOL:-$BINDIR/chaincoin-wallet}
-BITCOINQT=${BITCOINQT:-$BINDIR/qt/chaincoin-qt}
+BITCOIND=${BITCOIND:-$BINDIR/bagicoind}
+BITCOINCLI=${BITCOINCLI:-$BINDIR/bagicoin-cli}
+BITCOINTX=${BITCOINTX:-$BINDIR/bagicoin-tx}
+WALLET_TOOL=${WALLET_TOOL:-$BINDIR/bagicoin-wallet}
+BITCOINQT=${BITCOINQT:-$BINDIR/qt/bagicoin-qt}
 
 [ ! -x $BITCOIND ] && echo "$BITCOIND not found or not executable." && exit 1
 
@@ -19,8 +19,8 @@ BITCOINQT=${BITCOINQT:-$BINDIR/qt/chaincoin-qt}
 BTCVER=($($BITCOINCLI --version | head -n1 | awk -F'[ -]' '{ print $6, $7 }'))
 
 # Create a footer file with copyright content.
-# This gets autodetected fine for chaincoind if --version-string is not set,
-# but has different outcomes for chaincoin-qt and chaincoin-cli.
+# This gets autodetected fine for bagicoind if --version-string is not set,
+# but has different outcomes for bagicoin-qt and bagicoin-cli.
 echo "[COPYRIGHT]" > footer.h2m
 $BITCOIND --version | sed -n '1!p' >> footer.h2m
 

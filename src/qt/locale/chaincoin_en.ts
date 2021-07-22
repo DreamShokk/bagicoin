@@ -85,12 +85,12 @@
     </message>
     <message>
         <location line="+7"/>
-        <source>These are your Chaincoin addresses for sending payments. Always check the amount and the receiving address before sending coins.</source>
+        <source>These are your Bagicoin addresses for sending payments. Always check the amount and the receiving address before sending coins.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location line="+5"/>
-        <source>These are your Chaincoin addresses for receiving payments. It is recommended to use a new receiving address for each transaction.</source>
+        <source>These are your Bagicoin addresses for receiving payments. It is recommended to use a new receiving address for each transaction.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -341,12 +341,12 @@
     </message>
     <message>
         <location line="+7"/>
-        <source>Send coins to a Chaincoin address</source>
+        <source>Send coins to a Bagicoin address</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location line="+11"/>
-        <source>Request payments (generates QR codes and chaincoin: URIs)</source>
+        <source>Request payments (generates QR codes and bagicoin: URIs)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -441,12 +441,12 @@
     </message>
     <message>
         <location line="+2"/>
-        <source>Sign messages with your Chaincoin addresses to prove you own them</source>
+        <source>Sign messages with your Bagicoin addresses to prove you own them</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location line="+2"/>
-        <source>Verify messages to ensure they were signed with specified Chaincoin addresses</source>
+        <source>Verify messages to ensure they were signed with specified Bagicoin addresses</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -601,7 +601,7 @@
     </message>
     <message>
         <location line="+58"/>
-        <source>&amp;About Chaincoin Core</source>
+        <source>&amp;About Bagicoin Core</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -736,12 +736,12 @@
     </message>
     <message>
         <location line="+1"/>
-        <source>Open a chaincoin: URI or payment request</source>
+        <source>Open a bagicoin: URI or payment request</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location line="+12"/>
-        <source>Show the Chaincoin Core help message to get a list with possible Chaincoin Core command-line options</source>
+        <source>Show the Bagicoin Core help message to get a list with possible Bagicoin Core command-line options</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -772,7 +772,7 @@
     </message>
     <message numerus="yes">
         <location line="+107"/>
-        <source>%n active connection(s) to Chaincoin network</source>
+        <source>%n active connection(s) to Bagicoin network</source>
         <translation type="unfinished">
             <numerusform></numerusform>
             <numerusform></numerusform>
@@ -790,7 +790,7 @@
     </message>
     <message>
         <location line="+35"/>
-        <source>Chaincoin Core</source>
+        <source>Bagicoin Core</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -870,8 +870,8 @@
         <translation>Wallet is &lt;b&gt;encrypted&lt;/b&gt; and currently &lt;b&gt;locked&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../chaincoin.cpp" line="+393"/>
-        <source>A fatal error occurred. Chaincoin can no longer continue safely and will quit.</source>
+        <location filename="../bagicoin.cpp" line="+393"/>
+        <source>A fatal error occurred. Bagicoin can no longer continue safely and will quit.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -1169,17 +1169,17 @@
     </message>
     <message>
         <location line="-29"/>
-        <source>CoinJoin was successfully set to basic (%1 and 1 parent). You can change this at any time by opening Chaincoin&apos;s configuration screen.</source>
+        <source>CoinJoin was successfully set to basic (%1 and 1 parent). You can change this at any time by opening Bagicoin&apos;s configuration screen.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location line="+15"/>
-        <source>CoinJoin was successfully set to high (%1 and 2 parents). You can change this at any time by opening Chaincoin&apos;s configuration screen.</source>
+        <source>CoinJoin was successfully set to high (%1 and 2 parents). You can change this at any time by opening Bagicoin&apos;s configuration screen.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location line="+15"/>
-        <source>CoinJoin was successfully set to maximum (%1 and 3 parents). You can change this at any time by opening Chaincoin&apos;s configuration screen.</source>
+        <source>CoinJoin was successfully set to maximum (%1 and 3 parents). You can change this at any time by opening Bagicoin&apos;s configuration screen.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -1227,7 +1227,7 @@
     </message>
     <message>
         <location line="+75"/>
-        <source>The entered address &quot;%1&quot; is not a valid Chaincoin address.</source>
+        <source>The entered address &quot;%1&quot; is not a valid Bagicoin address.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1294,7 +1294,7 @@
     </message>
     <message>
         <location line="+5"/>
-        <source>About Chaincoin Core</source>
+        <source>About Bagicoin Core</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1309,7 +1309,7 @@
     </message>
     <message>
         <location line="+4"/>
-        <source>&lt;h3&gt;CoinJoin Basics&lt;/h3&gt; CoinJoin gives you true financial privacy by obscuring the origins of your funds. All the Chaincoin in your wallet is comprised of different &quot;inputs&quot; which you can think of as separate, discrete coins.&lt;br&gt; CoinJoin uses an improved process to mix your inputs with the inputs of two  or more other people, without having your coins ever leave your wallet. You retain control of your money at all times.&lt;hr&gt; &lt;b&gt;The CoinJoin process works like this:&lt;/b&gt;&lt;ol type=&quot;1&quot;&gt; &lt;li&gt;CoinJoin begins by breaking your transaction inputs down into standard denominations. The base denomination is 1.024 CHC which can be multiplied or divided by 2 -- sort of like the paper money you use every day.&lt;/li&gt; &lt;li&gt;Your wallet then sends requests to specially configured software nodes on the network, called &quot;masternodes.&quot; These masternodes are informed then that you are interested in mixing a certain denomination. No identifiable information is sent to the masternodes, so they never know &quot;who&quot; you are.&lt;/li&gt; &lt;li&gt;When two other people send similar messages, indicating that they wish to mix the same denomination, a mixing session begins. The masternode mixes up the inputs and instructs all three users&apos; wallets to pay the now-transformed input back to themselves. Your wallet pays that denomination directly to itself, but in a different address (called a change address).&lt;/li&gt; &lt;li&gt;In order to fully obscure your funds, your wallet must repeat this process a number of times with each denomination. Each time the process is completed, it&apos;s exponentially harder to trace the funds used. The origin of the (non-denominated) input is called the &quot;root.&quot; The wallet is analyzing the &quot;depth&quot; of the root and starts the process whenever required.&lt;/li&gt; &lt;li&gt;This mixing process happens in the background without any intervention on your part. When you wish to make a transaction, your funds will already be anonymized. No additional waiting is required.&lt;/li&gt; &lt;/ol&gt; &lt;hr&gt;&lt;b&gt;IMPORTANT:&lt;/b&gt; Your wallet only contains 1000 of these &quot;change addresses.&quot; Every time a mixing event happens, up to 9 of your addresses are used up. This means those 1000 addresses last for about 100 mixing events. When 900 of them are used, your wallet must create more addresses. It can only do this automatically, however, if you have automatic backups enabled.&lt;br&gt; Consequently, users who have backups disabled will also have CoinJoin disabled. &lt;hr&gt;For more info see &lt;a href=&quot;https://coinjoin.biz&quot;&gt;https://coinjoin.biz&lt;/a&gt;         </source>
+        <source>&lt;h3&gt;CoinJoin Basics&lt;/h3&gt; CoinJoin gives you true financial privacy by obscuring the origins of your funds. All the Bagicoin in your wallet is comprised of different &quot;inputs&quot; which you can think of as separate, discrete coins.&lt;br&gt; CoinJoin uses an improved process to mix your inputs with the inputs of two  or more other people, without having your coins ever leave your wallet. You retain control of your money at all times.&lt;hr&gt; &lt;b&gt;The CoinJoin process works like this:&lt;/b&gt;&lt;ol type=&quot;1&quot;&gt; &lt;li&gt;CoinJoin begins by breaking your transaction inputs down into standard denominations. The base denomination is 1.024 CHC which can be multiplied or divided by 2 -- sort of like the paper money you use every day.&lt;/li&gt; &lt;li&gt;Your wallet then sends requests to specially configured software nodes on the network, called &quot;masternodes.&quot; These masternodes are informed then that you are interested in mixing a certain denomination. No identifiable information is sent to the masternodes, so they never know &quot;who&quot; you are.&lt;/li&gt; &lt;li&gt;When two other people send similar messages, indicating that they wish to mix the same denomination, a mixing session begins. The masternode mixes up the inputs and instructs all three users&apos; wallets to pay the now-transformed input back to themselves. Your wallet pays that denomination directly to itself, but in a different address (called a change address).&lt;/li&gt; &lt;li&gt;In order to fully obscure your funds, your wallet must repeat this process a number of times with each denomination. Each time the process is completed, it&apos;s exponentially harder to trace the funds used. The origin of the (non-denominated) input is called the &quot;root.&quot; The wallet is analyzing the &quot;depth&quot; of the root and starts the process whenever required.&lt;/li&gt; &lt;li&gt;This mixing process happens in the background without any intervention on your part. When you wish to make a transaction, your funds will already be anonymized. No additional waiting is required.&lt;/li&gt; &lt;/ol&gt; &lt;hr&gt;&lt;b&gt;IMPORTANT:&lt;/b&gt; Your wallet only contains 1000 of these &quot;change addresses.&quot; Every time a mixing event happens, up to 9 of your addresses are used up. This means those 1000 addresses last for about 100 mixing events. When 900 of them are used, your wallet must create more addresses. It can only do this automatically, however, if you have automatic backups enabled.&lt;br&gt; Consequently, users who have backups disabled will also have CoinJoin disabled. &lt;hr&gt;For more info see &lt;a href=&quot;https://coinjoin.biz&quot;&gt;https://coinjoin.biz&lt;/a&gt;         </source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -1357,7 +1357,7 @@
     </message>
     <message>
         <location filename="../intro.cpp" line="+22"/>
-        <source>Chaincoin</source>
+        <source>Bagicoin</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1367,7 +1367,7 @@
     </message>
     <message>
         <location line="+9"/>
-        <source>%1 will download and store a copy of the Chaincoin block chain.</source>
+        <source>%1 will download and store a copy of the Bagicoin block chain.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1650,12 +1650,12 @@
     </message>
     <message>
         <location line="+117"/>
-        <source>Recent transactions may not yet be visible, and therefore your wallet&apos;s balance might be incorrect. This information will be correct once your wallet has finished synchronizing with the Chaincoin network, as detailed below.</source>
+        <source>Recent transactions may not yet be visible, and therefore your wallet&apos;s balance might be incorrect. This information will be correct once your wallet has finished synchronizing with the Bagicoin network, as detailed below.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location line="+19"/>
-        <source>Attempting to spend Chaincoin that are affected by not-yet-displayed transactions will not be accepted by the network.</source>
+        <source>Attempting to spend Bagicoin that are affected by not-yet-displayed transactions will not be accepted by the network.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1804,17 +1804,17 @@
     </message>
     <message>
         <location line="+42"/>
-        <source>Amount of Chaincoin to keep anonymized</source>
+        <source>Amount of Bagicoin to keep anonymized</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location line="+45"/>
-        <source>Automatically open the Chaincoin Core client port on the router. This only works when your router  UPnP and it is enabled.</source>
+        <source>Automatically open the Bagicoin Core client port on the router. This only works when your router  UPnP and it is enabled.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location line="+20"/>
-        <source>Connect to the Chaincoin network through a SOCKS5 proxy.</source>
+        <source>Connect to the Bagicoin network through a SOCKS5 proxy.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1832,7 +1832,7 @@
     </message>
     <message>
         <location line="+35"/>
-        <source>Connect to the Chaincoin network through a separate SOCKS5 proxy for Tor hidden services.</source>
+        <source>Connect to the Bagicoin network through a separate SOCKS5 proxy for Tor hidden services.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1882,12 +1882,12 @@
     </message>
     <message>
         <location line="-315"/>
-        <source>Automatically start Chaincoin Core after logging in to the system.</source>
+        <source>Automatically start Bagicoin Core after logging in to the system.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location line="+3"/>
-        <source>&amp;Start Chaincoin Core on system login</source>
+        <source>&amp;Start Bagicoin Core on system login</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2055,13 +2055,13 @@
     </message>
     <message>
         <location line="+525"/>
-        <source>The user interface language can be set here. This setting will take effect after restarting Chaincoin Core.</source>
+        <source>The user interface language can be set here. This setting will take effect after restarting Bagicoin Core.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location line="+21"/>
         <source>Language missing or translation incomplete? Help contributing translations here:
-https://www.transifex.com/projects/p/chaincoin/</source>
+https://www.transifex.com/projects/p/bagicoin/</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2202,7 +2202,7 @@ https://www.transifex.com/projects/p/chaincoin/</source>
     <message>
         <location line="+392"/>
         <location line="+238"/>
-        <source>The displayed information may be out of date. Your wallet automatically synchronizes with the Chaincoin network after a connection is established, but this process has not completed yet.</source>
+        <source>The displayed information may be out of date. Your wallet automatically synchronizes with the Bagicoin network after a connection is established, but this process has not completed yet.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2212,7 +2212,7 @@ https://www.transifex.com/projects/p/chaincoin/</source>
     </message>
     <message>
         <location line="-145"/>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The displayed information may be out of date. Your wallet automatically synchronizes with the Chaincoin network after a connection is established, but this process has not completed yet.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The displayed information may be out of date. Your wallet automatically synchronizes with the Bagicoin network after a connection is established, but this process has not completed yet.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2520,12 +2520,12 @@ https://www.transifex.com/projects/p/chaincoin/</source>
     </message>
     <message>
         <location line="-108"/>
-        <source>Cannot start chaincoin: click-to-pay handler</source>
+        <source>Cannot start bagicoin: click-to-pay handler</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location line="+62"/>
-        <source>&apos;chaincoin://&apos; is not a valid URI. Use &apos;bitcoin:&apos; instead.</source>
+        <source>&apos;bagicoin://&apos; is not a valid URI. Use &apos;bitcoin:&apos; instead.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2541,7 +2541,7 @@ https://www.transifex.com/projects/p/chaincoin/</source>
     </message>
     <message>
         <location line="-24"/>
-        <source>URI cannot be parsed! This can be caused by an invalid Chaincoin address or malformed URI parameters.</source>
+        <source>URI cannot be parsed! This can be caused by an invalid Bagicoin address or malformed URI parameters.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2679,7 +2679,7 @@ https://www.transifex.com/projects/p/chaincoin/</source>
     </message>
     <message>
         <location line="+18"/>
-        <source>The Chaincoin address to sign the message with</source>
+        <source>The Bagicoin address to sign the message with</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -3093,7 +3093,7 @@ https://www.transifex.com/projects/p/chaincoin/</source>
     </message>
     <message>
         <location filename="../guiutil.cpp" line="+110"/>
-        <source>Enter a Chaincoin address (e.g. %1)</source>
+        <source>Enter a Bagicoin address (e.g. %1)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -3207,7 +3207,7 @@ https://www.transifex.com/projects/p/chaincoin/</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../chaincoin.cpp" line="+197"/>
+        <location filename="../bagicoin.cpp" line="+197"/>
         <source>%1 didn&apos;t yet exit safely...</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3220,7 +3220,7 @@ https://www.transifex.com/projects/p/chaincoin/</source>
 <context>
     <name>QObject::QObject</name>
     <message>
-        <location filename="../chaincoin.cpp" line="-84"/>
+        <location filename="../bagicoin.cpp" line="-84"/>
         <source>Error: Specified data directory &quot;%1&quot; does not exist.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3831,7 +3831,7 @@ https://www.transifex.com/projects/p/chaincoin/</source>
     </message>
     <message>
         <location line="+45"/>
-        <source>An optional message to attach to the payment request, which will be displayed when the request is opened. Note: The message will not be sent with the payment over the Chaincoin network.</source>
+        <source>An optional message to attach to the payment request, which will be displayed when the request is opened. Note: The message will not be sent with the payment over the Bagicoin network.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -4350,7 +4350,7 @@ https://www.transifex.com/projects/p/chaincoin/</source>
     </message>
     <message>
         <location line="+101"/>
-        <source>Warning: Invalid Chaincoin address</source>
+        <source>Warning: Invalid Bagicoin address</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -4390,7 +4390,7 @@ https://www.transifex.com/projects/p/chaincoin/</source>
     </message>
     <message>
         <location line="+18"/>
-        <source>The Chaincoin address to send the payment to</source>
+        <source>The Bagicoin address to send the payment to</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -4432,7 +4432,7 @@ https://www.transifex.com/projects/p/chaincoin/</source>
     </message>
     <message>
         <location line="-1024"/>
-        <source>The fee will be deducted from the amount being sent. The recipient will receive a lower amount of Chaincoin than you enter in the amount field. If multiple recipients are selected, the fee is split equally.</source>
+        <source>The fee will be deducted from the amount being sent. The recipient will receive a lower amount of Bagicoin than you enter in the amount field. If multiple recipients are selected, the fee is split equally.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -4452,7 +4452,7 @@ https://www.transifex.com/projects/p/chaincoin/</source>
     </message>
     <message>
         <location line="+10"/>
-        <source>A message that was attached to the chaincoin: URI which will be stored with the transaction for your reference. Note: This message will not be sent over the Chaincoin network.</source>
+        <source>A message that was attached to the bagicoin: URI which will be stored with the transaction for your reference. Note: This message will not be sent over the Bagicoin network.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -4501,7 +4501,7 @@ https://www.transifex.com/projects/p/chaincoin/</source>
     <name>ShutdownWindow</name>
     <message>
         <location filename="../utilitydialog.cpp" line="+72"/>
-        <source>Chaincoin Core is shutting down...</source>
+        <source>Bagicoin Core is shutting down...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -4524,12 +4524,12 @@ https://www.transifex.com/projects/p/chaincoin/</source>
     </message>
     <message>
         <location line="+6"/>
-        <source>You can sign messages/agreements with your addresses to prove you can receive Chaincoin sent to them. Be careful not to sign anything vague or random, as phishing attacks may try to trick you into signing your identity over to them. Only sign fully-detailed statements you agree to.</source>
+        <source>You can sign messages/agreements with your addresses to prove you can receive Bagicoin sent to them. Be careful not to sign anything vague or random, as phishing attacks may try to trick you into signing your identity over to them. Only sign fully-detailed statements you agree to.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location line="+18"/>
-        <source>The Chaincoin address to sign the message with</source>
+        <source>The Bagicoin address to sign the message with</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -4571,17 +4571,17 @@ https://www.transifex.com/projects/p/chaincoin/</source>
     </message>
     <message>
         <location line="+17"/>
-        <source>Sign the message to prove you own this Chaincoin address</source>
+        <source>Sign the message to prove you own this Bagicoin address</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location line="+102"/>
-        <source>The Chaincoin address the message was signed with</source>
+        <source>The Bagicoin address the message was signed with</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location line="+36"/>
-        <source>Verify the message to ensure it was signed with the specified Chaincoin address</source>
+        <source>Verify the message to ensure it was signed with the specified Bagicoin address</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -4716,7 +4716,7 @@ https://www.transifex.com/projects/p/chaincoin/</source>
     </message>
     <message>
         <location line="+1"/>
-        <source>The Chaincoin Core developers</source>
+        <source>The Bagicoin Core developers</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -5498,9 +5498,9 @@ https://www.transifex.com/projects/p/chaincoin/</source>
     </message>
 </context>
 <context>
-    <name>chaincoin-core</name>
+    <name>bagicoin-core</name>
     <message>
-        <location filename="../chaincoinstrings.cpp" line="+12"/>
+        <location filename="../bagicoinstrings.cpp" line="+12"/>
         <location line="+1"/>
         <source>None</source>
         <translation type="unfinished"></translation>
@@ -5577,7 +5577,7 @@ https://www.transifex.com/projects/p/chaincoin/</source>
     </message>
     <message>
         <location line="+3"/>
-        <source>Starting in lite mode, all Chaincoin-specific functionality is disabled.</source>
+        <source>Starting in lite mode, all Bagicoin-specific functionality is disabled.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -6157,7 +6157,7 @@ https://www.transifex.com/projects/p/chaincoin/</source>
     </message>
     <message>
         <location line="+3"/>
-        <source>Disable all Chaincoin specific functionality (Masternodes, CoinJoin, Funding) (0-1, default: %u)</source>
+        <source>Disable all Bagicoin specific functionality (Masternodes, CoinJoin, Funding) (0-1, default: %u)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>

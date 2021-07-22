@@ -1,6 +1,6 @@
 #include <qt/test/addressbooktests.h>
 #include <qt/test/util.h>
-#include <test/test_chaincoin.h>
+#include <test/test_bagicoin.h>
 
 #include <interfaces/chain.h>
 #include <interfaces/node.h>

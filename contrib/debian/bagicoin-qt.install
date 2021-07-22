@@ -1,0 +1,6 @@
+usr/local/bin/bagicoin-qt usr/bin
+share/pixmaps/bagicoin32.xpm usr/share/pixmaps
+share/pixmaps/bagicoin16.xpm usr/share/pixmaps
+share/pixmaps/bagicoin128.png usr/share/pixmaps
+debian/bagicoin-qt.desktop usr/share/applications
+debian/bagicoin-qt.protocol usr/share/kde4/services/

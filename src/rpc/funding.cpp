@@ -47,7 +47,7 @@ UniValue gobject(const JSONRPCRequest& request)
                 "  list               - List funding objects (can be filtered by signal and/or object type)\n"
                 "  diff               - List differences since last diff\n"
                 "  vote-alias         - Vote on a funding object by masternode alias (using masternode.conf setup)\n"
-                "  vote-conf          - Vote on a funding object by masternode configured in chaincoin.conf\n"
+                "  vote-conf          - Vote on a funding object by masternode configured in bagicoin.conf\n"
                 "  vote-many          - Vote on a funding object by all masternodes (using masternode.conf setup)\n"
                 );
 
@@ -259,7 +259,7 @@ UniValue gobject(const JSONRPCRequest& request)
             nFailed++;
             statusObj.pushKV("result", "failed");
             statusObj.pushKV("errorMessage", "Can't find masternode by collateral output");
-            resultsObj.pushKV("chaincoin.conf", statusObj);
+            resultsObj.pushKV("bagicoin.conf", statusObj);
             returnObj.pushKV("overall", strprintf("Voted successfully %d time(s) and failed %d time(s).", nSuccessful, nFailed));
             returnObj.pushKV("detail", resultsObj);
             return returnObj;
@@ -270,7 +270,7 @@ UniValue gobject(const JSONRPCRequest& request)
             nFailed++;
             statusObj.pushKV("result", "failed");
             statusObj.pushKV("errorMessage", "Failure to sign.");
-            resultsObj.pushKV("chaincoin.conf", statusObj);
+            resultsObj.pushKV("bagicoin.conf", statusObj);
             returnObj.pushKV("overall", strprintf("Voted successfully %d time(s) and failed %d time(s).", nSuccessful, nFailed));
             returnObj.pushKV("detail", resultsObj);
             return returnObj;
@@ -287,7 +287,7 @@ UniValue gobject(const JSONRPCRequest& request)
             statusObj.pushKV("errorMessage", exception.GetExceptMessage());
         }
 
-        resultsObj.pushKV("chaincoin.conf", statusObj);
+        resultsObj.pushKV("bagicoin.conf", statusObj);
 
         returnObj.pushKV("overall", strprintf("Voted successfully %d time(s) and failed %d time(s).", nSuccessful, nFailed));
         returnObj.pushKV("detail", resultsObj);
@@ -891,11 +891,11 @@ static UniValue getsuperblockbudget(const JSONRPCRequest& request)
 static const CRPCCommand commands[] =
 { //  category              name                      actor (function)         argNames
   //  --------------------- ------------------------  -----------------------  ----------
-    /* Chaincoin features */
-    { "chaincoin",          "getfundinginfo",      &getfundinginfo,      {} },
-    { "chaincoin",          "getsuperblockbudget",    &getsuperblockbudget,    {"index"} },
-    { "chaincoin",          "gobject",                &gobject,                {} },
-    { "chaincoin",          "voteraw",                &voteraw,                {} },
+    /* Bagicoin features */
+    { "bagicoin",          "getfundinginfo",      &getfundinginfo,      {} },
+    { "bagicoin",          "getsuperblockbudget",    &getsuperblockbudget,    {"index"} },
+    { "bagicoin",          "gobject",                &gobject,                {} },
+    { "bagicoin",          "voteraw",                &voteraw,                {} },
 
 };
 

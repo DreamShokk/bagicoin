@@ -3,7 +3,7 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #if defined(HAVE_CONFIG_H)
-#include <config/chaincoin-config.h>
+#include <config/bagicoin-config.h>
 #endif
 
 #include <qt/walletmodel.h>
@@ -183,7 +183,7 @@ WalletModel::SendCoinsReturn WalletModel::prepareTransaction(WalletModelTransact
         }
         else
 #endif
-        {   // User-entered chaincoin address / amount:
+        {   // User-entered bagicoin address / amount:
             if(!validateAddress(rcp.address))
             {
                 return InvalidAddress;

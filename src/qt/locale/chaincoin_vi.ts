@@ -62,12 +62,12 @@
         <translation>Địa chỉ đang nhận</translation>
     </message>
     <message>
-        <source>These are your Chaincoin addresses for sending payments. Always check the amount and the receiving address before sending coins.</source>
-        <translation>Đây là những địa chỉ Chaincoin đang thực hiện thanh toán. Luôn kiểm tra số lượng và địa chỉ nhận trước khi gửi coins.</translation>
+        <source>These are your Bagicoin addresses for sending payments. Always check the amount and the receiving address before sending coins.</source>
+        <translation>Đây là những địa chỉ Bagicoin đang thực hiện thanh toán. Luôn kiểm tra số lượng và địa chỉ nhận trước khi gửi coins.</translation>
     </message>
     <message>
-        <source>These are your Chaincoin addresses for receiving payments. It is recommended to use a new receiving address for each transaction.</source>
-        <translation>Đây là địa chỉ Chaincoin của bạn để nhận thanh toán. Khuyến cáo nên sử dụng địa chỉ mới cho mỗi giao dịch.</translation>
+        <source>These are your Bagicoin addresses for receiving payments. It is recommended to use a new receiving address for each transaction.</source>
+        <translation>Đây là địa chỉ Bagicoin của bạn để nhận thanh toán. Khuyến cáo nên sử dụng địa chỉ mới cho mỗi giao dịch.</translation>
     </message>
     <message>
         <source>&amp;Copy Address</source>
@@ -185,7 +185,7 @@
     </message>
     <message>
         <source>Warning: If you encrypt your wallet and lose your passphrase, you will &lt;b&gt;LOSE ALL OF YOUR CHC&lt;/b&gt;!</source>
-        <translation>Cảnh báo: Nếu bạn mã hóa ví và mất cụm mật khẩu, bạn sẽ &lt;b&gt;MẤT TẤT CẢ Chaincoin&lt;/b&gt;!</translation>
+        <translation>Cảnh báo: Nếu bạn mã hóa ví và mất cụm mật khẩu, bạn sẽ &lt;b&gt;MẤT TẤT CẢ Bagicoin&lt;/b&gt;!</translation>
     </message>
     <message>
         <source>Wallet encrypted</source>
@@ -262,12 +262,12 @@
         <translation>Hiển thị tổng quan ví</translation>
     </message>
     <message>
-        <source>Send coins to a Chaincoin address</source>
-        <translation>Gửi coin đến một địa chỉ Chaincoin</translation>
+        <source>Send coins to a Bagicoin address</source>
+        <translation>Gửi coin đến một địa chỉ Bagicoin</translation>
     </message>
     <message>
-        <source>Request payments (generates QR codes and chaincoin: URIs)</source>
-        <translation>Yêu cầu thanh toán (tạo QR code và chaincoin: URIs)</translation>
+        <source>Request payments (generates QR codes and bagicoin: URIs)</source>
+        <translation>Yêu cầu thanh toán (tạo QR code và bagicoin: URIs)</translation>
     </message>
     <message>
         <source>&amp;Transactions</source>
@@ -326,12 +326,12 @@
         <translation>&amp;Thay Đổi Cụm Mật Khẩu...</translation>
     </message>
     <message>
-        <source>Sign messages with your Chaincoin addresses to prove you own them</source>
-        <translation>Đăng ký lời nhắn với địa chỉ Chaincoin của bạn để chứng minh quyền sở hữu chúng</translation>
+        <source>Sign messages with your Bagicoin addresses to prove you own them</source>
+        <translation>Đăng ký lời nhắn với địa chỉ Bagicoin của bạn để chứng minh quyền sở hữu chúng</translation>
     </message>
     <message>
-        <source>Verify messages to ensure they were signed with specified Chaincoin addresses</source>
-        <translation>Xác minh lời nhắn để chắc chắn đã được đăng ký với địa chỉ Chaincoin xác định</translation>
+        <source>Verify messages to ensure they were signed with specified Bagicoin addresses</source>
+        <translation>Xác minh lời nhắn để chắc chắn đã được đăng ký với địa chỉ Bagicoin xác định</translation>
     </message>
     <message>
         <source>&amp;Information</source>
@@ -442,8 +442,8 @@
         <translation>&amp;Nhận</translation>
     </message>
     <message>
-        <source>&amp;About Chaincoin Core</source>
-        <translation>&amp;Tài liệu về Chaincoin Core</translation>
+        <source>&amp;About Bagicoin Core</source>
+        <translation>&amp;Tài liệu về Bagicoin Core</translation>
     </message>
     <message>
         <source>&amp;Show / Hide</source>
@@ -518,12 +518,12 @@
         <translation>Mở &amp;URI...</translation>
     </message>
     <message>
-        <source>Open a chaincoin: URI or payment request</source>
-        <translation>Mở một Chaincoin: URI hoặc yêu cầu thanh toán</translation>
+        <source>Open a bagicoin: URI or payment request</source>
+        <translation>Mở một Bagicoin: URI hoặc yêu cầu thanh toán</translation>
     </message>
     <message>
-        <source>Show the Chaincoin Core help message to get a list with possible Chaincoin Core command-line options</source>
-        <translation>Hiển thị tin nhắn hỗ trợ của Chaincoin để nhận được danh sách lệnh của Chaincoin.</translation>
+        <source>Show the Bagicoin Core help message to get a list with possible Bagicoin Core command-line options</source>
+        <translation>Hiển thị tin nhắn hỗ trợ của Bagicoin để nhận được danh sách lệnh của Bagicoin.</translation>
     </message>
     <message>
         <source>&amp;PrivateSend information</source>
@@ -558,8 +558,8 @@
         <translation>Không thẻ mở tệp cấu hình.</translation>
     </message>
     <message numerus="yes">
-        <source>%n active connection(s) to Chaincoin network</source>
-        <translation><numerusform>%n kết nối đến mạng Chaincoin</numerusform></translation>
+        <source>%n active connection(s) to Bagicoin network</source>
+        <translation><numerusform>%n kết nối đến mạng Bagicoin</numerusform></translation>
     </message>
     <message>
         <source>Connecting to peers...</source>
@@ -574,8 +574,8 @@
         <translation>Đồng bộ hóa dữ liệu bổ sung: %p%</translation>
     </message>
     <message>
-        <source>Chaincoin Core</source>
-        <translation>Chaincoin</translation>
+        <source>Bagicoin Core</source>
+        <translation>Bagicoin</translation>
     </message>
     <message>
         <source>Date: %1
@@ -636,8 +636,8 @@
         <translation>Ví thì &lt;b&gt;được mã hóa&lt;/b&gt; và hiện tại &lt;b&gt;bị khóa&lt;/b&gt;</translation>
     </message>
     <message>
-        <source>A fatal error occurred. Chaincoin can no longer continue safely and will quit.</source>
-        <translation>Một lỗi nghiêm trọng vừa xảy ra. Chaincoin có thể không còn tiếp tục an toàn và sẽ bị bỏ.</translation>
+        <source>A fatal error occurred. Bagicoin can no longer continue safely and will quit.</source>
+        <translation>Một lỗi nghiêm trọng vừa xảy ra. Bagicoin có thể không còn tiếp tục an toàn và sẽ bị bỏ.</translation>
     </message>
 </context>
 <context>
@@ -910,8 +910,8 @@ Tùy chọn này khá nhanh và tốn khoảng 0,05 CHC để ẩn danh 1000 CHC
         <translation>Edit address đang gửi</translation>
     </message>
     <message>
-        <source>The entered address "%1" is not a valid Chaincoin address.</source>
-        <translation>Địa chỉ được nhập "%1" không phải là địa chỉ Chaincoin hợp lệ.</translation>
+        <source>The entered address "%1" is not a valid Bagicoin address.</source>
+        <translation>Địa chỉ được nhập "%1" không phải là địa chỉ Bagicoin hợp lệ.</translation>
     </message>
     <message>
         <source>The entered address "%1" is already in the address book.</source>
@@ -956,16 +956,16 @@ Tùy chọn này khá nhanh và tốn khoảng 0,05 CHC để ẩn danh 1000 CHC
         <translation>phiên bản</translation>
     </message>
     <message>
-        <source>Chaincoin Core</source>
-        <translation>Chaincoin</translation>
+        <source>Bagicoin Core</source>
+        <translation>Bagicoin</translation>
     </message>
     <message>
         <source>(%1-bit)</source>
         <translation>(%1-bit)</translation>
     </message>
     <message>
-        <source>About Chaincoin Core</source>
-        <translation>Tài liệu về Chaincoin Core</translation>
+        <source>About Bagicoin Core</source>
+        <translation>Tài liệu về Bagicoin Core</translation>
     </message>
     <message>
         <source>Command-line options</source>
@@ -1047,8 +1047,8 @@ Tùy chọn này khá nhanh và tốn khoảng 0,05 CHC để ẩn danh 1000 CHC
         <translation>Sử dụng custom danh mục data:</translation>
     </message>
     <message>
-        <source>Chaincoin</source>
-        <translation>Chaincoin</translation>
+        <source>Bagicoin</source>
+        <translation>Bagicoin</translation>
     </message>
     <message>
         <source>Error: Specified data directory "%1" cannot be created.</source>
@@ -1233,12 +1233,12 @@ Tùy chọn này khá nhanh và tốn khoảng 0,05 CHC để ẩn danh 1000 CHC
         <translation>hình thức</translation>
     </message>
     <message>
-        <source>Recent transactions may not yet be visible, and therefore your wallet's balance might be incorrect. This information will be correct once your wallet has finished synchronizing with the Chaincoin network, as detailed below.</source>
-        <translation>Giao dịch gần đây có thể chưa được hiển thị, và vì vậy số dư wallet của bạn có thể không dúng. Thông tin này sẽ được làm đúng khi wallet hoàn thành đồng bộ với mạng Chaincoin, như chi tiết bên dưới.</translation>
+        <source>Recent transactions may not yet be visible, and therefore your wallet's balance might be incorrect. This information will be correct once your wallet has finished synchronizing with the Bagicoin network, as detailed below.</source>
+        <translation>Giao dịch gần đây có thể chưa được hiển thị, và vì vậy số dư wallet của bạn có thể không dúng. Thông tin này sẽ được làm đúng khi wallet hoàn thành đồng bộ với mạng Bagicoin, như chi tiết bên dưới.</translation>
     </message>
     <message>
-        <source>Attempting to spend Chaincoin that are affected by not-yet-displayed transactions will not be accepted by the network.</source>
-        <translation>Cố gắng xài các Chaincoin bị ảnh hưởng bởi các giao dịch chưa được hiển thị sẽ không được chấp nhận bởi mạng.</translation>
+        <source>Attempting to spend Bagicoin that are affected by not-yet-displayed transactions will not be accepted by the network.</source>
+        <translation>Cố gắng xài các Bagicoin bị ảnh hưởng bởi các giao dịch chưa được hiển thị sẽ không được chấp nhận bởi mạng.</translation>
     </message>
     <message>
         <source>Number of blocks left</source>
@@ -1375,16 +1375,16 @@ Tùy chọn này khá nhanh và tốn khoảng 0,05 CHC để ẩn danh 1000 CHC
         <translation>Số tiền này đóng vai trò như một ngưỡng để tắt PrivateSend khi nó đạt đến.</translation>
     </message>
     <message>
-        <source>Amount of Chaincoin to keep anonymized</source>
-        <translation>Số lượng của Chaincoin để giữ vô danh</translation>
+        <source>Amount of Bagicoin to keep anonymized</source>
+        <translation>Số lượng của Bagicoin để giữ vô danh</translation>
     </message>
     <message>
-        <source>Automatically open the Chaincoin Core client port on the router. This only works when your router  UPnP and it is enabled.</source>
-        <translation>Tự động mở cổng khách hàng của Chaincoin Core trên router. Điều này chỉ hoạt động khi router UPnP của bạn và nó được kích hoạt.</translation>
+        <source>Automatically open the Bagicoin Core client port on the router. This only works when your router  UPnP and it is enabled.</source>
+        <translation>Tự động mở cổng khách hàng của Bagicoin Core trên router. Điều này chỉ hoạt động khi router UPnP của bạn và nó được kích hoạt.</translation>
     </message>
     <message>
-        <source>Connect to the Chaincoin network through a SOCKS5 proxy.</source>
-        <translation>Kết nối đến Chaincoin network qua một SOCKS5 proxy.</translation>
+        <source>Connect to the Bagicoin network through a SOCKS5 proxy.</source>
+        <translation>Kết nối đến Bagicoin network qua một SOCKS5 proxy.</translation>
     </message>
     <message>
         <source>IP address of the proxy (e.g. IPv4: 127.0.0.1 / IPv6: ::1)</source>
@@ -1395,8 +1395,8 @@ Tùy chọn này khá nhanh và tốn khoảng 0,05 CHC để ẩn danh 1000 CHC
         <translation>Hiển thị nếu cung cấp default SOCKS5 proxy is used to reach peers via this network type.</translation>
     </message>
     <message>
-        <source>Connect to the Chaincoin network through a separate SOCKS5 proxy for Tor hidden services.</source>
-        <translation>Kết nối đến Chaincoin network qua một nhánh rời SOCKS5 proxy của Tor hidden services.</translation>
+        <source>Connect to the Bagicoin network through a separate SOCKS5 proxy for Tor hidden services.</source>
+        <translation>Kết nối đến Bagicoin network qua một nhánh rời SOCKS5 proxy của Tor hidden services.</translation>
     </message>
     <message>
         <source>Use separate SOCKS&amp;5 proxy to reach peers via Tor hidden services:</source>
@@ -1439,12 +1439,12 @@ Tùy chọn này khá nhanh và tốn khoảng 0,05 CHC để ẩn danh 1000 CHC
         <translation>&amp;Network</translation>
     </message>
     <message>
-        <source>Automatically start Chaincoin Core after logging in to the system.</source>
-        <translation>Tự động khởi động Chaincoin Core sau khi đăng nhập vào hệ thống.</translation>
+        <source>Automatically start Bagicoin Core after logging in to the system.</source>
+        <translation>Tự động khởi động Bagicoin Core sau khi đăng nhập vào hệ thống.</translation>
     </message>
     <message>
-        <source>&amp;Start Chaincoin Core on system login</source>
-        <translation>&amp;Bắt đầu Chaincoin Core về đăng nhập hệ thống</translation>
+        <source>&amp;Start Bagicoin Core on system login</source>
+        <translation>&amp;Bắt đầu Bagicoin Core về đăng nhập hệ thống</translation>
     </message>
     <message>
         <source>(0 = auto, &lt;0 = leave that many cores free)</source>
@@ -1547,14 +1547,14 @@ Tùy chọn này khá nhanh và tốn khoảng 0,05 CHC để ẩn danh 1000 CHC
         <translation>Cho hiển thị tính năng coin control hoặc không.</translation>
     </message>
     <message>
-        <source>The user interface language can be set here. This setting will take effect after restarting Chaincoin Core.</source>
-        <translation>Giao diện ngôn ngữ người dùng có thể được thiết lập tại đây. Tùy chọn này sẽ có hiệu lực sau khi khởi động lại Chaincoin Core.</translation>
+        <source>The user interface language can be set here. This setting will take effect after restarting Bagicoin Core.</source>
+        <translation>Giao diện ngôn ngữ người dùng có thể được thiết lập tại đây. Tùy chọn này sẽ có hiệu lực sau khi khởi động lại Bagicoin Core.</translation>
     </message>
     <message>
         <source>Language missing or translation incomplete? Help contributing translations here:
-https://www.transifex.com/projects/p/chaincoin/</source>
+https://www.transifex.com/projects/p/bagicoin/</source>
         <translation>Thiếu ngôn ngữ hoặc bản dịch chưa hoàn chỉnh? Giúp đóng góp bản dịch tại đây:
-https://www.transifex.com/projects/p/chaincoin/</translation>
+https://www.transifex.com/projects/p/bagicoin/</translation>
     </message>
     <message>
         <source>User Interface Theme:</source>
@@ -1664,8 +1664,8 @@ https://www.transifex.com/projects/p/chaincoin/</translation>
         <translation>Số dư</translation>
     </message>
     <message>
-        <source>The displayed information may be out of date. Your wallet automatically synchronizes with the Chaincoin network after a connection is established, but this process has not completed yet.</source>
-        <translation>Thông tin được hiển thị có thể đã lỗi thời. Cái wallet tự động đồng bộ với Chaincoin network sau một connection được thiết lập, nhưng quá trình này vẫn chưa completed yet.</translation>
+        <source>The displayed information may be out of date. Your wallet automatically synchronizes with the Bagicoin network after a connection is established, but this process has not completed yet.</source>
+        <translation>Thông tin được hiển thị có thể đã lỗi thời. Cái wallet tự động đồng bộ với Bagicoin network sau một connection được thiết lập, nhưng quá trình này vẫn chưa completed yet.</translation>
     </message>
     <message>
         <source>Total:</source>
@@ -1913,12 +1913,12 @@ https://www.transifex.com/projects/p/chaincoin/</translation>
         <translation>Địa chỉ thanh toán không hợp lệ %1</translation>
     </message>
     <message>
-        <source>Cannot start chaincoin: click-to-pay handler</source>
-        <translation>Không thể bắt đầu chaincoin: trình xử lý nhấp để thanh toán</translation>
+        <source>Cannot start bagicoin: click-to-pay handler</source>
+        <translation>Không thể bắt đầu bagicoin: trình xử lý nhấp để thanh toán</translation>
     </message>
     <message>
-        <source>URI cannot be parsed! This can be caused by an invalid Chaincoin address or malformed URI parameters.</source>
-        <translation>URI không thể phân tích cú pháp! Đây có thể gây nên bởi invalid Chaincoin address hoặc URI không đúng định dạng tham số.</translation>
+        <source>URI cannot be parsed! This can be caused by an invalid Bagicoin address or malformed URI parameters.</source>
+        <translation>URI không thể phân tích cú pháp! Đây có thể gây nên bởi invalid Bagicoin address hoặc URI không đúng định dạng tham số.</translation>
     </message>
     <message>
         <source>Payment request file handling</source>
@@ -2025,8 +2025,8 @@ https://www.transifex.com/projects/p/chaincoin/</translation>
         <translation>Số lượng</translation>
     </message>
     <message>
-        <source>Enter a Chaincoin address (e.g. %1)</source>
-        <translation>Nhập một Chaincoin address (e.g. %1)</translation>
+        <source>Enter a Bagicoin address (e.g. %1)</source>
+        <translation>Nhập một Bagicoin address (e.g. %1)</translation>
     </message>
     <message>
         <source>%1 d</source>
@@ -2252,7 +2252,7 @@ https://www.transifex.com/projects/p/chaincoin/</translation>
         <translation>Bộ nhớ usage</translation>
     </message>
     <message>
-        <source>Open the Chaincoin Core debug log file from the current data directory. This can take a few seconds for large log files.</source>
+        <source>Open the Bagicoin Core debug log file from the current data directory. This can take a few seconds for large log files.</source>
         <translation>Mở tệp nhật ký gỡ lỗi Corecoin Core từ thư mục dữ liệu hiện tại. Quá trình này có thể mất vài giây cho các tệp nhật ký lớn.</translation>
     </message>
     <message>
@@ -2756,8 +2756,8 @@ https://www.transifex.com/projects/p/chaincoin/</translation>
         <translation>Nếu phí tùy chỉnh được đặt thành 1000 chuff và giao dịch chỉ là 250 byte, thì "mỗi kilobyte" chỉ trả 250 chuff phí, &lt;br /&gt;trong khi "ít nhất" trả 1000 chuffs. Đối với các giao dịch lớn hơn một kilobyte cả thanh toán bằng kilobyte.</translation>
     </message>
     <message>
-        <source>Paying only the minimum fee is just fine as long as there is less transaction volume than space in the blocks.&lt;br /&gt;But be aware that this can end up in a never confirming transaction once there is more demand for chaincoin transactions than the network can process.</source>
-        <translation>Chỉ cần trả tiền lệ phí tối thiểu là miễn là có khối lượng giao dịch ít hơn không gian trong các khối. &lt;br /&gt;Nhưng hãy lưu ý rằng điều này có thể kết thúc trong một giao dịch không bao giờ xác nhận khi có nhu cầu nhiều hơn cho các giao dịch chaincoin so với mạng có thể xử lý.</translation>
+        <source>Paying only the minimum fee is just fine as long as there is less transaction volume than space in the blocks.&lt;br /&gt;But be aware that this can end up in a never confirming transaction once there is more demand for bagicoin transactions than the network can process.</source>
+        <translation>Chỉ cần trả tiền lệ phí tối thiểu là miễn là có khối lượng giao dịch ít hơn không gian trong các khối. &lt;br /&gt;Nhưng hãy lưu ý rằng điều này có thể kết thúc trong một giao dịch không bao giờ xác nhận khi có nhu cầu nhiều hơn cho các giao dịch bagicoin so với mạng có thể xử lý.</translation>
     </message>
     <message>
         <source>&amp;Recommended:</source>
@@ -2916,8 +2916,8 @@ https://www.transifex.com/projects/p/chaincoin/</translation>
         <translation><numerusform>Dự kiến bắt đầu xác nhận trong vòng %n blocks.</numerusform></translation>
     </message>
     <message>
-        <source>Warning: Invalid Chaincoin address</source>
-        <translation>Cảnh báo: Địa chỉ Chaincoin không hợp lệ</translation>
+        <source>Warning: Invalid Bagicoin address</source>
+        <translation>Cảnh báo: Địa chỉ Bagicoin không hợp lệ</translation>
     </message>
     <message>
         <source>Warning: Unknown change address</source>
@@ -2947,8 +2947,8 @@ https://www.transifex.com/projects/p/chaincoin/</translation>
         <translation>Pay &amp;To:</translation>
     </message>
     <message>
-        <source>The Chaincoin address to send the payment to</source>
-        <translation>Địa chỉ Chaincoin để gửi thanh toán đến</translation>
+        <source>The Bagicoin address to send the payment to</source>
+        <translation>Địa chỉ Bagicoin để gửi thanh toán đến</translation>
     </message>
     <message>
         <source>&amp;Label:</source>
@@ -2979,8 +2979,8 @@ https://www.transifex.com/projects/p/chaincoin/</translation>
         <translation>Xóa bỏ entry này</translation>
     </message>
     <message>
-        <source>The fee will be deducted from the amount being sent. The recipient will receive a lower amount of Chaincoin than you enter in the amount field. If multiple recipients are selected, the fee is split equally.</source>
-        <translation>Lệ phí sẽ được khấu trừ từ số tiền được gửi. Người nhận sẽ nhận được số lượng Chaincoin thấp hơn số tiền bạn nhập vào trường số tiền. Nếu nhiều người nhận được chọn, lệ phí sẽ được chia đều.</translation>
+        <source>The fee will be deducted from the amount being sent. The recipient will receive a lower amount of Bagicoin than you enter in the amount field. If multiple recipients are selected, the fee is split equally.</source>
+        <translation>Lệ phí sẽ được khấu trừ từ số tiền được gửi. Người nhận sẽ nhận được số lượng Bagicoin thấp hơn số tiền bạn nhập vào trường số tiền. Nếu nhiều người nhận được chọn, lệ phí sẽ được chia đều.</translation>
     </message>
     <message>
         <source>S&amp;ubtract fee from amount</source>
@@ -2995,8 +2995,8 @@ https://www.transifex.com/projects/p/chaincoin/</translation>
         <translation>Tin nhắn:</translation>
     </message>
     <message>
-        <source>A message that was attached to the chaincoin: URI which will be stored with the transaction for your reference. Note: This message will not be sent over the Chaincoin network.</source>
-        <translation>Một thông điệp được gắn với chaincoin: URI sẽ được lưu trữ cùng với giao dịch để bạn tham khảo. Lưu ý: Thông báo này sẽ không được gửi qua mạng Chaincoin.</translation>
+        <source>A message that was attached to the bagicoin: URI which will be stored with the transaction for your reference. Note: This message will not be sent over the Bagicoin network.</source>
+        <translation>Một thông điệp được gắn với bagicoin: URI sẽ được lưu trữ cùng với giao dịch để bạn tham khảo. Lưu ý: Thông báo này sẽ không được gửi qua mạng Bagicoin.</translation>
     </message>
     <message>
         <source>This is an unauthenticated payment request.</source>
@@ -3033,8 +3033,8 @@ https://www.transifex.com/projects/p/chaincoin/</translation>
 <context>
     <name>ShutdownWindow</name>
     <message>
-        <source>Chaincoin Core is shutting down...</source>
-        <translation>Chaincoin Core đang tắt ...</translation>
+        <source>Bagicoin Core is shutting down...</source>
+        <translation>Bagicoin Core đang tắt ...</translation>
     </message>
     <message>
         <source>Do not shut down the computer until this window disappears.</source>
@@ -3052,12 +3052,12 @@ https://www.transifex.com/projects/p/chaincoin/</translation>
         <translation>&amp;Sign Tin nhắn</translation>
     </message>
     <message>
-        <source>You can sign messages/agreements with your addresses to prove you can receive Chaincoin sent to them. Be careful not to sign anything vague or random, as phishing attacks may try to trick you into signing your identity over to them. Only sign fully-detailed statements you agree to.</source>
-        <translation>Bạn có thể ký/đồng ý với địa chỉ chứng minh bạn có thể receive Chaincoin đã gửi đến chúng. Cẩn thận không ký bất cứ không rõ hay random, như các cuộc tấn công lừa đảo có thể cố lừa bạn ký tên vào danh tính của bạn.. Chỉ ký các bản tuyên bố hoàn chỉnh mà bạn đồng ý.</translation>
+        <source>You can sign messages/agreements with your addresses to prove you can receive Bagicoin sent to them. Be careful not to sign anything vague or random, as phishing attacks may try to trick you into signing your identity over to them. Only sign fully-detailed statements you agree to.</source>
+        <translation>Bạn có thể ký/đồng ý với địa chỉ chứng minh bạn có thể receive Bagicoin đã gửi đến chúng. Cẩn thận không ký bất cứ không rõ hay random, như các cuộc tấn công lừa đảo có thể cố lừa bạn ký tên vào danh tính của bạn.. Chỉ ký các bản tuyên bố hoàn chỉnh mà bạn đồng ý.</translation>
     </message>
     <message>
-        <source>The Chaincoin address to sign the message with</source>
-        <translation>Địa chỉ Chaincoin để ký thông báo</translation>
+        <source>The Bagicoin address to sign the message with</source>
+        <translation>Địa chỉ Bagicoin để ký thông báo</translation>
     </message>
     <message>
         <source>Choose previously used address</source>
@@ -3088,16 +3088,16 @@ https://www.transifex.com/projects/p/chaincoin/</translation>
         <translation>Copy hiện tại signature tới system clipboard</translation>
     </message>
     <message>
-        <source>Sign the message to prove you own this Chaincoin address</source>
-        <translation>Ký tin nhắn để chứng minh bạn sở hữu Chaincoin address này</translation>
+        <source>Sign the message to prove you own this Bagicoin address</source>
+        <translation>Ký tin nhắn để chứng minh bạn sở hữu Bagicoin address này</translation>
     </message>
     <message>
-        <source>The Chaincoin address the message was signed with</source>
-        <translation>Địa chỉ Chaincoin mà tin nhắn đã ký với</translation>
+        <source>The Bagicoin address the message was signed with</source>
+        <translation>Địa chỉ Bagicoin mà tin nhắn đã ký với</translation>
     </message>
     <message>
-        <source>Verify the message to ensure it was signed with the specified Chaincoin address</source>
-        <translation>Xác minh thông báo để đảm bảo rằng nó đã được ký với địa chỉ Chaincoin được chỉ định</translation>
+        <source>Verify the message to ensure it was signed with the specified Bagicoin address</source>
+        <translation>Xác minh thông báo để đảm bảo rằng nó đã được ký với địa chỉ Bagicoin được chỉ định</translation>
     </message>
     <message>
         <source>Sign &amp;Message</source>
@@ -3199,8 +3199,8 @@ https://www.transifex.com/projects/p/chaincoin/</translation>
         <translation>Các nhà phát triển Dash Core</translation>
     </message>
     <message>
-        <source>The Chaincoin Core developers</source>
-        <translation>Các nhà phát triển Chaincoin Core</translation>
+        <source>The Bagicoin Core developers</source>
+        <translation>Các nhà phát triển Bagicoin Core</translation>
     </message>
 </context>
 <context>
@@ -3811,7 +3811,7 @@ https://www.transifex.com/projects/p/chaincoin/</translation>
     </message>
 </context>
 <context>
-    <name>chaincoin-core</name>
+    <name>bagicoin-core</name>
     <message>
         <source>None</source>
         <translation>không có gì</translation>
@@ -3873,8 +3873,8 @@ https://www.transifex.com/projects/p/chaincoin/</translation>
         <translation>Xóa tất cả các giao dịch ví và chỉ khôi phục các phần của blockchain thông qua -rescan khi khởi động</translation>
     </message>
     <message>
-        <source>Disable all Chaincoin specific functionality (Masternodes, PrivateSend, Governance) (0-1, default: %u)</source>
-        <translation>Tắt tất cả chức năng cụ thể của Chaincoin (Masternodes, PrivateSend, Governance) (0-1, mặc định: %u)</translation>
+        <source>Disable all Bagicoin specific functionality (Masternodes, PrivateSend, Governance) (0-1, default: %u)</source>
+        <translation>Tắt tất cả chức năng cụ thể của Bagicoin (Masternodes, PrivateSend, Governance) (0-1, mặc định: %u)</translation>
     </message>
     <message>
         <source>Discover own IP addresses (default: 1 when listening and no -externalip or -proxy)</source>
@@ -4061,8 +4061,8 @@ https://www.transifex.com/projects/p/chaincoin/</translation>
         <translation>Chỉ định vị trí của tệp nhật ký gỡ lỗi: đây có thể là đường dẫn tuyệt đối hoặc đường dẫn tương đối với thư mục dữ liệu (mặc định: %s)</translation>
     </message>
     <message>
-        <source>Starting in lite mode, all Chaincoin-specific functionality is disabled.</source>
-        <translation>Bắt đầu từ chế độ lite, tất cả chức năng cụ thể của Chaincoin đều bị vô hiệu hóa.</translation>
+        <source>Starting in lite mode, all Bagicoin-specific functionality is disabled.</source>
+        <translation>Bắt đầu từ chế độ lite, tất cả chức năng cụ thể của Bagicoin đều bị vô hiệu hóa.</translation>
     </message>
     <message>
         <source>Support filtering of blocks and transaction with bloom filters (default: %u)</source>

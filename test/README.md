@@ -18,7 +18,7 @@ request is opened. All sets of tests can also be run locally.
 
 # Running tests locally
 
-Before tests can be run locally, Chaincoin Core must be built.  See the [building instructions](/doc#building) for help.
+Before tests can be run locally, Bagicoin Core must be built.  See the [building instructions](/doc#building) for help.
 
 
 ### Functional tests
@@ -200,7 +200,7 @@ For ways to generate more granular profiles, see the README in
 
 ### Util tests
 
-Util tests can be run locally by running `test/util/chaincoin-util-test.py`.
+Util tests can be run locally by running `test/util/bagicoin-util-test.py`.
 Use the `-v` option for verbose output.
 
 ### Lint tests

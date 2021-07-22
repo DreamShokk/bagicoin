@@ -20,7 +20,7 @@ public:
     State validate(QString &input, int &pos) const;
 };
 
-/** Chaincoin address widget validator, checks for a valid chaincoin address.
+/** Bagicoin address widget validator, checks for a valid bagicoin address.
  */
 class BitcoinAddressCheckValidator : public QValidator
 {

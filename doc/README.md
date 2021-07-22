@@ -1,30 +1,30 @@
-Chaincoin Core
+Bagicoin Core
 =============
 
 Setup
 ---------------------
-Chaincoin Core is the original Chaincoin client and it builds the backbone of the network. It downloads and, by default, stores the entire history of Bitcoin transactions, which requires a few hundred gigabytes of disk space. Depending on the speed of your computer and network connection, the synchronization process can take anywhere from a few hours to a day or more.
+Bagicoin Core is the original Bagicoin client and it builds the backbone of the network. It downloads and, by default, stores the entire history of Bitcoin transactions, which requires a few hundred gigabytes of disk space. Depending on the speed of your computer and network connection, the synchronization process can take anywhere from a few hours to a day or more.
 
-To download Chaincoin Core, visit [chaincoin.org](https://www.chaincoin.org/chaincoin-wallet/).
+To download Bagicoin Core, visit [bagicoin.org](https://www.bagicoin.org/bagicoin-wallet/).
 
 Running
 ---------------------
-The following are some helpful notes on how to run Chaincoin Core on your native platform.
+The following are some helpful notes on how to run Bagicoin Core on your native platform.
 
 ### Unix
 
 Unpack the files into a directory and run:
 
-- `bin/chaincoin-qt` (GUI) or
-- `bin/chaincoind` (headless)
+- `bin/bagicoin-qt` (GUI) or
+- `bin/bagicoind` (headless)
 
 ### Windows
 
-Unpack the files into a directory, and then run chaincoin-qt.exe.
+Unpack the files into a directory, and then run bagicoin-qt.exe.
 
 ### macOS
 
-Drag Chaincoin Core to your applications folder, and then run Chaincoin Core.
+Drag Bagicoin Core to your applications folder, and then run Bagicoin Core.
 
 ### Need Help?
 
@@ -35,7 +35,7 @@ for help and more information.
 
 Building
 ---------------------
-The following are developer notes on how to build Chaincoin Core on your native platform. They are not complete guides, but include notes on the necessary libraries, compile flags, etc.
+The following are developer notes on how to build Bagicoin Core on your native platform. They are not complete guides, but include notes on the necessary libraries, compile flags, etc.
 
 - [Dependencies](dependencies.md)
 - [macOS Build Notes](build-osx.md)
@@ -48,7 +48,7 @@ The following are developer notes on how to build Chaincoin Core on your native 
 
 Development
 ---------------------
-The Chaincoin repo's [root README](/README.md) contains relevant information on the development process and automated testing.
+The Bagicoin repo's [root README](/README.md) contains relevant information on the development process and automated testing.
 
 - [Developer Notes](developer-notes.md)
 - [Productivity Notes](productivity.md)

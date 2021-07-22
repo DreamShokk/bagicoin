@@ -54,7 +54,7 @@
 #include <boost/thread.hpp>
 
 #if defined(NDEBUG)
-# error "Chaincoin Core cannot be compiled without assertions."
+# error "Bagicoin Core cannot be compiled without assertions."
 #endif
 
 #define MICRO 0.000001
@@ -1709,7 +1709,7 @@ static bool WriteUndoDataForBlock(const CBlockUndo& blockundo, CValidationState&
 static CCheckQueue<CScriptCheck> scriptcheckqueue(128);
 
 void ThreadScriptCheck() {
-    RenameThread("chaincoin-scriptch");
+    RenameThread("bagicoin-scriptch");
     scriptcheckqueue.Thread();
 }
 
@@ -1771,7 +1771,7 @@ static unsigned int GetBlockScriptFlags(const CBlockIndex* pindex, const Consens
     unsigned int flags = SCRIPT_VERIFY_NONE;
 
     // BIP16 became active on Bitcoin Apr 1 2012
-    // As those rules have always been in place for Chaincoin,
+    // As those rules have always been in place for Bagicoin,
     // just enforce from Genesis
     flags |= SCRIPT_VERIFY_P2SH;
 
@@ -1892,7 +1892,7 @@ bool CChainState::ConnectBlock(const CBlock& block, CValidationState& state, CBl
     int64_t nTime1 = GetTimeMicros(); nTimeCheck += nTime1 - nTimeStart;
     LogPrint(BCLog::BENCH, "    - Sanity checks: %.2fms [%.2fs (%.2fms/blk)]\n", MILLI * (nTime1 - nTimeStart), nTimeCheck * MICRO, nTimeCheck * MILLI / nBlocksTotal);
 
-    // Removed BIP30 checks since there are no blocks before BIP34 in Chaincoin
+    // Removed BIP30 checks since there are no blocks before BIP34 in Bagicoin
 
     // Start enforcing BIP68 (sequence locks)
     int nLockTimeFlags = 0;

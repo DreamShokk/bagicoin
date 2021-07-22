@@ -5,7 +5,7 @@
 #include <util/system.h>
 
 #include <support/allocators/secure.h>
-#include <test/test_chaincoin.h>
+#include <test/test_bagicoin.h>
 
 #include <memory>
 

@@ -486,7 +486,7 @@ void CSuperblock::ParsePaymentSchedule(const std::string& strPaymentAddresses, c
         std::string address(vecParsed1[i]);
         CTxDestination destination = DecodeDestination(address);
         if (!IsValidDestination(destination)) {
-            throw std::runtime_error(strprintf("CSuperblock::ParsePaymentSchedule -- Invalid Chaincoin Address : %s", vecParsed1[i]));
+            throw std::runtime_error(strprintf("CSuperblock::ParsePaymentSchedule -- Invalid Bagicoin Address : %s", vecParsed1[i]));
         }
 
         CAmount nAmount = ParsePaymentAmount(vecParsed2[i]);

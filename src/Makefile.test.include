@@ -29,11 +29,11 @@ FUZZ_TARGETS = \
 if ENABLE_FUZZ
 noinst_PROGRAMS += $(FUZZ_TARGETS:=)
 else
-bin_PROGRAMS += test/test_chaincoin
+bin_PROGRAMS += test/test_bagicoin
 endif
 
 TEST_SRCDIR = test
-TEST_BINARY=test/test_chaincoin$(EXEEXT)
+TEST_BINARY=test/test_bagicoin$(EXEEXT)
 
 JSON_TEST_FILES = \
   test/data/script_tests.json \
@@ -54,15 +54,15 @@ RAW_TEST_FILES =
 GENERATED_TEST_FILES = $(JSON_TEST_FILES:.json=.json.h) $(RAW_TEST_FILES:.raw=.raw.h)
 
 BITCOIN_TEST_SUITE = \
-  test/test_chaincoin_main.cpp \
-  test/test_chaincoin.h \
-  test/test_chaincoin.cpp
+  test/test_bagicoin_main.cpp \
+  test/test_bagicoin.h \
+  test/test_bagicoin.cpp
 
 FUZZ_SUITE = \
   test/fuzz/fuzz.cpp \
   test/fuzz/fuzz.h
 
-# test_chaincoin binary #
+# test_bagicoin binary #
 BITCOIN_TESTS =\
   test/arith_uint256_tests.cpp \
   test/scriptnum10.h \
@@ -157,22 +157,22 @@ BITCOIN_TEST_SUITE += \
   wallet/test/init_test_fixture.h
 endif
 
-test_test_chaincoin_SOURCES = $(BITCOIN_TEST_SUITE) $(BITCOIN_TESTS) $(JSON_TEST_FILES) $(RAW_TEST_FILES)
-test_test_chaincoin_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES) $(TESTDEFS) $(EVENT_CFLAGS)
-test_test_chaincoin_LDADD =
+test_test_bagicoin_SOURCES = $(BITCOIN_TEST_SUITE) $(BITCOIN_TESTS) $(JSON_TEST_FILES) $(RAW_TEST_FILES)
+test_test_bagicoin_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES) $(TESTDEFS) $(EVENT_CFLAGS)
+test_test_bagicoin_LDADD =
 if ENABLE_WALLET
-test_test_chaincoin_LDADD += $(LIBBITCOIN_WALLET)
+test_test_bagicoin_LDADD += $(LIBBITCOIN_WALLET)
 endif
 
-test_test_chaincoin_LDADD += $(LIBBITCOIN_SERVER) $(LIBBITCOIN_CLI) $(LIBBITCOIN_COMMON) $(LIBBITCOIN_UTIL) $(LIBBITCOIN_CONSENSUS) $(LIBBITCOIN_CRYPTO) $(LIBUNIVALUE) \
+test_test_bagicoin_LDADD += $(LIBBITCOIN_SERVER) $(LIBBITCOIN_CLI) $(LIBBITCOIN_COMMON) $(LIBBITCOIN_UTIL) $(LIBBITCOIN_CONSENSUS) $(LIBBITCOIN_CRYPTO) $(LIBUNIVALUE) \
   $(LIBLEVELDB) $(LIBLEVELDB_SSE42) $(LIBMEMENV) $(BOOST_LIBS) $(BOOST_UNIT_TEST_FRAMEWORK_LIB) $(LIBSECP256K1) $(EVENT_LIBS) $(EVENT_PTHREADS_LIBS)
-test_test_chaincoin_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+test_test_bagicoin_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 
-test_test_chaincoin_LDADD += $(BDB_LIBS) $(CRYPTO_LIBS) $(MINIUPNPC_LIBS) $(RAPIDCHECK_LIBS)
-test_test_chaincoin_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS) -static
+test_test_bagicoin_LDADD += $(BDB_LIBS) $(CRYPTO_LIBS) $(MINIUPNPC_LIBS) $(RAPIDCHECK_LIBS)
+test_test_bagicoin_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS) -static
 
 if ENABLE_ZMQ
-test_test_chaincoin_LDADD += $(ZMQ_LIBS)
+test_test_bagicoin_LDADD += $(ZMQ_LIBS)
 endif
 
 if ENABLE_FUZZ
@@ -534,7 +534,7 @@ test_fuzz_blocktransactionsrequest_deserialize_LDADD = \
 test_fuzz_blocktransactionsrequest_deserialize_LDADD += $(BOOST_LIBS) $(CRYPTO_LIBS)
 endif # ENABLE_FUZZ
 
-nodist_test_test_chaincoin_SOURCES = $(GENERATED_TEST_FILES)
+nodist_test_test_bagicoin_SOURCES = $(GENERATED_TEST_FILES)
 
 $(BITCOIN_TESTS): $(GENERATED_TEST_FILES)
 
@@ -543,33 +543,33 @@ CLEAN_BITCOIN_TEST = test/*.gcda test/*.gcno $(GENERATED_TEST_FILES) $(BITCOIN_T
 CLEANFILES += $(CLEAN_BITCOIN_TEST)
 
 if TARGET_WINDOWS
-chaincoin_test: $(TEST_BINARY)
+bagicoin_test: $(TEST_BINARY)
 else
 if ENABLE_BENCH
-chaincoin_test: $(TEST_BINARY) $(BENCH_BINARY)
+bagicoin_test: $(TEST_BINARY) $(BENCH_BINARY)
 else
-chaincoin_test: $(TEST_BINARY)
+bagicoin_test: $(TEST_BINARY)
 endif
 endif
 benchmarking code
 
-chaincoin_test_check: $(TEST_BINARY) FORCE
+bagicoin_test_check: $(TEST_BINARY) FORCE
 	$(MAKE) check-TESTS TESTS=$^
 
-chaincoin_test_clean : FORCE
-	rm -f $(CLEAN_BITCOIN_TEST) $(test_test_chaincoin_OBJECTS) $(TEST_BINARY)
+bagicoin_test_clean : FORCE
+	rm -f $(CLEAN_BITCOIN_TEST) $(test_test_bagicoin_OBJECTS) $(TEST_BINARY)
 
 check-local: $(BITCOIN_TESTS:.cpp=.cpp.test)
 if BUILD_BITCOIN_TX
-	@echo "Running test/util/chaincoin-util-test.py..."
-	$(PYTHON) $(top_builddir)/test/util/chaincoin-util-test.py
+	@echo "Running test/util/bagicoin-util-test.py..."
+	$(PYTHON) $(top_builddir)/test/util/bagicoin-util-test.py
 endif
 	@echo "Running test/util/rpcauth-test.py..."
 	$(PYTHON) $(top_builddir)/test/util/rpcauth-test.py
 if TARGET_WINDOWS
 else
 if ENABLE_BENCH
-	@echo "Running bench/bench_chaincoin -evals=1 -scaling=0..."
+	@echo "Running bench/bench_bagicoin -evals=1 -scaling=0..."
 	$(BENCH_BINARY) -evals=1 -scaling=0 > /dev/null
 endif
 endif

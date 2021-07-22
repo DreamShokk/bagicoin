@@ -2,7 +2,7 @@ NetBSD build guide
 ======================
 (updated for NetBSD 8.0)
 
-This guide describes how to build chaincoind and command-line utilities on NetBSD.
+This guide describes how to build bagicoind and command-line utilities on NetBSD.
 
 This guide does not contain instructions for building the GUI.
 
@@ -24,7 +24,7 @@ python37
 
 Download the source code:
 ```
-git clone https://github.com/chaincoin/chaincoin.git
+git clone https://github.com/bagicoin/bagicoin.git
 ```
 
 See [dependencies.md](dependencies.md) for a complete overview.
@@ -49,7 +49,7 @@ from the root of the repository. Then set `BDB_PREFIX` for the next section:
 export BDB_PREFIX="$PWD/db4"
 ```
 
-### Building Chaincoin Core
+### Building Bagicoin Core
 
 **Important**: Use `gmake` (the non-GNU `make` will exit with an error).
 

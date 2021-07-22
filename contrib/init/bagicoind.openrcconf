@@ -1,0 +1,33 @@
+# /etc/conf.d/bagicoind: config file for /etc/init.d/bagicoind
+
+# Config file location
+#BITCOIND_CONFIGFILE="/etc/bagicoin/bagicoin.conf"
+
+# What directory to write pidfile to?  (created and owned by $BITCOIND_USER)
+#BITCOIND_PIDDIR="/var/run/bagicoind"
+
+# What filename to give the pidfile
+#BITCOIND_PIDFILE="${BITCOIND_PIDDIR}/bagicoind.pid"
+
+# Where to write bagicoind data (be mindful that the blockchain is large)
+#BITCOIND_DATADIR="/var/lib/bagicoind"
+
+# User and group to own bagicoind process
+#BITCOIND_USER="bagicoin"
+#BITCOIND_GROUP="bagicoin"
+
+# Path to bitcoind executable
+#BITCOIND_BIN="/usr/bin/bagicoind"
+
+# Nice value to run bagicoind under
+#BITCOIND_NICE=0
+
+# Additional options (avoid -conf and -datadir, use flags above)
+#BITCOIND_OPTS=""
+
+# The timeout in seconds OpenRC will wait for bagicoind to terminate
+# after a SIGTERM has been raised.
+# Note that this will be mapped as argument to start-stop-daemon's
+# '--retry' option, which means you can specify a retry schedule
+# here. For more information see man 8 start-stop-daemon.
+BITCOIND_SIGTERM_TIMEOUT=60

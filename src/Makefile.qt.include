@@ -1,122 +1,122 @@
-bin_PROGRAMS += qt/chaincoin-qt
-EXTRA_LIBRARIES += qt/libchaincoinqt.a
+bin_PROGRAMS += qt/bagicoin-qt
+EXTRA_LIBRARIES += qt/libbagicoinqt.a
 
-# chaincoin qt core #
+# bagicoin qt core #
 QT_TS = \
-  qt/locale/chaincoin_af.ts \
-  qt/locale/chaincoin_af_ZA.ts \
-  qt/locale/chaincoin_am.ts \
-  qt/locale/chaincoin_ar.ts \
-  qt/locale/chaincoin_be_BY.ts \
-  qt/locale/chaincoin_bg.ts \
-  qt/locale/chaincoin_bg_BG.ts \
-  qt/locale/chaincoin_bn.ts \
-  qt/locale/chaincoin_ca.ts \
-  qt/locale/chaincoin_ca@valencia.ts \
-  qt/locale/chaincoin_ca_ES.ts \
-  qt/locale/chaincoin_cs.ts \
-  qt/locale/chaincoin_cs_CZ.ts \
-  qt/locale/chaincoin_cy.ts \
-  qt/locale/chaincoin_da.ts \
-  qt/locale/chaincoin_de.ts \
-  qt/locale/chaincoin_de_AT.ts \
-  qt/locale/chaincoin_de_DE.ts \
-  qt/locale/chaincoin_el.ts \
-  qt/locale/chaincoin_el_GR.ts \
-  qt/locale/chaincoin_en.ts \
-  qt/locale/chaincoin_en_GB.ts \
-  qt/locale/chaincoin_eo.ts \
-  qt/locale/chaincoin_es.ts \
-  qt/locale/chaincoin_es_419.ts \
-  qt/locale/chaincoin_es_AR.ts \
-  qt/locale/chaincoin_es_CL.ts \
-  qt/locale/chaincoin_es_CO.ts \
-  qt/locale/chaincoin_es_DO.ts \
-  qt/locale/chaincoin_es_ES.ts \
-  qt/locale/chaincoin_es_MX.ts \
-  qt/locale/chaincoin_es_UY.ts \
-  qt/locale/chaincoin_es_VE.ts \
-  qt/locale/chaincoin_et.ts \
-  qt/locale/chaincoin_et_EE.ts \
-  qt/locale/chaincoin_eu_ES.ts \
-  qt/locale/chaincoin_fa.ts \
-  qt/locale/chaincoin_fa_IR.ts \
-  qt/locale/chaincoin_fi.ts \
-  qt/locale/chaincoin_fr.ts \
-  qt/locale/chaincoin_fr_CA.ts \
-  qt/locale/chaincoin_fr_FR.ts \
-  qt/locale/chaincoin_gl.ts \
-  qt/locale/chaincoin_he.ts \
-  qt/locale/chaincoin_he_IL.ts \
-  qt/locale/chaincoin_hi_IN.ts \
-  qt/locale/chaincoin_hr.ts \
-  qt/locale/chaincoin_hu.ts \
-  qt/locale/chaincoin_hu_HU.ts \
-  qt/locale/chaincoin_id.ts \
-  qt/locale/chaincoin_id_ID.ts \
-  qt/locale/chaincoin_is.ts \
-  qt/locale/chaincoin_it.ts \
-  qt/locale/chaincoin_it_IT.ts \
-  qt/locale/chaincoin_ja.ts \
-  qt/locale/chaincoin_ja_JP.ts \
-  qt/locale/chaincoin_ka.ts \
-  qt/locale/chaincoin_kk_KZ.ts \
-  qt/locale/chaincoin_km_KH.ts \
-  qt/locale/chaincoin_ko.ts \
-  qt/locale/chaincoin_ko_KR.ts \
-  qt/locale/chaincoin_ku_IQ.ts \
-  qt/locale/chaincoin_ky.ts \
-  qt/locale/chaincoin_la.ts \
-  qt/locale/chaincoin_lt.ts \
-  qt/locale/chaincoin_lv_LV.ts \
-  qt/locale/chaincoin_mk_MK.ts \
-  qt/locale/chaincoin_ml.ts \
-  qt/locale/chaincoin_mn.ts \
-  qt/locale/chaincoin_mr_IN.ts \
-  qt/locale/chaincoin_ms.ts \
-  qt/locale/chaincoin_ms_MY.ts \
-  qt/locale/chaincoin_my.ts \
-  qt/locale/chaincoin_nb.ts \
-  qt/locale/chaincoin_nb_NO.ts \
-  qt/locale/chaincoin_ne.ts \
-  qt/locale/chaincoin_nl.ts \
-  qt/locale/chaincoin_nl_NL.ts \
-  qt/locale/chaincoin_pam.ts \
-  qt/locale/chaincoin_pl.ts \
-  qt/locale/chaincoin_pl_PL.ts \
-  qt/locale/chaincoin_pt.ts \
-  qt/locale/chaincoin_pt_BR.ts \
-  qt/locale/chaincoin_pt_MZ.ts \
-  qt/locale/chaincoin_pt_PT.ts \
-  qt/locale/chaincoin_ro.ts \
-  qt/locale/chaincoin_ro_RO.ts \
-  qt/locale/chaincoin_ru.ts \
-  qt/locale/chaincoin_ru_RU.ts \
-  qt/locale/chaincoin_si.ts \
-  qt/locale/chaincoin_sk.ts \
-  qt/locale/chaincoin_sl_SI.ts \
-  qt/locale/chaincoin_sn.ts \
-  qt/locale/chaincoin_sq.ts \
-  qt/locale/chaincoin_sr.ts \
-  qt/locale/chaincoin_sr@latin.ts \
-  qt/locale/chaincoin_sv.ts \
-  qt/locale/chaincoin_ta.ts \
-  qt/locale/chaincoin_ta_IN.ts \
-  qt/locale/chaincoin_te.ts \
-  qt/locale/chaincoin_th.ts \
-  qt/locale/chaincoin_th_TH.ts \
-  qt/locale/chaincoin_tr.ts \
-  qt/locale/chaincoin_tr_TR.ts \
-  qt/locale/chaincoin_uk.ts \
-  qt/locale/chaincoin_ur_PK.ts \
-  qt/locale/chaincoin_uz@Cyrl.ts \
-  qt/locale/chaincoin_vi.ts \
-  qt/locale/chaincoin_vi_VN.ts \
-  qt/locale/chaincoin_zh-Hans.ts \
-  qt/locale/chaincoin_zh.ts \
-  qt/locale/chaincoin_zh_CN.ts \
-  qt/locale/chaincoin_zh_HK.ts \
-  qt/locale/chaincoin_zh_TW.ts 
+  qt/locale/bagicoin_af.ts \
+  qt/locale/bagicoin_af_ZA.ts \
+  qt/locale/bagicoin_am.ts \
+  qt/locale/bagicoin_ar.ts \
+  qt/locale/bagicoin_be_BY.ts \
+  qt/locale/bagicoin_bg.ts \
+  qt/locale/bagicoin_bg_BG.ts \
+  qt/locale/bagicoin_bn.ts \
+  qt/locale/bagicoin_ca.ts \
+  qt/locale/bagicoin_ca@valencia.ts \
+  qt/locale/bagicoin_ca_ES.ts \
+  qt/locale/bagicoin_cs.ts \
+  qt/locale/bagicoin_cs_CZ.ts \
+  qt/locale/bagicoin_cy.ts \
+  qt/locale/bagicoin_da.ts \
+  qt/locale/bagicoin_de.ts \
+  qt/locale/bagicoin_de_AT.ts \
+  qt/locale/bagicoin_de_DE.ts \
+  qt/locale/bagicoin_el.ts \
+  qt/locale/bagicoin_el_GR.ts \
+  qt/locale/bagicoin_en.ts \
+  qt/locale/bagicoin_en_GB.ts \
+  qt/locale/bagicoin_eo.ts \
+  qt/locale/bagicoin_es.ts \
+  qt/locale/bagicoin_es_419.ts \
+  qt/locale/bagicoin_es_AR.ts \
+  qt/locale/bagicoin_es_CL.ts \
+  qt/locale/bagicoin_es_CO.ts \
+  qt/locale/bagicoin_es_DO.ts \
+  qt/locale/bagicoin_es_ES.ts \
+  qt/locale/bagicoin_es_MX.ts \
+  qt/locale/bagicoin_es_UY.ts \
+  qt/locale/bagicoin_es_VE.ts \
+  qt/locale/bagicoin_et.ts \
+  qt/locale/bagicoin_et_EE.ts \
+  qt/locale/bagicoin_eu_ES.ts \
+  qt/locale/bagicoin_fa.ts \
+  qt/locale/bagicoin_fa_IR.ts \
+  qt/locale/bagicoin_fi.ts \
+  qt/locale/bagicoin_fr.ts \
+  qt/locale/bagicoin_fr_CA.ts \
+  qt/locale/bagicoin_fr_FR.ts \
+  qt/locale/bagicoin_gl.ts \
+  qt/locale/bagicoin_he.ts \
+  qt/locale/bagicoin_he_IL.ts \
+  qt/locale/bagicoin_hi_IN.ts \
+  qt/locale/bagicoin_hr.ts \
+  qt/locale/bagicoin_hu.ts \
+  qt/locale/bagicoin_hu_HU.ts \
+  qt/locale/bagicoin_id.ts \
+  qt/locale/bagicoin_id_ID.ts \
+  qt/locale/bagicoin_is.ts \
+  qt/locale/bagicoin_it.ts \
+  qt/locale/bagicoin_it_IT.ts \
+  qt/locale/bagicoin_ja.ts \
+  qt/locale/bagicoin_ja_JP.ts \
+  qt/locale/bagicoin_ka.ts \
+  qt/locale/bagicoin_kk_KZ.ts \
+  qt/locale/bagicoin_km_KH.ts \
+  qt/locale/bagicoin_ko.ts \
+  qt/locale/bagicoin_ko_KR.ts \
+  qt/locale/bagicoin_ku_IQ.ts \
+  qt/locale/bagicoin_ky.ts \
+  qt/locale/bagicoin_la.ts \
+  qt/locale/bagicoin_lt.ts \
+  qt/locale/bagicoin_lv_LV.ts \
+  qt/locale/bagicoin_mk_MK.ts \
+  qt/locale/bagicoin_ml.ts \
+  qt/locale/bagicoin_mn.ts \
+  qt/locale/bagicoin_mr_IN.ts \
+  qt/locale/bagicoin_ms.ts \
+  qt/locale/bagicoin_ms_MY.ts \
+  qt/locale/bagicoin_my.ts \
+  qt/locale/bagicoin_nb.ts \
+  qt/locale/bagicoin_nb_NO.ts \
+  qt/locale/bagicoin_ne.ts \
+  qt/locale/bagicoin_nl.ts \
+  qt/locale/bagicoin_nl_NL.ts \
+  qt/locale/bagicoin_pam.ts \
+  qt/locale/bagicoin_pl.ts \
+  qt/locale/bagicoin_pl_PL.ts \
+  qt/locale/bagicoin_pt.ts \
+  qt/locale/bagicoin_pt_BR.ts \
+  qt/locale/bagicoin_pt_MZ.ts \
+  qt/locale/bagicoin_pt_PT.ts \
+  qt/locale/bagicoin_ro.ts \
+  qt/locale/bagicoin_ro_RO.ts \
+  qt/locale/bagicoin_ru.ts \
+  qt/locale/bagicoin_ru_RU.ts \
+  qt/locale/bagicoin_si.ts \
+  qt/locale/bagicoin_sk.ts \
+  qt/locale/bagicoin_sl_SI.ts \
+  qt/locale/bagicoin_sn.ts \
+  qt/locale/bagicoin_sq.ts \
+  qt/locale/bagicoin_sr.ts \
+  qt/locale/bagicoin_sr@latin.ts \
+  qt/locale/bagicoin_sv.ts \
+  qt/locale/bagicoin_ta.ts \
+  qt/locale/bagicoin_ta_IN.ts \
+  qt/locale/bagicoin_te.ts \
+  qt/locale/bagicoin_th.ts \
+  qt/locale/bagicoin_th_TH.ts \
+  qt/locale/bagicoin_tr.ts \
+  qt/locale/bagicoin_tr_TR.ts \
+  qt/locale/bagicoin_uk.ts \
+  qt/locale/bagicoin_ur_PK.ts \
+  qt/locale/bagicoin_uz@Cyrl.ts \
+  qt/locale/bagicoin_vi.ts \
+  qt/locale/bagicoin_vi_VN.ts \
+  qt/locale/bagicoin_zh-Hans.ts \
+  qt/locale/bagicoin_zh.ts \
+  qt/locale/bagicoin_zh_CN.ts \
+  qt/locale/bagicoin_zh_HK.ts \
+  qt/locale/bagicoin_zh_TW.ts 
 
 QT_FORMS_UI = \
   qt/forms/addressbookpage.ui \
@@ -151,7 +151,7 @@ QT_MOC_CPP = \
   qt/moc_bitcoinamountfield.cpp \
   qt/moc_bitcoingui.cpp \
   qt/moc_bitcoinunits.cpp \
-  qt/moc_chaincoin.cpp \
+  qt/moc_bagicoin.cpp \
   qt/moc_clientmodel.cpp \
   qt/moc_coincontroldialog.cpp \
   qt/moc_coincontroltreewidget.cpp \
@@ -209,10 +209,10 @@ QT_MOC = \
   qt/overviewpage.moc \
   qt/rpcconsole.moc
 
-QT_QRC_CPP = qt/qrc_chaincoin.cpp
-QT_QRC = qt/chaincoin.qrc
-QT_QRC_LOCALE_CPP = qt/qrc_chaincoin_locale.cpp
-QT_QRC_LOCALE = qt/chaincoin_locale.qrc
+QT_QRC_CPP = qt/qrc_bagicoin.cpp
+QT_QRC = qt/bagicoin.qrc
+QT_QRC_LOCALE_CPP = qt/qrc_bagicoin_locale.cpp
+QT_QRC_LOCALE = qt/bagicoin_locale.qrc
 
 if ENABLE_BIP70
 PROTOBUF_CC = qt/paymentrequest.pb.cc
@@ -233,7 +233,7 @@ BITCOIN_QT_H = \
   qt/bitcoinamountfield.h \
   qt/bitcoingui.h \
   qt/bitcoinunits.h \
-  qt/chaincoin.h \
+  qt/bagicoin.h \
   qt/clientmodel.h \
   qt/coincontroldialog.h \
   qt/coincontroltreewidget.h \
@@ -289,8 +289,8 @@ BITCOIN_QT_H = \
   qt/winshutdownmonitor.h
 
 RES_ICONS = \
-  qt/res/icons/chaincoin.ico \
-  qt/res/icons/chaincoin.png \
+  qt/res/icons/bagicoin.ico \
+  qt/res/icons/bagicoin.png \
   qt/res/icons/chevron.png \
   qt/res/icons/warning.png \
   qt/res/icons/add.png \
@@ -344,7 +344,7 @@ BITCOIN_QT_BASE_CPP = \
   qt/bitcoinamountfield.cpp \
   qt/bitcoingui.cpp \
   qt/bitcoinunits.cpp \
-  qt/chaincoin.cpp \
+  qt/bagicoin.cpp \
   qt/clientmodel.cpp \
   qt/csvmodelwriter.cpp \
   qt/guiutil.cpp \
@@ -416,7 +416,7 @@ endif # ENABLE_WALLET
 
 RES_IMAGES = \
   qt/res/images/about.png \
-  qt/res/images/chaincoin_logo_horizontal.png \
+  qt/res/images/bagicoin_logo_horizontal.png \
   qt/res/images/checked.png \
   qt/res/images/downArrow.png \
   qt/res/images/downArrow_small.png \
@@ -435,22 +435,22 @@ RES_QSS = \
 
 RES_MOVIES = $(wildcard $(srcdir)/qt/res/movies/spinner-*.png)
 
-BITCOIN_RC = qt/res/chaincoin-qt-res.rc
+BITCOIN_RC = qt/res/bagicoin-qt-res.rc
 
 BITCOIN_QT_INCLUDES = -DQT_NO_KEYWORDS
 
-qt_libchaincoinqt_a_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES) $(BITCOIN_QT_INCLUDES) \
+qt_libbagicoinqt_a_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES) $(BITCOIN_QT_INCLUDES) \
   $(QT_INCLUDES) $(QT_DBUS_INCLUDES) $(PROTOBUF_CFLAGS) $(QR_CFLAGS)
-qt_libchaincoinqt_a_CXXFLAGS = $(AM_CXXFLAGS) $(QT_PIE_FLAGS)
-qt_libchaincoinqt_a_OBJCXXFLAGS = $(AM_OBJCXXFLAGS) $(QT_PIE_FLAGS)
+qt_libbagicoinqt_a_CXXFLAGS = $(AM_CXXFLAGS) $(QT_PIE_FLAGS)
+qt_libbagicoinqt_a_OBJCXXFLAGS = $(AM_OBJCXXFLAGS) $(QT_PIE_FLAGS)
 
-qt_libchaincoinqt_a_SOURCES = $(BITCOIN_QT_CPP) $(BITCOIN_QT_H) $(QT_FORMS_UI) \
+qt_libbagicoinqt_a_SOURCES = $(BITCOIN_QT_CPP) $(BITCOIN_QT_H) $(QT_FORMS_UI) \
   $(QT_QRC) $(QT_QRC_LOCALE) $(QT_TS) $(PROTOBUF_PROTO) $(RES_ICONS) $(RES_IMAGES) $(RES_QSS) $(RES_MOVIES)
 if TARGET_DARWIN
-  qt_libchaincoinqt_a_SOURCES += $(BITCOIN_MM)
+  qt_libbagicoinqt_a_SOURCES += $(BITCOIN_MM)
 endif
 
-nodist_qt_libchaincoinqt_a_SOURCES = $(QT_MOC_CPP) $(QT_MOC) $(PROTOBUF_CC) \
+nodist_qt_libbagicoinqt_a_SOURCES = $(QT_MOC_CPP) $(QT_MOC) $(PROTOBUF_CC) \
   $(PROTOBUF_H) $(QT_QRC_CPP) $(QT_QRC_LOCALE_CPP)
 
 # forms/foo.h -> forms/ui_foo.h
@@ -459,75 +459,75 @@ QT_FORMS_H=$(join $(dir $(QT_FORMS_UI)),$(addprefix ui_, $(notdir $(QT_FORMS_UI:
 # Most files will depend on the forms and moc files as includes. Generate them
 # before anything else.
 $(QT_MOC): $(QT_FORMS_H)
-$(qt_libchaincoinqt_a_OBJECTS) $(qt_chaincoin_qt_OBJECTS) : | $(QT_MOC)
+$(qt_libbagicoinqt_a_OBJECTS) $(qt_bagicoin_qt_OBJECTS) : | $(QT_MOC)
 
 #Generating these with a half-written protobuf header leads to wacky results.
 #This makes sure it's done.
 $(QT_MOC): $(PROTOBUF_H)
 $(QT_MOC_CPP): $(PROTOBUF_H)
 
-# chaincoin-qt binary #
-qt_chaincoin_qt_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES) $(BITCOIN_QT_INCLUDES) \
+# bagicoin-qt binary #
+qt_bagicoin_qt_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES) $(BITCOIN_QT_INCLUDES) \
   $(QT_INCLUDES) $(PROTOBUF_CFLAGS) $(QR_CFLAGS)
-qt_chaincoin_qt_CXXFLAGS = $(AM_CXXFLAGS) $(QT_PIE_FLAGS)
+qt_bagicoin_qt_CXXFLAGS = $(AM_CXXFLAGS) $(QT_PIE_FLAGS)
 
-qt_chaincoin_qt_SOURCES = qt/main.cpp
+qt_bagicoin_qt_SOURCES = qt/main.cpp
 if TARGET_WINDOWS
-  qt_chaincoin_qt_SOURCES += $(BITCOIN_RC)
+  qt_bagicoin_qt_SOURCES += $(BITCOIN_RC)
 endif
-qt_chaincoin_qt_LDADD = qt/libchaincoinqt.a $(LIBBITCOIN_SERVER)
+qt_bagicoin_qt_LDADD = qt/libbagicoinqt.a $(LIBBITCOIN_SERVER)
 if ENABLE_WALLET
-qt_chaincoin_qt_LDADD += $(LIBBITCOIN_UTIL) $(LIBBITCOIN_WALLET)
+qt_bagicoin_qt_LDADD += $(LIBBITCOIN_UTIL) $(LIBBITCOIN_WALLET)
 endif
 if ENABLE_ZMQ
-qt_chaincoin_qt_LDADD += $(LIBBITCOIN_ZMQ) $(ZMQ_LIBS)
+qt_bagicoin_qt_LDADD += $(LIBBITCOIN_ZMQ) $(ZMQ_LIBS)
 endif
-qt_chaincoin_qt_LDADD += $(LIBBITCOIN_CLI) $(LIBBITCOIN_COMMON) $(LIBBITCOIN_UTIL) $(LIBBITCOIN_CONSENSUS) $(LIBBITCOIN_CRYPTO) $(LIBUNIVALUE) $(LIBLEVELDB) $(LIBLEVELDB_SSE42) $(LIBMEMENV) \
+qt_bagicoin_qt_LDADD += $(LIBBITCOIN_CLI) $(LIBBITCOIN_COMMON) $(LIBBITCOIN_UTIL) $(LIBBITCOIN_CONSENSUS) $(LIBBITCOIN_CRYPTO) $(LIBUNIVALUE) $(LIBLEVELDB) $(LIBLEVELDB_SSE42) $(LIBMEMENV) \
   $(BOOST_LIBS) $(QT_LIBS) $(QT_DBUS_LIBS) $(QR_LIBS) $(PROTOBUF_LIBS) $(BDB_LIBS) $(MINIUPNPC_LIBS) $(LIBSECP256K1) \
   $(EVENT_PTHREADS_LIBS) $(EVENT_LIBS)
 if ENABLE_BIP70
-qt_chaincoin_qt_LDADD += $(SSL_LIBS)
+qt_bagicoin_qt_LDADD += $(SSL_LIBS)
 else
 if TARGET_WINDOWS
-qt_chaincoin_qt_LDADD += $(SSL_LIBS)
+qt_bagicoin_qt_LDADD += $(SSL_LIBS)
 endif
 endif
-qt_chaincoin_qt_LDADD += $(CRYPTO_LIBS)
-qt_chaincoin_qt_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(QT_LDFLAGS) $(LIBTOOL_APP_LDFLAGS)
-qt_chaincoin_qt_LIBTOOLFLAGS = $(AM_LIBTOOLFLAGS) --tag CXX
+qt_bagicoin_qt_LDADD += $(CRYPTO_LIBS)
+qt_bagicoin_qt_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(QT_LDFLAGS) $(LIBTOOL_APP_LDFLAGS)
+qt_bagicoin_qt_LIBTOOLFLAGS = $(AM_LIBTOOLFLAGS) --tag CXX
 
 #locale/foo.ts -> locale/foo.qm
 QT_QM=$(QT_TS:.ts=.qm)
 
 SECONDARY: $(QT_QM)
 
-qt/chaincoinstrings.cpp: $(libchaincoin_server_a_SOURCES) $(libchaincoin_wallet_a_SOURCES) $(libchaincoin_common_a_SOURCES) $(libchaincoin_zmq_a_SOURCES) $(libchaincoin_consensus_a_SOURCES) $(libchaincoin_util_a_SOURCES)
+qt/bagicoinstrings.cpp: $(libbagicoin_server_a_SOURCES) $(libbagicoin_wallet_a_SOURCES) $(libbagicoin_common_a_SOURCES) $(libbagicoin_zmq_a_SOURCES) $(libbagicoin_consensus_a_SOURCES) $(libbagicoin_util_a_SOURCES)
 	@test -n $(XGETTEXT) || echo "xgettext is required for updating translations"
 	$(AM_V_GEN) cd $(srcdir); XGETTEXT=$(XGETTEXT) ../share/qt/extract_strings_qt.py $^
 
-translate: qt/chaincoinstrings.cpp $(QT_FORMS_UI) $(QT_FORMS_UI) $(BITCOIN_QT_CPP) qt/chaincoin.cpp $(BITCOIN_QT_H) $(BITCOIN_MM)
+translate: qt/bagicoinstrings.cpp $(QT_FORMS_UI) $(QT_FORMS_UI) $(BITCOIN_QT_CPP) qt/bagicoin.cpp $(BITCOIN_QT_H) $(BITCOIN_MM)
 	@test -n $(LUPDATE) || echo "lupdate is required for updating translations"
-	$(AM_V_GEN) QT_SELECT=$(QT_SELECT) $(LUPDATE) $^ -locations relative -no-obsolete -ts qt/locale/chaincoin_en.ts
+	$(AM_V_GEN) QT_SELECT=$(QT_SELECT) $(LUPDATE) $^ -locations relative -no-obsolete -ts qt/locale/bagicoin_en.ts
 
 $(QT_QRC_LOCALE_CPP): $(QT_QRC_LOCALE) $(QT_QM)
 	@test -f $(RCC)
 	@test -f $(@D)/$(<F) || cp -f $< $(@D)
-	$(AM_V_GEN) QT_SELECT=$(QT_SELECT) $(RCC) -name chaincoin_locale $(@D)/$(<F) | \
+	$(AM_V_GEN) QT_SELECT=$(QT_SELECT) $(RCC) -name bagicoin_locale $(@D)/$(<F) | \
 	  $(SED) -e '/^\*\*.*Created:/d' -e '/^\*\*.*by:/d' > $@
 
 $(QT_QRC_CPP): $(QT_QRC) $(QT_FORMS_H) $(RES_ICONS) $(RES_IMAGES) $(RES_CSS) $(RES_MOVIES) $(PROTOBUF_H)
 	@test -f $(RCC)
-	$(AM_V_GEN) QT_SELECT=$(QT_SELECT) $(RCC) -name chaincoin $< | \
+	$(AM_V_GEN) QT_SELECT=$(QT_SELECT) $(RCC) -name bagicoin $< | \
 	  $(SED) -e '/^\*\*.*Created:/d' -e '/^\*\*.*by:/d' > $@
 
-CLEAN_QT = $(nodist_qt_libchaincoinqt_a_SOURCES) $(QT_QM) $(QT_FORMS_H) qt/*.gcda qt/*.gcno qt/temp_chaincoin_locale.qrc
+CLEAN_QT = $(nodist_qt_libbagicoinqt_a_SOURCES) $(QT_QM) $(QT_FORMS_H) qt/*.gcda qt/*.gcno qt/temp_bagicoin_locale.qrc
 
 CLEANFILES += $(CLEAN_QT)
 
-chaincoin_qt_clean: FORCE
-	rm -f $(CLEAN_QT) $(qt_libchaincoinqt_a_OBJECTS) $(qt_chaincoin_qt_OBJECTS) qt/chaincoin-qt$(EXEEXT) $(LIBBITCOINQT)
+bagicoin_qt_clean: FORCE
+	rm -f $(CLEAN_QT) $(qt_libbagicoinqt_a_OBJECTS) $(qt_bagicoin_qt_OBJECTS) qt/bagicoin-qt$(EXEEXT) $(LIBBITCOINQT)
 
-chaincoin_qt : qt/chaincoin-qt$(EXEEXT)
+bagicoin_qt : qt/bagicoin-qt$(EXEEXT)
 
 ui_%.h: %.ui
 	@test -f $(UIC)

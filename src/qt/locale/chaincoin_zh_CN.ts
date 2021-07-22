@@ -62,11 +62,11 @@
         <translation>收款地址</translation>
     </message>
     <message>
-        <source>These are your Chaincoin addresses for sending payments. Always check the amount and the receiving address before sending coins.</source>
+        <source>These are your Bagicoin addresses for sending payments. Always check the amount and the receiving address before sending coins.</source>
         <translation>这些是你要付款过去的链币地址。在付钱之前，务必要检查金额和收款地址是否正确。</translation>
     </message>
     <message>
-        <source>These are your Chaincoin addresses for receiving payments. It is recommended to use a new receiving address for each transaction.</source>
+        <source>These are your Bagicoin addresses for receiving payments. It is recommended to use a new receiving address for each transaction.</source>
         <translation>这些是你用来收款的链币地址。建议在每次交易时，都使用一个新的收款地址。</translation>
     </message>
     <message>
@@ -266,11 +266,11 @@
         <translation>显示钱包概况</translation>
     </message>
     <message>
-        <source>Send coins to a Chaincoin address</source>
+        <source>Send coins to a Bagicoin address</source>
         <translation>向一个链币地址发送链币</translation>
     </message>
     <message>
-        <source>Request payments (generates QR codes and chaincoin: URIs)</source>
+        <source>Request payments (generates QR codes and bagicoin: URIs)</source>
         <translation>请求支付 (生成二维码和链币: URI)</translation>
     </message>
     <message>
@@ -338,11 +338,11 @@
         <translation>更改密码(&amp;C)...</translation>
     </message>
     <message>
-        <source>Sign messages with your Chaincoin addresses to prove you own them</source>
+        <source>Sign messages with your Bagicoin addresses to prove you own them</source>
         <translation>用链币地址关联的私钥为消息签名，以证明您拥有这个链币地址</translation>
     </message>
     <message>
-        <source>Verify messages to ensure they were signed with specified Chaincoin addresses</source>
+        <source>Verify messages to ensure they were signed with specified Bagicoin addresses</source>
         <translation>验证邮件以确保它们使用指定的链币地址进行签名</translation>
     </message>
     <message>
@@ -454,7 +454,7 @@
         <translation>接收(&amp;R)</translation>
     </message>
     <message>
-        <source>&amp;About Chaincoin Core</source>
+        <source>&amp;About Bagicoin Core</source>
         <translation>＆关于链币核心</translation>
     </message>
     <message>
@@ -530,11 +530,11 @@
         <translation>打开 $URI...</translation>
     </message>
     <message>
-        <source>Open a chaincoin: URI or payment request</source>
+        <source>Open a bagicoin: URI or payment request</source>
         <translation>打开一个链币: URI 或支付请求</translation>
     </message>
     <message>
-        <source>Show the Chaincoin Core help message to get a list with possible Chaincoin Core command-line options</source>
+        <source>Show the Bagicoin Core help message to get a list with possible Bagicoin Core command-line options</source>
         <translation>显示链币核心帮助信息来得到链币核心的命令行选项列表</translation>
     </message>
     <message>
@@ -570,7 +570,7 @@
         <translation>配置文件无法打开。</translation>
     </message>
     <message numerus="yes">
-        <source>%n active connection(s) to Chaincoin network</source>
+        <source>%n active connection(s) to Bagicoin network</source>
         <translation><numerusform>％n活动连接在链币网上</numerusform></translation>
     </message>
     <message>
@@ -582,8 +582,8 @@
         <translation>更新中...</translation>
     </message>
     <message>
-        <source>Chaincoin Core</source>
-        <translation>Chaincoin Core</translation>
+        <source>Bagicoin Core</source>
+        <translation>Bagicoin Core</translation>
     </message>
     <message>
         <source>Date: %1
@@ -644,7 +644,7 @@
         <translation>钱包已被&lt;b&gt;加密&lt;/b&gt;，当前为&lt;b&gt;锁定&lt;/b&gt;状态</translation>
     </message>
     <message>
-        <source>A fatal error occurred. Chaincoin can no longer continue safely and will quit.</source>
+        <source>A fatal error occurred. Bagicoin can no longer continue safely and will quit.</source>
         <translation>发生致命错误。 链币不能再安全继续并且会退出。</translation>
     </message>
 </context>
@@ -877,15 +877,15 @@
         <translation>PrivateSend 配置</translation>
     </message>
     <message>
-        <source>PrivateSend was successfully set to basic (%1 and 2 rounds). You can change this at any time by opening Chaincoin's configuration screen.</source>
+        <source>PrivateSend was successfully set to basic (%1 and 2 rounds). You can change this at any time by opening Bagicoin's configuration screen.</source>
         <translation>PrivateSend已成功设置为基本（%1和2轮）。您可以随时打开链币配置屏幕来改变这一点。</translation>
     </message>
     <message>
-        <source>PrivateSend was successfully set to high (%1 and 8 rounds). You can change this at any time by opening Chaincoin's configuration screen.</source>
+        <source>PrivateSend was successfully set to high (%1 and 8 rounds). You can change this at any time by opening Bagicoin's configuration screen.</source>
         <translation>PrivateSend已成功设置为基本（%1和8轮）。你可以随时打开链币配置屏幕来改变这一点。</translation>
     </message>
     <message>
-        <source>PrivateSend was successfully set to maximum (%1 and 16 rounds). You can change this at any time by opening Chaincoin's configuration screen.</source>
+        <source>PrivateSend was successfully set to maximum (%1 and 16 rounds). You can change this at any time by opening Bagicoin's configuration screen.</source>
         <translation>PrivateSend已成功设置为基本（%1和16轮）. 你可以随时打开链币配置屏幕来改变这一点.</translation>
     </message>
 </context>
@@ -928,7 +928,7 @@
         <translation>编辑付款地址</translation>
     </message>
     <message>
-        <source>The entered address "%1" is not a valid Chaincoin address.</source>
+        <source>The entered address "%1" is not a valid Bagicoin address.</source>
         <translation>输入的地址"%1"不是有效的链币地址</translation>
     </message>
     <message>
@@ -974,7 +974,7 @@
         <translation>版本</translation>
     </message>
     <message>
-        <source>Chaincoin Core</source>
+        <source>Bagicoin Core</source>
         <translation>链币核心</translation>
     </message>
     <message>
@@ -982,7 +982,7 @@
         <translation>(%1 位)</translation>
     </message>
     <message>
-        <source>About Chaincoin Core</source>
+        <source>About Bagicoin Core</source>
         <translation>关于链币核心</translation>
     </message>
     <message>
@@ -1030,7 +1030,7 @@
         <translation>PrivateSend 信息</translation>
     </message>
     <message>
-        <source>&lt;h3&gt;PrivateSend Basics&lt;/h3&gt; PrivateSend gives you true financial privacy by obscuring the origins of your funds. All the Chaincoin in your wallet is comprised of different "inputs" which you can think of as separate, discrete coins.&lt;br&gt; PrivateSend uses an innovative process to mix your inputs with the inputs of two other people, without having your coins ever leave your wallet. You retain control of your money at all times..&lt;hr&gt; &lt;b&gt;The PrivateSend process works like this:&lt;/b&gt;&lt;ol type="1"&gt; &lt;li&gt;PrivateSend begins by breaking your transaction inputs down into standard denominations. These denominations are 0.01 CHC, 0.1 CHC, 1 CHC and 10 CHC -- sort of like the paper money you use every day.&lt;/li&gt; &lt;li&gt;Your wallet then sends requests to specially configured software nodes on the network, called "masternodes." These masternodes are informed then that you are interested in mixing a certain denomination. No identifiable information is sent to the masternodes, so they never know "who" you are.&lt;/li&gt; &lt;li&gt;When two other people send similar messages, indicating that they wish to mix the same denomination, a mixing session begins. The masternode mixes up the inputs and instructs all three users' wallets to pay the now-transformed input back to themselves. Your wallet pays that denomination directly to itself, but in a different address (called a change address).&lt;/li&gt; &lt;li&gt;In order to fully obscure your funds, your wallet must repeat this process a number of times with each denomination. Each time the process is completed, it's called a "round." Each round of PrivateSend makes it exponentially more difficult to determine where your funds originated.&lt;/li&gt; &lt;li&gt;This mixing process happens in the background without any intervention on your part. When you wish to make a transaction, your funds will already be anonymized. No additional waiting is required.&lt;/li&gt; &lt;/ol&gt; &lt;hr&gt;&lt;b&gt;IMPORTANT:&lt;/b&gt; Your wallet only contains 1000 of these "change addresses." Every time a mixing event happens, up to 9 of your addresses are used up. This means those 1000 addresses last for about 100 mixing events. When 900 of them are used, your wallet must create more addresses. It can only do this, however, if you have automatic backups enabled.&lt;br&gt; Consequently, users who have backups disabled will also have PrivateSend disabled. &lt;hr&gt;For more info see &lt;a href="https://dashpay.atlassian.net/wiki/display/DOC/PrivateSend"&gt;https://dashpay.atlassian.net/wiki/display/DOC/PrivateSend&lt;/a&gt;         </source>
+        <source>&lt;h3&gt;PrivateSend Basics&lt;/h3&gt; PrivateSend gives you true financial privacy by obscuring the origins of your funds. All the Bagicoin in your wallet is comprised of different "inputs" which you can think of as separate, discrete coins.&lt;br&gt; PrivateSend uses an innovative process to mix your inputs with the inputs of two other people, without having your coins ever leave your wallet. You retain control of your money at all times..&lt;hr&gt; &lt;b&gt;The PrivateSend process works like this:&lt;/b&gt;&lt;ol type="1"&gt; &lt;li&gt;PrivateSend begins by breaking your transaction inputs down into standard denominations. These denominations are 0.01 CHC, 0.1 CHC, 1 CHC and 10 CHC -- sort of like the paper money you use every day.&lt;/li&gt; &lt;li&gt;Your wallet then sends requests to specially configured software nodes on the network, called "masternodes." These masternodes are informed then that you are interested in mixing a certain denomination. No identifiable information is sent to the masternodes, so they never know "who" you are.&lt;/li&gt; &lt;li&gt;When two other people send similar messages, indicating that they wish to mix the same denomination, a mixing session begins. The masternode mixes up the inputs and instructs all three users' wallets to pay the now-transformed input back to themselves. Your wallet pays that denomination directly to itself, but in a different address (called a change address).&lt;/li&gt; &lt;li&gt;In order to fully obscure your funds, your wallet must repeat this process a number of times with each denomination. Each time the process is completed, it's called a "round." Each round of PrivateSend makes it exponentially more difficult to determine where your funds originated.&lt;/li&gt; &lt;li&gt;This mixing process happens in the background without any intervention on your part. When you wish to make a transaction, your funds will already be anonymized. No additional waiting is required.&lt;/li&gt; &lt;/ol&gt; &lt;hr&gt;&lt;b&gt;IMPORTANT:&lt;/b&gt; Your wallet only contains 1000 of these "change addresses." Every time a mixing event happens, up to 9 of your addresses are used up. This means those 1000 addresses last for about 100 mixing events. When 900 of them are used, your wallet must create more addresses. It can only do this, however, if you have automatic backups enabled.&lt;br&gt; Consequently, users who have backups disabled will also have PrivateSend disabled. &lt;hr&gt;For more info see &lt;a href="https://dashpay.atlassian.net/wiki/display/DOC/PrivateSend"&gt;https://dashpay.atlassian.net/wiki/display/DOC/PrivateSend&lt;/a&gt;         </source>
         <translation>&lt;h3&gt;PrivateSend基本&lt;/h3&gt;PrivateSend 模糊你的资金来源，为你提供真正的财务隐私。你钱包里的所有链币都是由不同的“投入”组成的，你可以把它看作是独立, 分别的硬币。&lt;br&gt;PrivateSend使用新的处理过程将你的输入与其他两个人的输入混合在一起，而不会让你的硬币离开您的钱包。你始终保持对你的钱的控制。&lt;hr&gt;&lt;b&gt;PrivateSend的过程将像这样工作：&lt;/b&gt;&lt;ol type="1"&gt;&lt;li&gt;PrivateSend首先将您的交易投入分解为标准面值。这些面值是0.01 链币，0.1 链币，1 链币和 10 链币 - 有点像你每天使用的纸币。&lt;/li&gt;&lt;li&gt;你的钱包然后将所有请求发送到网络上特殊配置的软件节点，称为“主节点”。这些“主节点”会被通知你有兴趣混合一定的面额。没有任何可识别的信息会被发送到主节点，所以他们永远不知道你是谁。&lt;/li&gt;&lt;li&gt;当另外两个人发出类似的信息时，表示他们希望混合相同的面额，混合会开始。主节点将会混合输入并指示所有三个用户的钱包现在把换后的输入回付给自己。你的钱包会直接向其自己支付这个面额, 但是以不同的地址（称为更改地址)。&lt;/li&gt;&lt;li&gt;为了充分掩盖您的资金，你的钱包必须在每个面额下多次重复此过程。每当这个过程完成时，它就被称为“一轮”。每一轮PrivateSend都会让别人更难以确定你的资金来源。&lt;/li&gt;&lt;li&gt;这种混合过程在后台进行，无需任何干预。当你想进行交易时，你的资金已经会被匿名化了。不需要额外的等待。&lt;/li&gt;&lt;/ol&gt;&lt;hr&gt;&lt;b&gt;重要：&lt;/b&gt;您的钱包只包含1000个“更改地址”。每次发生混和时，最多9个地址会被使用。这意味着这1000个地址会持续大约100个混和事件。当900个使用时， 你的钱包必须创建更多地址。但是，只有在启用了自动备份的情况下才能执行此操作。&lt;br&gt;因此，禁用备份的用户也将禁用PrivateSend。&lt;hr&gt;更多信息请参阅&lt;a href="https://dashpay.atlassian.net/wiki/display/DOC/PrivateSend"&gt;https://dashpay.atlassian.net/wiki/display/DOC/PrivateSend&lt;/a&gt;</translation>
     </message>
 </context>
@@ -1065,7 +1065,7 @@
         <translation>使用自定义的数据目录：</translation>
     </message>
     <message>
-        <source>Chaincoin</source>
+        <source>Bagicoin</source>
         <translation>链币</translation>
     </message>
     <message>
@@ -1251,11 +1251,11 @@
         <translation>表单</translation>
     </message>
     <message>
-        <source>Recent transactions may not yet be visible, and therefore your wallet's balance might be incorrect. This information will be correct once your wallet has finished synchronizing with the Chaincoin network, as detailed below.</source>
+        <source>Recent transactions may not yet be visible, and therefore your wallet's balance might be incorrect. This information will be correct once your wallet has finished synchronizing with the Bagicoin network, as detailed below.</source>
         <translation>最近的交易可能还看不见，因此你的钱包的余额可能不正确。一旦你的钱包完成了与链币网络的同步，这些信息就会正确无误，详情如下。</translation>
     </message>
     <message>
-        <source>Attempting to spend Chaincoin that are affected by not-yet-displayed transactions will not be accepted by the network.</source>
+        <source>Attempting to spend Bagicoin that are affected by not-yet-displayed transactions will not be accepted by the network.</source>
         <translation>当试花 ‘尚未显示的交易’ 的链币将不会被网络接受。</translation>
     </message>
     <message>
@@ -1393,15 +1393,15 @@
         <translation>一旦达到，此金额充当一个门槛关闭私人发送。</translation>
     </message>
     <message>
-        <source>Amount of Chaincoin to keep anonymized</source>
+        <source>Amount of Bagicoin to keep anonymized</source>
         <translation>链币数量要保持匿名</translation>
     </message>
     <message>
-        <source>Automatically open the Chaincoin Core client port on the router. This only works when your router  UPnP and it is enabled.</source>
+        <source>Automatically open the Bagicoin Core client port on the router. This only works when your router  UPnP and it is enabled.</source>
         <translation>自动打开路由器上的链币中心客户端端口。</translation>
     </message>
     <message>
-        <source>Connect to the Chaincoin network through a SOCKS5 proxy.</source>
+        <source>Connect to the Bagicoin network through a SOCKS5 proxy.</source>
         <translation>通过SOCKS5代理连接到链币网络。</translation>
     </message>
     <message>
@@ -1413,7 +1413,7 @@
         <translation>显示默认的SOCKS5代理是否被用于在该类型的网络下连接同伴</translation>
     </message>
     <message>
-        <source>Connect to the Chaincoin network through a separate SOCKS5 proxy for Tor hidden services.</source>
+        <source>Connect to the Bagicoin network through a separate SOCKS5 proxy for Tor hidden services.</source>
         <translation>通过Tor隐藏服务的单独SOCKS5代理连接到链币网络。</translation>
     </message>
     <message>
@@ -1457,11 +1457,11 @@
         <translation>网络(&amp;N)</translation>
     </message>
     <message>
-        <source>Automatically start Chaincoin Core after logging in to the system.</source>
+        <source>Automatically start Bagicoin Core after logging in to the system.</source>
         <translation>登录到系统后自动启动链币核心</translation>
     </message>
     <message>
-        <source>&amp;Start Chaincoin Core on system login</source>
+        <source>&amp;Start Bagicoin Core on system login</source>
         <translation>&amp;在系统登录时启动链币核心</translation>
     </message>
     <message>
@@ -1565,13 +1565,13 @@
         <translation>是否需要交易源地址控制功能。</translation>
     </message>
     <message>
-        <source>The user interface language can be set here. This setting will take effect after restarting Chaincoin Core.</source>
+        <source>The user interface language can be set here. This setting will take effect after restarting Bagicoin Core.</source>
         <translation>用户界面语言可以在这里设置。 设置将在重新启动链币核心后生效</translation>
     </message>
     <message>
         <source>Language missing or translation incomplete? Help contributing translations here:
-https://www.transifex.com/projects/p/chaincoin/</source>
-        <translation>语言不全或翻译不完整？这里帮助提供翻译: https://www.transifex.com/projects/p/chaincoin/</translation>
+https://www.transifex.com/projects/p/bagicoin/</source>
+        <translation>语言不全或翻译不完整？这里帮助提供翻译: https://www.transifex.com/projects/p/bagicoin/</translation>
     </message>
     <message>
         <source>User Interface Theme:</source>
@@ -1681,7 +1681,7 @@ https://www.transifex.com/projects/p/chaincoin/</source>
         <translation>余额</translation>
     </message>
     <message>
-        <source>The displayed information may be out of date. Your wallet automatically synchronizes with the Chaincoin network after a connection is established, but this process has not completed yet.</source>
+        <source>The displayed information may be out of date. Your wallet automatically synchronizes with the Bagicoin network after a connection is established, but this process has not completed yet.</source>
         <translation>显示的信息可能已过时。连接建立后，你的钱包会自动与链币网络同步，但此过程尚未完成。</translation>
     </message>
     <message>
@@ -1918,11 +1918,11 @@ https://www.transifex.com/projects/p/chaincoin/</source>
         <translation>无效的付款地址 %1</translation>
     </message>
     <message>
-        <source>Cannot start chaincoin: click-to-pay handler</source>
+        <source>Cannot start bagicoin: click-to-pay handler</source>
         <translation>无法启动链币：点击付款处理程序</translation>
     </message>
     <message>
-        <source>URI cannot be parsed! This can be caused by an invalid Chaincoin address or malformed URI parameters.</source>
+        <source>URI cannot be parsed! This can be caused by an invalid Bagicoin address or malformed URI parameters.</source>
         <translation>网址无法解析！ 这可能是由无效的链币地址或格式错误的网址参数引起的。</translation>
     </message>
     <message>
@@ -2429,7 +2429,7 @@ https://www.transifex.com/projects/p/chaincoin/</source>
         <translation>内存使用</translation>
     </message>
     <message>
-        <source>Open the Chaincoin Core debug log file from the current data directory. This can take a few seconds for large log files.</source>
+        <source>Open the Bagicoin Core debug log file from the current data directory. This can take a few seconds for large log files.</source>
         <translation>从当前数据目录打开链币调试日志文件。 对于大型日志文件，这可能需要几秒钟。</translation>
     </message>
     <message>
@@ -2696,7 +2696,7 @@ https://www.transifex.com/projects/p/chaincoin/</source>
         <translation>请求付款(&amp;R)</translation>
     </message>
     <message>
-        <source>An optional message to attach to the payment request, which will be displayed when the request is opened. Note: The message will not be sent with the payment over the Chaincoin network.</source>
+        <source>An optional message to attach to the payment request, which will be displayed when the request is opened. Note: The message will not be sent with the payment over the Bagicoin network.</source>
         <translation>附加到付款请求的可选消息，将在请求打开时显示。 注意：该消息不会通过链币网络进行支付。</translation>
     </message>
     <message>
@@ -2937,7 +2937,7 @@ https://www.transifex.com/projects/p/chaincoin/</source>
         <translation>如果定制费用设置为1000个chuffs且交易只有250个字节, 则“每千字节”仅支付250个chuffs费用，&lt;br /&gt;而“至少”支付1000个chuffs。 对于大于一千字节的交易，都按千字节付费。</translation>
     </message>
     <message>
-        <source>Paying only the minimum fee is just fine as long as there is less transaction volume than space in the blocks.&lt;br /&gt;But be aware that this can end up in a never confirming transaction once there is more demand for chaincoin transactions than the network can process.</source>
+        <source>Paying only the minimum fee is just fine as long as there is less transaction volume than space in the blocks.&lt;br /&gt;But be aware that this can end up in a never confirming transaction once there is more demand for bagicoin transactions than the network can process.</source>
         <translation>只要交易量少于块中的空间，只需支付最低费用即可。&lt;br /&gt;但请注意，一旦对链币交易的需求超过网络可处理的范围，这可能最终导致永不确认的交易。</translation>
     </message>
     <message>
@@ -3093,7 +3093,7 @@ https://www.transifex.com/projects/p/chaincoin/</source>
         <translation><numerusform>估计在％n个区块内开始确认。</numerusform></translation>
     </message>
     <message>
-        <source>Warning: Invalid Chaincoin address</source>
+        <source>Warning: Invalid Bagicoin address</source>
         <translation>警告：无效的链币地址</translation>
     </message>
     <message>
@@ -3124,7 +3124,7 @@ https://www.transifex.com/projects/p/chaincoin/</source>
         <translation>付给(&amp;T)：</translation>
     </message>
     <message>
-        <source>The Chaincoin address to send the payment to</source>
+        <source>The Bagicoin address to send the payment to</source>
         <translation>发送付款的链币地址</translation>
     </message>
     <message>
@@ -3156,7 +3156,7 @@ https://www.transifex.com/projects/p/chaincoin/</source>
         <translation>移除此项</translation>
     </message>
     <message>
-        <source>The fee will be deducted from the amount being sent. The recipient will receive a lower amount of Chaincoin than you enter in the amount field. If multiple recipients are selected, the fee is split equally.</source>
+        <source>The fee will be deducted from the amount being sent. The recipient will receive a lower amount of Bagicoin than you enter in the amount field. If multiple recipients are selected, the fee is split equally.</source>
         <translation>费用将从发送的金额中扣除。收件人将获得的链币会低于您在金额字段中输入的数量。如果选择了多个收件人，则费用将平均分配。</translation>
     </message>
     <message>
@@ -3172,7 +3172,7 @@ https://www.transifex.com/projects/p/chaincoin/</source>
         <translation>消息：</translation>
     </message>
     <message>
-        <source>A message that was attached to the chaincoin: URI which will be stored with the transaction for your reference. Note: This message will not be sent over the Chaincoin network.</source>
+        <source>A message that was attached to the bagicoin: URI which will be stored with the transaction for your reference. Note: This message will not be sent over the Bagicoin network.</source>
         <translation>附加到链币的消息：网址将与交易一起存储供您参考。注意：此消息不会通过链币网络发送。</translation>
     </message>
     <message>
@@ -3210,7 +3210,7 @@ https://www.transifex.com/projects/p/chaincoin/</source>
 <context>
     <name>ShutdownWindow</name>
     <message>
-        <source>Chaincoin Core is shutting down...</source>
+        <source>Bagicoin Core is shutting down...</source>
         <translation>链币正在关闭......</translation>
     </message>
     <message>
@@ -3229,11 +3229,11 @@ https://www.transifex.com/projects/p/chaincoin/</source>
         <translation>签名消息(&amp;S)</translation>
     </message>
     <message>
-        <source>You can sign messages/agreements with your addresses to prove you can receive Chaincoin sent to them. Be careful not to sign anything vague or random, as phishing attacks may try to trick you into signing your identity over to them. Only sign fully-detailed statements you agree to.</source>
+        <source>You can sign messages/agreements with your addresses to prove you can receive Bagicoin sent to them. Be careful not to sign anything vague or random, as phishing attacks may try to trick you into signing your identity over to them. Only sign fully-detailed statements you agree to.</source>
         <translation>您可以使用您的地址签署消息/协议，以证明您可以收到发送给他们的链币.小心不要签署任何模糊或随机的内容,因为网络钓鱼攻击可能会欺骗您将身份签名给他们。 只签署您同意的完整详细声明。</translation>
     </message>
     <message>
-        <source>The Chaincoin address to sign the message with</source>
+        <source>The Bagicoin address to sign the message with</source>
         <translation>链币地址用来签署消息</translation>
     </message>
     <message>
@@ -3265,15 +3265,15 @@ https://www.transifex.com/projects/p/chaincoin/</source>
         <translation>复制当前签名至剪切板</translation>
     </message>
     <message>
-        <source>Sign the message to prove you own this Chaincoin address</source>
+        <source>Sign the message to prove you own this Bagicoin address</source>
         <translation>签署消息以证明您拥有此链币地址</translation>
     </message>
     <message>
-        <source>The Chaincoin address the message was signed with</source>
+        <source>The Bagicoin address the message was signed with</source>
         <translation>签这消息的链币地址</translation>
     </message>
     <message>
-        <source>Verify the message to ensure it was signed with the specified Chaincoin address</source>
+        <source>Verify the message to ensure it was signed with the specified Bagicoin address</source>
         <translation>验证消息以确保是用指定的链币地址来使进行的签名</translation>
     </message>
     <message>
@@ -3372,7 +3372,7 @@ https://www.transifex.com/projects/p/chaincoin/</source>
         <translation>Dash 核心开发人员</translation>
     </message>
     <message>
-        <source>The Chaincoin Core developers</source>
+        <source>The Bagicoin Core developers</source>
         <translation>链币核心开发人员</translation>
     </message>
 </context>
@@ -3984,7 +3984,7 @@ https://www.transifex.com/projects/p/chaincoin/</source>
     </message>
 </context>
 <context>
-    <name>chaincoin-core</name>
+    <name>bagicoin-core</name>
     <message>
         <source>None</source>
         <translation>没有</translation>
@@ -4078,7 +4078,7 @@ https://www.transifex.com/projects/p/chaincoin/</source>
         <translation>指定保存钱包的目录（默认值：&lt;datadir&gt;/ wallets，如果存在，否则&lt;datadir&gt;）</translation>
     </message>
     <message>
-        <source>Starting in lite mode, all Chaincoin-specific functionality is disabled.</source>
+        <source>Starting in lite mode, all Bagicoin-specific functionality is disabled.</source>
         <translation>从lite模式开始，所有链币特定功能都被禁用。</translation>
     </message>
     <message>

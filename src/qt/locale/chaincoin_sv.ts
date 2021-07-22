@@ -2810,6 +2810,6 @@ Var vänlig och försök igen.</translation>
     </message>
 </context>
 <context>
-    <name>chaincoin-core</name>
+    <name>bagicoin-core</name>
     </context>
 </TS>

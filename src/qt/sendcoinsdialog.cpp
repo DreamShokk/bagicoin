@@ -4,7 +4,7 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #if defined(HAVE_CONFIG_H)
-#include <config/chaincoin-config.h>
+#include <config/bagicoin-config.h>
 #endif
 
 #include <qt/sendcoinsdialog.h>
@@ -89,7 +89,7 @@ SendCoinsDialog::SendCoinsDialog(const PlatformStyle *_platformStyle, QWidget *p
     connect(ui->checkBoxCoinControlChange, &QCheckBox::stateChanged, this, &SendCoinsDialog::coinControlChangeChecked);
     connect(ui->lineEditCoinControlChange, &QValidatedLineEdit::textEdited, this, &SendCoinsDialog::coinControlChangeEdited);
 
-    // Chaincoin specific
+    // Bagicoin specific
     QSettings settings;
     if (!settings.contains("bCoinJoinLevel"))
         settings.setValue("bCoinJoinLevel", 0);
@@ -848,7 +848,7 @@ void SendCoinsDialog::coinControlChangeEdited(const QString& text)
         }
         else if (!IsValidDestination(dest)) // Invalid address
         {
-            ui->labelCoinControlChangeLabel->setText(tr("Warning: Invalid Chaincoin address"));
+            ui->labelCoinControlChangeLabel->setText(tr("Warning: Invalid Bagicoin address"));
         }
         else // Valid address
         {

@@ -1,10 +1,10 @@
-# Valgrind suppressions file for Chaincoin.
+# Valgrind suppressions file for Bagicoin.
 #
 # Includes known Valgrind warnings in our dependencies that cannot be fixed
 # in-tree.
 #
 # Example use:
-# $ valgrind --suppressions=contrib/valgrind.supp src/test/test_chaincoin
+# $ valgrind --suppressions=contrib/valgrind.supp src/test/test_bagicoin
 # $ valgrind --suppressions=contrib/valgrind.supp --leak-check=full \
 #       --show-leak-kinds=all src/test/test_bitcoin --log_level=test_suite
 {

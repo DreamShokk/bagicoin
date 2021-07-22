@@ -39,7 +39,7 @@ struct MasterNodeCount;
 struct Masternode;
 struct Proposal;
 
-//! Top-level interface for a chaincoin node (chaincoind process).
+//! Top-level interface for a bagicoin node (bagicoind process).
 class Node
 {
 public:

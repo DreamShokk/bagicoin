@@ -18,7 +18,7 @@
 #include <util/system.h>
 #include <util/strencodings.h>
 
-#include <test/test_chaincoin.h>
+#include <test/test_bagicoin.h>
 
 #include <memory>
 

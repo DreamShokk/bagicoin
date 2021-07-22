@@ -24,39 +24,39 @@ BITCOIN_INCLUDES=-I$(builddir) $(BDB_CPPFLAGS) $(BOOST_CPPFLAGS) $(LEVELDB_CPPFL
 BITCOIN_INCLUDES += -I$(srcdir)/secp256k1/include
 BITCOIN_INCLUDES += $(UNIVALUE_CFLAGS)
 
-LIBBITCOIN_SERVER=libchaincoin_server.a
-LIBBITCOIN_COMMON=libchaincoin_common.a
-LIBBITCOIN_CONSENSUS=libchaincoin_consensus.a
-LIBBITCOIN_CLI=libchaincoin_cli.a
-LIBBITCOIN_UTIL=libchaincoin_util.a
-LIBBITCOIN_CRYPTO_BASE=crypto/libchaincoin_crypto_base.a
-LIBBITCOIN_CRYPTO_C11=crypto/libchaincoin_crypto_c11.a
+LIBBITCOIN_SERVER=libbagicoin_server.a
+LIBBITCOIN_COMMON=libbagicoin_common.a
+LIBBITCOIN_CONSENSUS=libbagicoin_consensus.a
+LIBBITCOIN_CLI=libbagicoin_cli.a
+LIBBITCOIN_UTIL=libbagicoin_util.a
+LIBBITCOIN_CRYPTO_BASE=crypto/libbagicoin_crypto_base.a
+LIBBITCOIN_CRYPTO_C11=crypto/libbagicoin_crypto_c11.a
 
-LIBBITCOINQT=qt/libchaincoinqt.a
+LIBBITCOINQT=qt/libbagicoinqt.a
 LIBSECP256K1=secp256k1/libsecp256k1.la
 
 if ENABLE_ZMQ
-LIBBITCOIN_ZMQ=libchaincoin_zmq.a
+LIBBITCOIN_ZMQ=libbagicoin_zmq.a
 endif
 if BUILD_BITCOIN_LIBS
-LIBBITCOINCONSENSUS=libchaincoinconsensus.la
+LIBBITCOINCONSENSUS=libbagicoinconsensus.la
 endif
 if ENABLE_WALLET
-LIBBITCOIN_WALLET=libchaincoin_wallet.a
-LIBBITCOIN_WALLET_TOOL=libchaincoin_wallet_tool.a
+LIBBITCOIN_WALLET=libbagicoin_wallet.a
+LIBBITCOIN_WALLET_TOOL=libbagicoin_wallet_tool.a
 endif
 
 LIBBITCOIN_CRYPTO= $(LIBBITCOIN_CRYPTO_BASE)
 if ENABLE_SSE41
-LIBBITCOIN_CRYPTO_SSE41 = crypto/libchaincoin_crypto_sse41.a
+LIBBITCOIN_CRYPTO_SSE41 = crypto/libbagicoin_crypto_sse41.a
 LIBBITCOIN_CRYPTO += $(LIBBITCOIN_CRYPTO_SSE41)
 endif
 if ENABLE_AVX2
-LIBBITCOIN_CRYPTO_AVX2 = crypto/libchaincoin_crypto_avx2.a
+LIBBITCOIN_CRYPTO_AVX2 = crypto/libbagicoin_crypto_avx2.a
 LIBBITCOIN_CRYPTO += $(LIBBITCOIN_CRYPTO_AVX2)
 endif
 if ENABLE_SHANI
-LIBBITCOIN_CRYPTO_SHANI = crypto/libchaincoin_crypto_shani.a
+LIBBITCOIN_CRYPTO_SHANI = crypto/libbagicoin_crypto_shani.a
 LIBBITCOIN_CRYPTO += $(LIBBITCOIN_CRYPTO_SHANI)
 endif
 
@@ -87,23 +87,23 @@ TESTS =
 BENCHMARKS =
 
 if BUILD_BITCOIND
-  bin_PROGRAMS += chaincoind
+  bin_PROGRAMS += bagicoind
 endif
 
 if BUILD_BITCOIN_CLI
-  bin_PROGRAMS += chaincoin-cli
+  bin_PROGRAMS += bagicoin-cli
 endif
 if BUILD_BITCOIN_TX
-  bin_PROGRAMS += chaincoin-tx
+  bin_PROGRAMS += bagicoin-tx
 endif
 if ENABLE_WALLET
 if BUILD_BITCOIN_WALLET
-  bin_PROGRAMS += chaincoin-wallet
+  bin_PROGRAMS += bagicoin-wallet
 endif
 endif
 
 .PHONY: FORCE check-symbols check-security
-# chaincoin core #
+# bagicoin core #
 BITCOIN_CORE_H = \
   addrman.h \
   attributes.h \
@@ -259,12 +259,12 @@ obj/build.h: FORCE
 	@$(MKDIR_P) $(builddir)/obj
 	@$(top_srcdir)/share/genbuild.sh "$(abs_top_builddir)/src/obj/build.h" \
 	  "$(abs_top_srcdir)"
-libchaincoin_util_a-clientversion.$(OBJEXT): obj/build.h
+libbagicoin_util_a-clientversion.$(OBJEXT): obj/build.h
 
-# server: shared between chaincoind and chaincoin-qt
-libchaincoin_server_a_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES) $(MINIUPNPC_CPPFLAGS) $(EVENT_CFLAGS) $(EVENT_PTHREADS_CFLAGS)
-libchaincoin_server_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
-libchaincoin_server_a_SOURCES = \
+# server: shared between bagicoind and bagicoin-qt
+libbagicoin_server_a_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES) $(MINIUPNPC_CPPFLAGS) $(EVENT_CFLAGS) $(EVENT_PTHREADS_CFLAGS)
+libbagicoin_server_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+libbagicoin_server_a_SOURCES = \
   addrman.cpp \
   banman.cpp \
   bloom.cpp \
@@ -335,13 +335,13 @@ libchaincoin_server_a_SOURCES = \
   $(BITCOIN_CORE_H)
 
 if !ENABLE_WALLET
-libchaincoin_server_a_SOURCES += dummywallet.cpp
+libbagicoin_server_a_SOURCES += dummywallet.cpp
 endif
 
 if ENABLE_ZMQ
-libchaincoin_zmq_a_CPPFLAGS = $(BITCOIN_INCLUDES) $(ZMQ_CFLAGS)
-libchaincoin_zmq_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
-libchaincoin_zmq_a_SOURCES = \
+libbagicoin_zmq_a_CPPFLAGS = $(BITCOIN_INCLUDES) $(ZMQ_CFLAGS)
+libbagicoin_zmq_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+libbagicoin_zmq_a_SOURCES = \
   zmq/zmqabstractnotifier.cpp \
   zmq/zmqnotificationinterface.cpp \
   zmq/zmqpublishnotifier.cpp \
@@ -349,11 +349,11 @@ libchaincoin_zmq_a_SOURCES = \
 endif
 
 
-# wallet: shared between chaincoind and chaincoin-qt, but only linked
+# wallet: shared between bagicoind and bagicoin-qt, but only linked
 # when wallet enabled
-libchaincoin_wallet_a_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES)
-libchaincoin_wallet_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
-libchaincoin_wallet_a_SOURCES = \
+libbagicoin_wallet_a_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES)
+libbagicoin_wallet_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+libbagicoin_wallet_a_SOURCES = \
   interfaces/wallet.cpp \
   wallet/coincontrol.cpp \
   wallet/coinjoin_client.cpp \
@@ -371,16 +371,16 @@ libchaincoin_wallet_a_SOURCES = \
   wallet/coinselection.cpp \
   $(BITCOIN_CORE_H)
 
-libchaincoin_wallet_tool_a_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES)
-libchaincoin_wallet_tool_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
-libchaincoin_wallet_tool_a_SOURCES = \
+libbagicoin_wallet_tool_a_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES)
+libbagicoin_wallet_tool_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+libbagicoin_wallet_tool_a_SOURCES = \
   wallet/wallettool.cpp \
   $(BITCOIN_CORE_H)
 
 # crypto primitives library
-crypto_libchaincoin_crypto_base_a_CPPFLAGS = $(AM_CPPFLAGS)
-crypto_libchaincoin_crypto_base_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
-crypto_libchaincoin_crypto_base_a_SOURCES = \
+crypto_libbagicoin_crypto_base_a_CPPFLAGS = $(AM_CPPFLAGS)
+crypto_libbagicoin_crypto_base_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+crypto_libbagicoin_crypto_base_a_SOURCES = \
   crypto/aes.cpp \
   crypto/aes.h \
   crypto/chacha20.h \
@@ -402,14 +402,14 @@ crypto_libchaincoin_crypto_base_a_SOURCES = \
   crypto/siphash.h
   
 if USE_ASM
-crypto_libchaincoin_crypto_base_a_SOURCES += crypto/sha256_sse4.cpp
+crypto_libbagicoin_crypto_base_a_SOURCES += crypto/sha256_sse4.cpp
 endif
 
 
 # c11
-crypto_libchaincoin_crypto_c11_a_CPPFLAGS = $(AM_CPPFLAGS)
-crypto_libchaincoin_crypto_c11_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
-crypto_libchaincoin_crypto_c11_a_SOURCES = \
+crypto_libbagicoin_crypto_c11_a_CPPFLAGS = $(AM_CPPFLAGS)
+crypto_libbagicoin_crypto_c11_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+crypto_libbagicoin_crypto_c11_a_SOURCES = \
   crypto/blake512.cpp \
   crypto/blake512.h \
   crypto/bmw512.cpp \
@@ -434,28 +434,28 @@ crypto_libchaincoin_crypto_c11_a_SOURCES = \
   crypto/skein512.cpp \
   crypto/skein512.h
   
-crypto_libchaincoin_crypto_sse41_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
-crypto_libchaincoin_crypto_sse41_a_CPPFLAGS = $(AM_CPPFLAGS)
-crypto_libchaincoin_crypto_sse41_a_CXXFLAGS += $(SSE41_CXXFLAGS)
-crypto_libchaincoin_crypto_sse41_a_CPPFLAGS += -DENABLE_SSE41
-crypto_libchaincoin_crypto_sse41_a_SOURCES = crypto/sha256_sse41.cpp
+crypto_libbagicoin_crypto_sse41_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+crypto_libbagicoin_crypto_sse41_a_CPPFLAGS = $(AM_CPPFLAGS)
+crypto_libbagicoin_crypto_sse41_a_CXXFLAGS += $(SSE41_CXXFLAGS)
+crypto_libbagicoin_crypto_sse41_a_CPPFLAGS += -DENABLE_SSE41
+crypto_libbagicoin_crypto_sse41_a_SOURCES = crypto/sha256_sse41.cpp
 
-crypto_libchaincoin_crypto_avx2_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
-crypto_libchaincoin_crypto_avx2_a_CPPFLAGS = $(AM_CPPFLAGS)
-crypto_libchaincoin_crypto_avx2_a_CXXFLAGS += $(AVX2_CXXFLAGS)
-crypto_libchaincoin_crypto_avx2_a_CPPFLAGS += -DENABLE_AVX2
-crypto_libchaincoin_crypto_avx2_a_SOURCES = crypto/sha256_avx2.cpp
+crypto_libbagicoin_crypto_avx2_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+crypto_libbagicoin_crypto_avx2_a_CPPFLAGS = $(AM_CPPFLAGS)
+crypto_libbagicoin_crypto_avx2_a_CXXFLAGS += $(AVX2_CXXFLAGS)
+crypto_libbagicoin_crypto_avx2_a_CPPFLAGS += -DENABLE_AVX2
+crypto_libbagicoin_crypto_avx2_a_SOURCES = crypto/sha256_avx2.cpp
 
-crypto_libchaincoin_crypto_shani_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
-crypto_libchaincoin_crypto_shani_a_CPPFLAGS = $(AM_CPPFLAGS)
-crypto_libchaincoin_crypto_shani_a_CXXFLAGS += $(SHANI_CXXFLAGS)
-crypto_libchaincoin_crypto_shani_a_CPPFLAGS += -DENABLE_SHANI
-crypto_libchaincoin_crypto_shani_a_SOURCES = crypto/sha256_shani.cpp
+crypto_libbagicoin_crypto_shani_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+crypto_libbagicoin_crypto_shani_a_CPPFLAGS = $(AM_CPPFLAGS)
+crypto_libbagicoin_crypto_shani_a_CXXFLAGS += $(SHANI_CXXFLAGS)
+crypto_libbagicoin_crypto_shani_a_CPPFLAGS += -DENABLE_SHANI
+crypto_libbagicoin_crypto_shani_a_SOURCES = crypto/sha256_shani.cpp
 
 # consensus: shared between all executables that validate any consensus rules.
-libchaincoin_consensus_a_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES)
-libchaincoin_consensus_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
-libchaincoin_consensus_a_SOURCES = \
+libbagicoin_consensus_a_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES)
+libbagicoin_consensus_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+libbagicoin_consensus_a_SOURCES = \
   amount.h \
   arith_uint256.cpp \
   arith_uint256.h \
@@ -472,7 +472,7 @@ libchaincoin_consensus_a_SOURCES = \
   primitives/transaction.h \
   pubkey.cpp \
   pubkey.h \
-  script/chaincoinconsensus.cpp \
+  script/bagicoinconsensus.cpp \
   script/interpreter.cpp \
   script/interpreter.h \
   script/script.cpp \
@@ -488,10 +488,10 @@ libchaincoin_consensus_a_SOURCES = \
   util/strencodings.h \
   version.h
 
-# common: shared between chaincoind, and chaincoin-qt and non-server tools
-libchaincoin_common_a_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES)
-libchaincoin_common_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
-libchaincoin_common_a_SOURCES = \
+# common: shared between bagicoind, and bagicoin-qt and non-server tools
+libbagicoin_common_a_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES)
+libbagicoin_common_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+libbagicoin_common_a_SOURCES = \
   base58.cpp \
   bech32.cpp \
   chainparams.cpp \
@@ -519,9 +519,9 @@ libchaincoin_common_a_SOURCES = \
 # util: shared between all executables.
 # This library *must* be included to make sure that the glibc
 # backward-compatibility objects and their sanity checks are linked.
-libchaincoin_util_a_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES)
-libchaincoin_util_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
-libchaincoin_util_a_SOURCES = \
+libbagicoin_util_a_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES)
+libbagicoin_util_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+libbagicoin_util_a_SOURCES = \
   support/lockedpool.cpp \
   chainparamsbase.cpp \
   clientversion.cpp \
@@ -544,31 +544,31 @@ libchaincoin_util_a_SOURCES = \
   $(BITCOIN_CORE_H)
 
 if GLIBC_BACK_COMPAT
-libchaincoin_util_a_SOURCES += compat/glibc_compat.cpp
+libbagicoin_util_a_SOURCES += compat/glibc_compat.cpp
 AM_LDFLAGS += $(COMPAT_LDFLAGS)
 endif
 
-# cli: shared between chaincoin-cli and chaincoin-qt
-libchaincoin_cli_a_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES)
-libchaincoin_cli_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
-libchaincoin_cli_a_SOURCES = \
+# cli: shared between bagicoin-cli and bagicoin-qt
+libbagicoin_cli_a_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES)
+libbagicoin_cli_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+libbagicoin_cli_a_SOURCES = \
   rpc/client.cpp \
   $(BITCOIN_CORE_H)
 
-nodist_libchaincoin_util_a_SOURCES = $(srcdir)/obj/build.h
+nodist_libbagicoin_util_a_SOURCES = $(srcdir)/obj/build.h
 #
 
-# chaincoind binary #
-chaincoind_SOURCES = chaincoind.cpp
-chaincoind_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES)
-chaincoind_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
-chaincoind_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS)
+# bagicoind binary #
+bagicoind_SOURCES = bagicoind.cpp
+bagicoind_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES)
+bagicoind_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+bagicoind_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS)
 
 if TARGET_WINDOWS
-chaincoind_SOURCES += chaincoind-res.rc
+bagicoind_SOURCES += bagicoind-res.rc
 endif
 
-chaincoind_LDADD = \
+bagicoind_LDADD = \
   $(LIBBITCOIN_SERVER) \
   $(LIBBITCOIN_WALLET) \
   $(LIBBITCOIN_SERVER) \
@@ -583,38 +583,38 @@ chaincoind_LDADD = \
   $(LIBMEMENV) \
   $(LIBSECP256K1)
 
-chaincoind_LDADD += $(BOOST_LIBS) $(BDB_LIBS) $(CRYPTO_LIBS) $(MINIUPNPC_LIBS) $(EVENT_PTHREADS_LIBS) $(EVENT_LIBS) $(ZMQ_LIBS)
+bagicoind_LDADD += $(BOOST_LIBS) $(BDB_LIBS) $(CRYPTO_LIBS) $(MINIUPNPC_LIBS) $(EVENT_PTHREADS_LIBS) $(EVENT_LIBS) $(ZMQ_LIBS)
 
-# chaincoin-cli binary #
-chaincoin_cli_SOURCES = chaincoin-cli.cpp
-chaincoin_cli_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES) $(EVENT_CFLAGS)
-chaincoin_cli_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
-chaincoin_cli_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS)
+# bagicoin-cli binary #
+bagicoin_cli_SOURCES = bagicoin-cli.cpp
+bagicoin_cli_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES) $(EVENT_CFLAGS)
+bagicoin_cli_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+bagicoin_cli_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS)
 
 if TARGET_WINDOWS
-chaincoin_cli_SOURCES += chaincoin-cli-res.rc
+bagicoin_cli_SOURCES += bagicoin-cli-res.rc
 endif
 
-chaincoin_cli_LDADD = \
+bagicoin_cli_LDADD = \
   $(LIBBITCOIN_CLI) \
   $(LIBUNIVALUE) \
   $(LIBBITCOIN_UTIL) \
   $(LIBBITCOIN_CRYPTO)
 
-chaincoin_cli_LDADD += $(BOOST_LIBS) $(CRYPTO_LIBS) $(EVENT_LIBS)
+bagicoin_cli_LDADD += $(BOOST_LIBS) $(CRYPTO_LIBS) $(EVENT_LIBS)
 #
 
-# chaincoin-tx binary #
-chaincoin_tx_SOURCES = chaincoin-tx.cpp
-chaincoin_tx_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES)
-chaincoin_tx_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
-chaincoin_tx_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS)
+# bagicoin-tx binary #
+bagicoin_tx_SOURCES = bagicoin-tx.cpp
+bagicoin_tx_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES)
+bagicoin_tx_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+bagicoin_tx_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS)
 
 if TARGET_WINDOWS
-chaincoin_tx_SOURCES += chaincoin-tx-res.rc
+bagicoin_tx_SOURCES += bagicoin-tx-res.rc
 endif
 
-chaincoin_tx_LDADD = \
+bagicoin_tx_LDADD = \
   $(LIBUNIVALUE) \
   $(LIBBITCOIN_COMMON) \
   $(LIBBITCOIN_UTIL) \
@@ -622,20 +622,20 @@ chaincoin_tx_LDADD = \
   $(LIBBITCOIN_CRYPTO) \
   $(LIBSECP256K1)
 
-chaincoin_tx_LDADD += $(BOOST_LIBS) $(CRYPTO_LIBS)
+bagicoin_tx_LDADD += $(BOOST_LIBS) $(CRYPTO_LIBS)
 #
 
-# chaincoin-wallet binary #
-chaincoin_wallet_SOURCES = chaincoin-wallet.cpp
-chaincoin_wallet_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES)
-chaincoin_wallet_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
-chaincoin_wallet_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS)
+# bagicoin-wallet binary #
+bagicoin_wallet_SOURCES = bagicoin-wallet.cpp
+bagicoin_wallet_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES)
+bagicoin_wallet_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+bagicoin_wallet_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS)
 
 if TARGET_WINDOWS
-chaincoin_wallet_SOURCES += chaincoin-wallet-res.rc
+bagicoin_wallet_SOURCES += bagicoin-wallet-res.rc
 endif
 
-chaincoin_wallet_LDADD = \
+bagicoin_wallet_LDADD = \
   $(LIBBITCOIN_WALLET_TOOL) \
   $(LIBBITCOIN_WALLET) \
   $(LIBBITCOIN_SERVER) \
@@ -652,22 +652,22 @@ chaincoin_wallet_LDADD = \
   $(LIBSECP256K1) \
   $(LIBUNIVALUE)
 
-chaincoin_wallet_LDADD += $(BOOST_LIBS) $(BDB_LIBS) $(CRYPTO_LIBS) $(EVENT_PTHREADS_LIBS) $(EVENT_LIBS) $(MINIUPNPC_LIBS) $(ZMQ_LIBS)
+bagicoin_wallet_LDADD += $(BOOST_LIBS) $(BDB_LIBS) $(CRYPTO_LIBS) $(EVENT_PTHREADS_LIBS) $(EVENT_LIBS) $(MINIUPNPC_LIBS) $(ZMQ_LIBS)
 #
 
-# chaincoinconsensus library #
+# bagicoinconsensus library #
 if BUILD_BITCOIN_LIBS
-include_HEADERS = script/chaincoinconsensus.h
-libchaincoinconsensus_la_SOURCES = $(crypto_libchaincoin_crypto_base_a_SOURCES) $(crypto_libchaincoin_crypto_c11_a_SOURCES) $(libchaincoin_consensus_a_SOURCES)
+include_HEADERS = script/bagicoinconsensus.h
+libbagicoinconsensus_la_SOURCES = $(crypto_libbagicoin_crypto_base_a_SOURCES) $(crypto_libbagicoin_crypto_c11_a_SOURCES) $(libbagicoin_consensus_a_SOURCES)
 
 if GLIBC_BACK_COMPAT
-  libchaincoinconsensus_la_SOURCES += compat/glibc_compat.cpp
+  libbagicoinconsensus_la_SOURCES += compat/glibc_compat.cpp
 endif
 
-libchaincoinconsensus_la_LDFLAGS = $(AM_LDFLAGS) -no-undefined $(RELDFLAGS)
-libchaincoinconsensus_la_LIBADD = $(LIBSECP256K1)
-libchaincoinconsensus_la_CPPFLAGS = $(AM_CPPFLAGS) -I$(builddir)/obj -I$(srcdir)/secp256k1/include -DBUILD_BITCOIN_INTERNAL
-libchaincoinconsensus_la_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+libbagicoinconsensus_la_LDFLAGS = $(AM_LDFLAGS) -no-undefined $(RELDFLAGS)
+libbagicoinconsensus_la_LIBADD = $(LIBSECP256K1)
+libbagicoinconsensus_la_CPPFLAGS = $(AM_CPPFLAGS) -I$(builddir)/obj -I$(srcdir)/secp256k1/include -DBUILD_BITCOIN_INTERNAL
+libbagicoinconsensus_la_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 
 endif
 #
@@ -697,12 +697,12 @@ CLEANFILES += obj/build.h
 EXTRA_DIST = $(CTAES_DIST)
 
 
-config/chaincoin-config.h: config/stamp-h1
+config/bagicoin-config.h: config/stamp-h1
 	@$(MAKE) -C $(top_builddir) $(subdir)/$(@)
-config/stamp-h1: $(top_srcdir)/$(subdir)/config/chaincoin-config.h.in $(top_builddir)/config.status
+config/stamp-h1: $(top_srcdir)/$(subdir)/config/bagicoin-config.h.in $(top_builddir)/config.status
 	$(AM_V_at)$(MAKE) -C $(top_builddir) $(subdir)/$(@)
-$(top_srcdir)/$(subdir)/config/chaincoin-config.h.in:  $(am__configure_deps)
-	$(AM_V_at)$(MAKE) -C $(top_srcdir) $(subdir)/config/chaincoin-config.h.in
+$(top_srcdir)/$(subdir)/config/bagicoin-config.h.in:  $(am__configure_deps)
+	$(AM_V_at)$(MAKE) -C $(top_srcdir) $(subdir)/config/bagicoin-config.h.in
 
 clean-local:
 	-$(MAKE) -C secp256k1 clean

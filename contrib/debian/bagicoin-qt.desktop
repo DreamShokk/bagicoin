@@ -1,0 +1,13 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=Bagicoin Core
+Comment=Connect to the Bagicoin P2P Network
+Comment[de]=Verbinde mit dem Bagicoin peer-to-peer Netzwerk
+Comment[fr]=Bagicoin, monnaie virtuelle cryptographique pair à pair
+Comment[tr]=Bagicoin, eşten eşe kriptografik sanal para birimi
+Exec=bagicoin-qt %u
+Terminal=false
+Type=Application
+Icon=bagicoin128
+MimeType=x-scheme-handler/bagicoin;
+Categories=Office;Finance;P2P;Network;Qt;

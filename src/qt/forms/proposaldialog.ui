@@ -38,7 +38,7 @@
      <item>
       <widget class="QValidatedLineEdit" name="addressIn">
        <property name="toolTip">
-        <string>The Chaincoin address to sign the message with</string>
+        <string>The Bagicoin address to sign the message with</string>
        </property>
        <property name="text">
         <string/>
@@ -89,7 +89,7 @@
    <item>
     <widget class="QLineEdit" name="urlIn">
      <property name="placeholderText">
-      <string notr="true">Enter valid URL (https://chaincoin.org, www.example.com)</string>
+      <string notr="true">Enter valid URL (https://bagicoin.org, www.example.com)</string>
      </property>
     </widget>
    </item>

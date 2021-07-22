@@ -6,7 +6,7 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #if defined(HAVE_CONFIG_H)
-#include <config/chaincoin-config.h>
+#include <config/bagicoin-config.h>
 #endif
 
 #include <init.h>
@@ -119,7 +119,7 @@ static const char* FEE_ESTIMATES_FILENAME="fee_estimates.dat";
 /**
  * The PID file facilities.
  */
-static const char* CHAINCOIN_PID_FILENAME = "chaincoind.pid";
+static const char* CHAINCOIN_PID_FILENAME = "bagicoind.pid";
 
 static fs::path GetPidFile()
 {
@@ -169,7 +169,7 @@ NODISCARD static bool CreatePidFile()
 /**
  * This is a minimally invasive approach to shutdown on LevelDB read errors from the
  * chainstate, while keeping user interface out of the common library, which is shared
- * between chaincoind, and bitcoin-qt and non-server tools.
+ * between bagicoind, and bitcoin-qt and non-server tools.
 */
 class CCoinsViewErrorCatcher final : public CCoinsViewBacked
 {
@@ -224,7 +224,7 @@ void Shutdown(InitInterfaces& interfaces)
     /// for example if the data directory was found to be locked.
     /// Be sure that anything that writes files or flushes caches only does this if the respective
     /// module was initialized.
-    RenameThread("chaincoin-shutoff");
+    RenameThread("bagicoin-shutoff");
 
     mempool.AddTransactionsUpdated(1);
     StopHTTPRPC();
@@ -560,7 +560,7 @@ void SetupServerArgs()
 
     SetupChainParamsBaseOptions();
 
-    gArgs.AddArg("-litemode=<n>", strprintf(_("Disable all Chaincoin specific functionality (Masternodes, CoinJoin, Funding) (0-1, default: %u)"), 0), false, OptionsCategory::OPTIONS);
+    gArgs.AddArg("-litemode=<n>", strprintf(_("Disable all Bagicoin specific functionality (Masternodes, CoinJoin, Funding) (0-1, default: %u)"), 0), false, OptionsCategory::OPTIONS);
 
     gArgs.AddArg("-masternode=<n>", strprintf(_("Enable the client to act as a masternode (0-1, default: %u)"), 0), false, OptionsCategory::OPTIONS);
     gArgs.AddArg("-mnconf=<file>", strprintf(_("Specify masternode configuration file (default: %s)"), "masternode.conf"), false, OptionsCategory::OPTIONS);
@@ -610,8 +610,8 @@ void SetupServerArgs()
 
 std::string LicenseInfo()
 {
-    const std::string URL_SOURCE_CODE = "<https://github.com/chaincoin/chaincoin>";
-    const std::string URL_WEBSITE = "<https://www.chaincoin.org>";
+    const std::string URL_SOURCE_CODE = "<https://github.com/bagicoin/bagicoin>";
+    const std::string URL_WEBSITE = "<https://www.bagicoin.org>";
     // todo: remove urls from translations on next change
     return CopyrightHolders(strprintf(_("Copyright (C) %i-%i"), 2009, COPYRIGHT_YEAR) + " ") + "\n" +
             "\n" +
@@ -716,7 +716,7 @@ static void CleanupBlockRevFiles()
 static void ThreadImport(std::vector<fs::path> vImportFiles)
 {
     const CChainParams& chainparams = Params();
-    RenameThread("chaincoin-loadblk");
+    RenameThread("bagicoin-loadblk");
     ScheduleBatchPriority();
     {
     CImportingNow imp;
@@ -788,7 +788,7 @@ static void ThreadImport(std::vector<fs::path> vImportFiles)
 }
 
 /** Sanity checks
- *  Ensure that Chaincoin Core is running in a usable environment with all
+ *  Ensure that Bagicoin Core is running in a usable environment with all
  *  necessary library support.
  */
 static bool InitSanityCheck()
@@ -1329,7 +1329,7 @@ bool AppInitMain(InitInterfaces& interfaces)
     // Warn about relative -datadir path.
     if (gArgs.IsArgSet("-datadir") && !fs::path(gArgs.GetArg("-datadir", "")).is_absolute()) {
         LogPrintf("Warning: relative datadir option '%s' specified, which will be interpreted relative to the " /* Continued */
-                  "current working directory '%s'. This is fragile, because if chaincoin is started in the future "
+                  "current working directory '%s'. This is fragile, because if bagicoin is started in the future "
                   "from a different location, it will be unable to locate the current data files. There could "
                   "also be data loss if bitcoin is started while in a temporary directory.\n",
             gArgs.GetArg("-datadir", ""), fs::current_path().string());
@@ -1793,7 +1793,7 @@ bool AppInitMain(InitInterfaces& interfaces)
 
     // ********************************************************* Step 11a: setup CoinJoin
 
-    //lite mode disables all Chaincoin-specific functionality
+    //lite mode disables all Bagicoin-specific functionality
     fLiteMode = gArgs.GetBoolArg("-litemode", false);
     fMasternodeMode = gArgs.GetBoolArg("-masternode", false);
 
@@ -1803,7 +1803,7 @@ bool AppInitMain(InitInterfaces& interfaces)
     }
 
     if(fLiteMode) {
-        InitWarning(_("Starting in lite mode, all Chaincoin-specific functionality is disabled."));
+        InitWarning(_("Starting in lite mode, all Bagicoin-specific functionality is disabled."));
     }
 
     if(fLiteMode && fMasternodeMode) {
@@ -1880,7 +1880,7 @@ bool AppInitMain(InitInterfaces& interfaces)
     }
 
 
-    // ********************************************************* Step 11c: update block tip in Chaincoin modules
+    // ********************************************************* Step 11c: update block tip in Bagicoin modules
 
     // force UpdatedBlockTip to initialize nCachedBlockHeight for CJ, MN payments and budgets
     // but don't call it directly to prevent triggering of other listeners like zmq etc.
